@@ -9,6 +9,7 @@ import { Editor } from 'react-draft-wysiwyg';
 import {EndpointDefaults, Endpoints} from "@octokit/types";
 import {compileFunction} from "vm";
 import {stringify} from "querystring";
+import {BranchesContainer} from "./components/commitAndBranches/branches-container";
 
 const { Octokit } = require("@octokit/core");
 const octokit = new Octokit({ auth: `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` });
@@ -51,14 +52,14 @@ const App = () => {
                     console.log(response.data)
                     for (let i=0; i< response.data.length; i++)
                         if (response.data[i].name === "uniquenik.github.io") {
-                            return resolve(new Array(response.data[i].owner.login, response.data[i].name));
+                            resolve(new Array(response.data[i].owner.login, response.data[i].name));
                             //getRep(response.data[i].owner.login, response.data[i].name)
                             //console.log("In ",i, "repository find file")
                         }
 
                 })
                 .catch((error: any) => {
-                    return reject(new Array(stringify(error)));
+                    reject(new Array(stringify(error)));
                 });
         });
         //return new Array("wtf");
@@ -291,7 +292,7 @@ const App = () => {
                                         octokit.request('POST /repos/{owner}/{repo}/git/commits', {
                                             owner: 'uniquenik',
                                             repo: repo,
-                                            message: 'first commit!!!',
+                                            message: 'very very very very large commit.................',
                                             parents: [lastCommit],
                                             tree: response.data.sha
                                         })
@@ -299,7 +300,7 @@ const App = () => {
                                                 octokit.request('PATCH /repos/{owner}/{repo}/git/refs/{ref}', {
                                                     owner: 'uniquenik',
                                                     repo: repo,
-                                                    ref: 'heads/main',
+                                                    ref: 'heads/save',
                                                     sha: response.data.sha,
                                                     force: true
                                                 })
@@ -356,6 +357,7 @@ const App = () => {
 
     return (
         <div className="App">
+            <BranchesContainer/>
             <header className="App-header">
                 Rich Text Editor Example
             </header>
