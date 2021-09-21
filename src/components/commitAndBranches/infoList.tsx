@@ -1,5 +1,6 @@
 import React from "react";
 import {branchInfo} from "../../types/data-types";
+import dot from "./../other/button.svg"
 
 export const InfoList = (
     props: {
@@ -13,12 +14,12 @@ export const InfoList = (
     }
 ) => {
     return (
-        <div className={"grid grid-cols-7 bg-dark text-white"}>
+        <div className={"w-full grid grid-cols-7 bg-dark text-white"}>
             <div className={"col-span-2"}>
                 <div className={`grid grid-cols-${props.listBranches.length}`}>
                     {props.checkTrees.map((br,key) =>
                         <div key={key} className={"text-base text-white"}>
-                    {br && "sas"}
+                    {br && <img src={dot} />}
                     </div>)}
                 </div>
             </div>

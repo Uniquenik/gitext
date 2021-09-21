@@ -11,9 +11,6 @@ export const Branches = (
     ) => {
         return (
             <div className={"w-full"}>
-                <div>
-                    {props.listBranches.values()}
-                </div>
                         {props.listCommits.map((branch )=>
                             <div className={"text-xs"} key={branch.sha}>
                                 <InfoList

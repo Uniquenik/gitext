@@ -6,6 +6,10 @@ module.exports = {
       "20px":"20px",
       "50px":"50px"
     },
+    width: {
+      "250px":"250px",
+      "300px":"300px"
+    },
     colors: {
       black: {
         DEFAULT: "#0E0E0F",

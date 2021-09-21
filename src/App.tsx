@@ -22,9 +22,9 @@ const App = () => {
     const [editorState, setEditorState] = useState(()=>EditorState.createEmpty(),);
 
     useEffect( () => {
-        let content = localStorage.getItem('file')
-        let contentParse
-        setEditorState(EditorState.createEmpty())
+        //let content = localStorage.getItem('file')
+        //let contentParse
+        //setEditorState(EditorState.createEmpty())
         /*console.log(content)
         if (content) {
             contentParse = convertFromRaw(JSON.parse(content))

@@ -102,8 +102,40 @@ export const useBranches = () => {
                 })
 
         })
-
     }
+
+    const getPullRequest = (owner:string, repo:string, pull_number:number) => {
+        return new Promise<Endpoints['GET /repos/{owner}/{repo}/pulls/{pull_number}/commits']["response"]["data"]>((resolve, reject) => {
+            octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}/commits', {
+                owner: owner,
+                repo: repo,
+                pull_number: pull_number
+            })
+                .then((response:any) => {
+                    resolve(response.data)
+                })
+                .catch((error:any) => {
+                    reject(error)
+                })
+        })
+    }
+
+    const getAllPullRequests = (owner:string, repo:string) => {
+        return new Promise<Endpoints['GET /repos/{owner}/{repo}/pulls']["response"]["data"]>((resolve, reject) => {
+            octokit.request('GET /repos/{owner}/{repo}/pulls', {
+                owner: owner,
+                repo: repo,
+                state: 'all'
+            })
+                .then((response:any) => {
+                    resolve(response.data)
+                })
+                .catch((error:any) => {
+                    reject(error)
+                })
+        })
+    }
+
 
     return {
         getAllBranches: getAllBranches,
@@ -111,7 +143,9 @@ export const useBranches = () => {
         getTreeSha: getTreeSha,
         getCommitSha: getCommitSha,
         createNewBranch: createNewBranch,
-        getTreesCommits: getTreesCommits
+        getTreesCommits: getTreesCommits,
+        getPullRequest: getPullRequest,
+        getAllPullRequests: getAllPullRequests
 
     }
 

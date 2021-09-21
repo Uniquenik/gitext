@@ -11,3 +11,8 @@ export interface branchInfo {
     name: string,
     color: string,
 }
+
+export interface mergeInfo {
+    from: string,
+    to: string
+}
