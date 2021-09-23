@@ -8,6 +8,7 @@ import {Gitgraph, Orientation, templateExtend, TemplateName} from "@gitgraph/rea
 import React from "react";
 import {RootReducer} from "../../redux";
 import {setCommitsTrue} from "../../redux/branches-state/branches-action-creators";
+import {list} from "postcss";
 
 
 export const BranchesContainer = () => {
@@ -173,8 +174,8 @@ export const BranchesContainer = () => {
             }
             console.log("Final", commitsInfo)
             console.log(branchesInfo)
-            setListBranches(branchesInfo)
-            setListCommits(commitsInfo)
+            setListBranches(branchesInfo.slice(0,per_page))
+            setListCommits(commitsInfo.slice(0,per_page))
             setMainBranch(thismainBranch)
             let result = await getAllPullRequests(owner, repo)
             let newListMerge:mergeInfo[] = new Array()
@@ -217,7 +218,7 @@ export const BranchesContainer = () => {
             lineWidth: 5,
             spacing: (200/listBranches.length),
             label: {
-                //display:false
+                display:false
             },
         },
         tag: {
@@ -228,7 +229,7 @@ export const BranchesContainer = () => {
             },
             spacing:40,
             message: {
-                //display:false
+                display:false
             },
         },
     });
@@ -236,37 +237,45 @@ export const BranchesContainer = () => {
         template: withoutAuthor,
     };
 
-    const gitgraphCommits = (gitgraph:any) => {
+    const gitGraphCommits = (gitgraph) => {
+        console.log(gitgraph)
         let branches:any[] = new Array()
+        let displayTree:boolean[] = new Array()
+        gitgraph._graph.template.colors = new Array(0)
+        for (let i = 0; i < branches.length; i++) displayTree.push(false)
         listBranches.forEach(function (item){
-            branches.push(gitgraph.branch(item.name))
-            console.log(item.name)
+            //@ts-ignore
+            branches.push(gitgraph.branch({name: item.name}))
+            gitgraph._graph.template.colors.push(item.color)
+            console.log(item.name, item.color)
         })
         console.log("List:", listMerge)
         for (let q = listCommits.length-1; q >= 0; q-=1){
             let merge = false
+            let index1 = -1
+            let index2 = -1
             listMerge.forEach(function(item){
                 if (item.from === listCommits[q].sha) {
                     console.log(item.from)
-                    let index1 = -1
-                    let index2 = -1
-                    while (index1==index2) {
+                    while (index1 == index2) {
                         do index1++
                         while (!listCommits[q].checkTrees[index1])
                         do index2++
                         while (!listCommits[q - 1].checkTrees[index2])
                     }
                     console.log(index1, index2)
-                    branches[index1].commit(listCommits[q].commitMessage)
-                    branches[index1].merge(branches[index2], "")
-                    q -= 1
+                    console.log(listCommits[q].sha)
+                    //branches[index1].commit({hash: listCommits[q].sha})
+                    //branches[index2].merge(branches[index1], "")
+                    //q -= 1
                     merge = true
                 }
             })
-            if (!merge) {
+            //if (!merge) {
                 let check = listCommits[q].checkTrees.slice()
                 if (check.every(i => i === true)) {
-                    branches[mainBranch].commit(listCommits[q].commitMessage)
+                    displayTree[mainBranch] = true
+                    branches[mainBranch].commit({hash: listCommits[q].sha})
                     /*for(let i=0;i < listBranches.length;i++){
                         if (i != mainBranch) {
                             branches[i].merge(branches[mainBranch])
@@ -281,42 +290,79 @@ export const BranchesContainer = () => {
                             counter += 1
                             index = i
                         }
-                    if (counter == 1)
-                        if (q+1<listCommits.length || listCommits[q+1].checkTrees[index])
-                            branches[index].commit(listCommits[q].commitMessage)
-                        else {
-                            let find = q+1
-                            while (listCommits[find].checkTrees[index]) {
+                    if(index1 !=-1) index = index1
+                    if (counter == 1) {
+                        if (q + 1 < listCommits.length && listCommits[q + 1].checkTrees[index]) {
+                            let br = gitgraph.branch({
+                                name: branches[index].name,
+                                from: listCommits[q + 1].sha
+                            })
+                            displayTree[index] = true
+                            br.commit({
+                                hash: listCommits[q].sha
+                            })
+                        } else {
+                            let find = q + 1
+                            while (!listCommits[find].checkTrees[index] && find < listCommits.length - 1) {
                                 find++
                             }
+                            let br = gitgraph.branch({
+                                name: branches[index].name,
+                                from: listCommits[find].sha
+                            })
+                            displayTree[index] = true
+                            br.commit({
+                                hash: listCommits[q].sha
+                            })
+
                             //
                         }
-                    else
-                        if (listCommits[q].checkTrees[mainBranch]) {
-                        branches[mainBranch].commit(listCommits[q].commitMessage)
-                    }
-                    else { //while (counter != 0) {
+                    } else if (listCommits[q].checkTrees[mainBranch]) {
+                        console.log(listCommits[q].sha)
+                        displayTree[mainBranch] = true
+                        branches[mainBranch].commit({hash: listCommits[q].sha})
+                    } else { //while (counter != 0) {
                         //if (check[index]) {
-                            let commitEariler = false
-                            let k = 0
-                            for (let i = q; i < listCommits.length && !commitEariler; i++) {
-                                k = 0
-                                while (k < listBranches.length && !commitEariler) {
-                                    if (listCommits[i].checkTrees[index]) commitEariler = true
-                                    k++
+                        let commitEarlier = false
+                        let k = 0
+                        let fixI = 0
+
+                        for (let i = q; i < listCommits.length && !commitEarlier; i++) {
+                            k = 0
+                            while (k < listBranches.length && !commitEarlier) {
+                                if (listCommits[i].checkTrees[index]) {
+                                    commitEarlier = true
+                                    fixI = i
                                 }
+                                k++
                             }
-                            if (commitEariler) branches[k].commit(listCommits[q].commitMessage)
-                            }
-                            counter--
+                        }
+                        if (commitEarlier) {
+                            let br = gitgraph.branch({
+                                name: branches[k].name,
+                                from: listCommits[fixI].sha
+                            })
+                            displayTree[k] = true
+                            br.commit({
+                                hash: listCommits[q].sha
+                            })
                         }
                     }
-                        //else index--
-                    //}
+                    counter--
                 }
+                //}
+                //else index--
+                /*if (merge) {
+                    if (listCommits[q].checkTrees[mainBranch]) branches[index2].merge(branches[mainBranch], "")
+                    else  branches[index2].merge(branches[index1], "")
+                    console.log(index1, index2)
+                    q -= 1
+                }*/
+            }
+                    //}
             //}
         //}
-        const master = gitgraph.branch("master");
+        /*const master = gitgraph.branch("master");
         master.commit();
         const feat1 = gitgraph.branch("feat1");
         feat1.commit().commit();
@@ -324,23 +370,9 @@ export const BranchesContainer = () => {
             name: "feat2",
             from: master
         });
-        feat2.commit();
-        /*const master = gitgraph.branch("master");
-        master.commit("Init")/!*.tag("master");*!/
-        master.commit("Create boolean IsGrowin");
-        let growin = gitgraph.branch("growin");
-        growin.commit("Init")/!*.tag("growin");*!/
-        master.commit("Create boolean IsElevus");
-        let elevus = gitgraph.branch("elevus");
-        elevus.commit("Init")/!*.tag("elevus");*!/
-        master.commit("Fix errors").commit("Add changes");
-        growin.merge(master, "Deploy to DEV");
-        growin.commit("Fix error");
-        master.merge(growin, "Merge error fix");
-        elevus.merge(master);
-        elevus.commit("Make some changes");
-        master.commit("Add more changes without deploy");*/
-
+        feat2.commit();*/
+        gitgraph._graph.template.branch.spacing = (200/(displayTree.filter(x=>x).length))
+        console.log(gitgraph)
     }
 
     return (
@@ -350,7 +382,7 @@ export const BranchesContainer = () => {
                     <div className={"w-250px"}>
                         <Gitgraph options={options}>
                             {(gitgraph) => {
-                                gitgraphCommits(gitgraph)
+                                gitGraphCommits(gitgraph)
                             }}
                         </Gitgraph>
                     </div>
@@ -374,6 +406,7 @@ export const BranchesContainer = () => {
                 </div>}
         <Branches listBranches={listBranches}
                   listCommits={listCommits}
+                  gitGraphCreate={gitGraphCommits}
         />
         </>
     )

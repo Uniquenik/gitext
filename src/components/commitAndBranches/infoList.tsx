@@ -14,16 +14,17 @@ export const InfoList = (
     }
 ) => {
     return (
-        <div className={"w-full grid grid-cols-7 bg-dark text-white"}>
-            <div className={"col-span-2"}>
+        <div className={"w-full bg-dark text-white"}>
+
+           {/* <div className={"col-span-2"}>
                 <div className={`grid grid-cols-${props.listBranches.length}`}>
                     {props.checkTrees.map((br,key) =>
                         <div key={key} className={"text-base text-white"}>
                     {br && <img src={dot} />}
                     </div>)}
                 </div>
-            </div>
-            <div className={"col-span-5"}>
+            </div>*/}
+            {/*<div className={"col-span-5"}>*/}
                 <div className={"flex flex-col px-1 py-2"}>
                 <div className={"text-lg"}>
                     <div>
@@ -47,7 +48,7 @@ export const InfoList = (
 
                 </div>
             </div>
-            </div>
+            {/*</div>*/}
         </div>
 
     )

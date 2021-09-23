@@ -6,11 +6,17 @@ import {branchInfo, commitInfo} from "../../types/data-types";
 export const Branches = (
     props: {
         listBranches:branchInfo[],
-        listCommits:Array<commitInfo>
+        listCommits:Array<commitInfo>,
+        gitGraphCreate: (gitGraph) => void,
     }
     ) => {
         return (
             <div className={"w-full"}>
+                <div>
+                    <div>
+
+                    </div>
+                    <div>
                         {props.listCommits.map((branch )=>
                             <div className={"text-xs"} key={branch.sha}>
                                 <InfoList
@@ -24,6 +30,8 @@ export const Branches = (
                                 />
                             </div>
                         )}
+                    </div>
+                </div>
             </div>
         );
 
