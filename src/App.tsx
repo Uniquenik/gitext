@@ -10,6 +10,7 @@ import {EndpointDefaults, Endpoints} from "@octokit/types";
 import {compileFunction} from "vm";
 import {stringify} from "querystring";
 import {BranchesContainer} from "./components/commitAndBranches/branches-container";
+import {useCommits} from "./hooks/commits-hook";
 
 const { Octokit } = require("@octokit/core");
 const octokit = new Octokit({ auth: `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` });
@@ -19,27 +20,13 @@ let r = 'sas'
 
 
 const App = () => {
+    const {getSingleTree, getSingleCommit, createBlob, createTree, createCommit, updateRef} = useCommits()
+
     const [editorState, setEditorState] = useState(()=>EditorState.createEmpty(),);
 
+
+
     useEffect( () => {
-        //let content = localStorage.getItem('file')
-        //let contentParse
-        //setEditorState(EditorState.createEmpty())
-        /*console.log(content)
-        if (content) {
-            contentParse = convertFromRaw(JSON.parse(content))
-        }
-        else { setEditorState(EditorState.createEmpty()) }
-        console.log(contentParse)
-        if (contentParse) {
-            const { contentBlocks, entityMap } = contentParse;
-            const contentState = ContentState.createFromBlockArray(contentBlocks, entityMap);
-            setEditorState(EditorState.createWithContent(contentState));
-        }
-        else
-            {
-            setEditorState(EditorState.createEmpty())
-            }*/
     },[])
 
     const [convertedContent, setConvertedContent] = useState("");
@@ -219,134 +206,53 @@ const App = () => {
         window.localStorage.setItem('content', JSON.stringify(convertToRaw(content)));
     }
     const convertContentToHTML = () => {
-        let currentContentAsHTML = draftToHtml(convertToRaw(/*{
-            styleToHTML: (style) => {
-                if (style === 'BOLD') {
-                    return <span style={{color: 'blue'}} />;
-                }
-            },
-            blockToHTML: (block) => {
-                /!*if (block.type === 'IMAGE') {
-                    return <img src={block.data.src} />;
-                }*!/
-            },
-            entityToHTML: (entity, originalText) => {
-                if (entity.type === 'LINK') {
-                    return <a href={entity.data.url}>{originalText}</a>;
-                }
-                if (entity.type === "IMAGE") {
-                    return { start: "<img src='" + (entity.data.src) + "'", end:"</img>" };
-                }
-                return originalText;
-            }
-        })(*/editorState.getCurrentContent()));
+        let currentContentAsHTML = draftToHtml(convertToRaw(editorState.getCurrentContent()));
         setConvertedContent(currentContentAsHTML);
         localStorage.setItem('contentHTML', currentContentAsHTML)
         console.log("HTML: ", currentContentAsHTML)
 
     }
 
-    const saveGitContent =   () => {
-        let htmlFile = draftToHtml(convertToRaw(editorState.getCurrentContent()))
-        console.log("File:", htmlFile)
-        //console.log(b64EncodeUnicode(localStorage.getItem('file')))
-        //convertContentToHTML();
-        octokit.request('GET /repos/{owner}/{repo}/git/trees/{tree_sha}', {
-            owner: 'uniquenik',
-            repo: repo,
-            tree_sha: 'main'
-        })
-            .then((response:any) => {
-                console.log(response.data)
-                octokit.request('GET /repos/{owner}/{repo}/git/commits/{commit_sha}', {
-                    owner: 'uniquenik',
-                    repo: repo,
-                    commit_sha: response.data.sha
-                })
-                    .then((response:any) => {
-                        console.log(response.data)
-                        let lastCommit = response.data.sha
-                        octokit.request('POST /repos/{owner}/{repo}/git/blobs', {
-                            owner: 'uniquenik',
-                            repo: repo,
-                            content: htmlFile,
-                            encoding: "utf-8"
-                        })
-                            .then((response:any)=> {
-                                console.log(response.data)
-                                octokit.request('POST /repos/{owner}/{repo}/git/trees', {
-                                    base_tree: lastCommit,
-                                    owner: 'uniquenik',
-                                    repo: repo,
-                                    tree: [
-                                        {
-                                            path: 'index.html',
-                                            mode: '100644',
-                                            type: 'blob',
-                                            sha: response.data.sha,
-                                        }
-                                    ]
-                                })
-                                    .then ((response:any) => {
-                                        console.log(response.data)
-                                        octokit.request('POST /repos/{owner}/{repo}/git/commits', {
-                                            owner: 'uniquenik',
-                                            repo: repo,
-                                            message: 'very very very very large commit.................',
-                                            parents: [lastCommit],
-                                            tree: response.data.sha
-                                        })
-                                            .then((response:any) => {
-                                                octokit.request('PATCH /repos/{owner}/{repo}/git/refs/{ref}', {
-                                                    owner: 'uniquenik',
-                                                    repo: repo,
-                                                    ref: 'heads/save',
-                                                    sha: response.data.sha,
-                                                    force: true
-                                                })
-                                                    .then ((response:any) => {
-                                                        console.log(response.data)
-                                                    })
-                                            })
-                                    })
-                                    .catch ((error:any) => {
-                                        console.log(error)
-                                    })
-                            })
-                            .catch((error:any) => {
-                                console.log(error)
-                            })
-
-                    })
-                    .catch((error:any) => {
-                        console.log(error)
-                    })
-
-        })
-            .catch((error:any) => {
-                console.log(error)
-
+    async function saveContentInGit (owner:string, repo:string, treeFromName:string,
+                                     file:any, path:string, messageCommit:string, treeToName:string) {
+        let lastCommitSha
+        let getLastTree = await getSingleTree(owner, repo, treeFromName)
+            .then(response => {
+                let getCommitFromTree = getSingleCommit(owner, repo, response.sha)
+                //let forCommitInfo = {lastCommit: getCommitFromTree.sha, blob: newBlob.sha}
+                return getCommitFromTree
             })
-        /*octokit.request('POST /repos/{owner}/{repo}/git/blobs', {
-            owner: 'uniquenik',
-            repo: 'sas',
-            content: b64EncodeUnicode(localStorage.getItem('file'))
-        })
-            .then((response:any) => {
-            console.log(response.data)
-                octokit.request('POST /repos/{owner}/{repo}/git/commits', {
-                    owner: 'uniquenil',
-                    repo: 'sas',
-                    message: 'message',
-                    tree: response.data.sha
-                })
-                    .then((response:any)=> {
-                        console.log('sas')
+            .then(getCommitFromTree => {
+                lastCommitSha = getCommitFromTree.sha
+                let newBlob = createBlob(owner, repo, file)
+                return newBlob
+            })
+            .then(newBlob => {
+                let newTree = createTree(lastCommitSha, owner, repo, newBlob.sha, path)
+                return newTree
+            })
+            .then(newTree => {
+                let newCommit = createCommit(owner, repo, messageCommit, lastCommitSha, newTree.sha)
+                return newCommit
+            })
+            .then(newCommit => {
+                let updRef = updateRef(owner, repo, treeToName, newCommit.sha )
+            })
+            .catch(error => {
+                console.log(error);
+            });
+        console.log("Commit added!!")
+    }
 
-                    })
-
-        })*/
-
+    const saveGitContent = () => {
+        let htmlFile = draftToHtml(convertToRaw(editorState.getCurrentContent()))
+        let owner = "uniquenik"
+        let treeFromName = "save"
+        let path = "index.html"
+        let messageCommit = "new commit!"
+        let treeToName = "save"
+        saveContentInGit(owner, repo, treeFromName, htmlFile, path, messageCommit, treeToName)
+        console.log("File:", htmlFile)
     }
 
     const createMarkup = (html) => {

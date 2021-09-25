@@ -1,6 +1,6 @@
 import { combineReducers } from "redux";
 import { createStore, applyMiddleware } from "redux";
-import {branchesReducer} from "./branches-state/branches-reducer";
+import {branchesReducer} from "./branches-state";
 import {branchesState} from "./branches-state/data-types";
 
 export interface RootReducer {

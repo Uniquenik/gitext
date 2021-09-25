@@ -1,6 +1,6 @@
 import React from "react";
 import {branchInfo} from "../../types/data-types";
-import dot from "./../other/button.svg"
+import dot from "../other/dot.svg"
 
 export const InfoList = (
     props: {
@@ -14,7 +14,7 @@ export const InfoList = (
     }
 ) => {
     return (
-        <div className={"w-full bg-dark text-white"}>
+        <div className={"w-full bg-dark text-white h-104px"}>
 
            {/* <div className={"col-span-2"}>
                 <div className={`grid grid-cols-${props.listBranches.length}`}>
@@ -26,7 +26,7 @@ export const InfoList = (
             </div>*/}
             {/*<div className={"col-span-5"}>*/}
                 <div className={"flex flex-col px-1 py-2"}>
-                <div className={"text-lg"}>
+                <div className={"text-base h-48px"}>
                     <div>
                         {props.commitMessage}
                     </div>
