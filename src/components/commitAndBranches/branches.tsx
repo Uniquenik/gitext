@@ -51,34 +51,34 @@ export const Branches = (
     };
 
     const gitGraphCreate = (gitgraph) => {
-        console.log(gitgraph)
+
+        console.log(props.listCommits)
+        debugger
         let branches:any[] = new Array()
         let displayTree:string[] = new Array()
         gitgraph._graph.template.colors = new Array(0)
-        console.log("Br: ",props.listBranches)
+/*        console.log("Br: ",props.listBranches)*/
         props.listBranches.forEach(function (item){
             //@ts-ignore
             branches.push(gitgraph.branch({name: item.name}))
             gitgraph._graph.template.colors.push(item.color)
         })
-        console.log(branches)
+/*        console.log(branches)*/
         for (let q = props.listCommits.length-1; q >= 0; q-=1){
+            console.log(gitgraph)
             let merge = false
             let index1 = -1
             let index2 = -1
             props.listMerge.forEach(function(item){
                 if (item.from === props.listCommits[q].sha) {
-                    console.log(item.from)
-                    while (index1 == index2) {
+/*                    console.log(item.from)*/
+                    /*while (index1 == index2) {
+                        console.log(index1, index2)
                         do index1++
                         while (!props.listCommits[q].checkTrees[index1])
                         do index2++
                         while (!props.listCommits[q - 1].checkTrees[index2])
-                    }
-                    //console.log(index1, index2)
-                    //console.log(props.listCommits[q].sha)
-                    //branches[index1].commit({hash: listCommits[q].sha})
-                    //branches[index2].merge(branches[index1], "")
+                    }*/
                     //q -= 1
                     merge = true
                 }
@@ -159,15 +159,15 @@ export const Branches = (
                 }
                 counter--
             }
-            if (merge) {
+            /*if (merge) {
                 if (props.listCommits[q].checkTrees[props.mainBranch])
                     branches[index2].merge(branches[props.mainBranch], "")
                 else branches[index2].merge(branches[index1], "")
                 if (!displayTree.includes(branches[index2].name))
                     displayTree.push(branches[index2].name)
-                console.log(index1, index2)
+                /!*console.log(index1, index2)*!/
                 q -= 1
-            }
+            }*/
         }
         gitgraph._graph.template.branch.spacing = (150/(displayTree.length))
         let displayTreeGraph:branchInfo[] = new Array()
@@ -177,8 +177,8 @@ export const Branches = (
                 color: gitgraph._graph.template.colors[i]})
         }
         setDisplayTreeInfo(displayTreeGraph)
-        console.log(displayTree)
-        console.log(branchesStatus.getTrees)
+       /* console.log(displayTree)
+        console.log(branchesStatus.getTrees)*/
         dispatch(setCommitsTree(true))
     }
         return (

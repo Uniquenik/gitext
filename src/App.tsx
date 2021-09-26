@@ -1,19 +1,18 @@
 import React, {useEffect, useState} from 'react';
-import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import './App.css';
-//import { convertToHTML, convertFromHTML } from 'draft-convert';
-import draftToHtml from 'draftjs-to-html';
-import htmlToDraft from 'html-to-draftjs';
-import { EditorState, convertToRaw, convertFromRaw, ContentState, Entity, inBlock } from 'draft-js';
-import { Editor } from 'react-draft-wysiwyg';
-import {EndpointDefaults, Endpoints} from "@octokit/types";
-import {compileFunction} from "vm";
+
 import {stringify} from "querystring";
 import {BranchesContainer} from "./components/commitAndBranches/branches-container";
 import {useCommits} from "./hooks/commits-hook";
+import EditorToolbar, { modules, formats } from "./editorToolbar"
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+import {Editor} from "./editor";
+
 
 const { Octokit } = require("@octokit/core");
 const octokit = new Octokit({ auth: `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` });
+
 
 const repo = 'uniquenik.github.io'
 let r = 'sas'
@@ -22,22 +21,21 @@ let r = 'sas'
 const App = () => {
     const {getSingleTree, getSingleCommit, createBlob, createTree, createCommit, updateRef} = useCommits()
 
-    const [editorState, setEditorState] = useState(()=>EditorState.createEmpty(),);
+    //const [editorState, setEditorState] = useState(() => EditorState.createEmpty(),);
 
+    const [state, setState] = React.useState({ value: null });
 
-
-    useEffect( () => {
-    },[])
+    useEffect(() => {
+    }, [])
 
     const [convertedContent, setConvertedContent] = useState("");
 
     async function getAllRep() {
-        return new Promise<string[]>((resolve, reject) =>
-        {
+        return new Promise<string[]>((resolve, reject) => {
             octokit.request('GET /user/repos')
                 .then((response: any) => {
                     console.log(response.data)
-                    for (let i=0; i< response.data.length; i++)
+                    for (let i = 0; i < response.data.length; i++)
                         if (response.data[i].name === "uniquenik.github.io") {
                             resolve(new Array(response.data[i].owner.login, response.data[i].name));
                             //getRep(response.data[i].owner.login, response.data[i].name)
@@ -52,14 +50,13 @@ const App = () => {
         //return new Array("wtf");
     }
 
-    function getRep(owner:string, repo:string) {
-        return new Promise<any>((resolve, reject) =>
-        {
+    function getRep(owner: string, repo: string) {
+        return new Promise<any>((resolve, reject) => {
             octokit.request('GET /repos/{owner}/{repo}/contents/index.html', {
                 'owner': owner,
                 'repo': repo
             })
-                .then((response:any)=> {
+                .then((response: any) => {
                     localStorage.removeItem('file')
                     console.log('Localstorage clean, get file...')
                     let ENTITY_TYPE = 'IMAGE';
@@ -129,7 +126,7 @@ const App = () => {
                     //    contentFromHTML = b64DecodeUnicode(file)
                     //}
                 })
-                .catch((error:any) => {
+                .catch((error: any) => {
                     console.log(error)
                     reject(error)
                 });
@@ -139,7 +136,7 @@ const App = () => {
 
     function b64DecodeUnicode(str: any) {
         // Going backwards: from bytestream, to percent-encoding, to original string.
-        return decodeURIComponent(atob(str).split('').map(function(c) {
+        return decodeURIComponent(atob(str).split('').map(function (c) {
             return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
         }).join(''));
     }
@@ -157,36 +154,38 @@ const App = () => {
     const reviveFromStorage = () => {
         let content = localStorage.getItem('file');
         let contentFrom
-        if (content) { contentFrom = htmlToDraft(JSON.parse(content)) }
+        if (content) {
+            //contentFrom = htmlToDraft(JSON.parse(content))
+        }
         console.log("From lc:", contentFrom)
         if (contentFrom) {
-            const { contentBlocks, entityMap } = contentFrom;
-            const contentState = ContentState.createFromBlockArray(contentBlocks, entityMap);
-            setEditorState(EditorState.createWithContent(contentState));
+            const {contentBlocks, entityMap} = contentFrom;
+            //const contentState = ContentState.createFromBlockArray(contentBlocks, entityMap);
+            //setEditorState(EditorState.createWithContent(contentState));
         }
-       /* if (content) {
-            setEditorState(EditorState.createWithContent(convertFromRaw(JSON.parse(content))));
-        } else {
-            setEditorState(EditorState.createEmpty());
-        }*/
+        /* if (content) {
+             setEditorState(EditorState.createWithContent(convertFromRaw(JSON.parse(content))));
+         } else {
+             setEditorState(EditorState.createEmpty());
+         }*/
     }
 
-    async function reviveFromGit () {
+    async function reviveFromGit() {
         let names = await getAllRep()
         console.log(names)
-        let contentGit = await getRep(names[0],names[1])
+        let contentGit = await getRep(names[0], names[1])
         //let contentGit = localStorage.getItem('file')
         //console.log('New content:')
-        console.log("From rep HTML:", htmlToDraft(contentGit))
+        //console.log("From rep HTML:", htmlToDraft(contentGit))
         if (contentGit) {
-            const { contentBlocks, entityMap } = htmlToDraft(contentGit);
-            const contentState = ContentState.createFromBlockArray(contentBlocks, entityMap);
-            setEditorState(EditorState.createWithContent(contentState));
+            //const {contentBlocks, entityMap} = htmlToDraft(contentGit);
+            //const contentState = ContentState.createFromBlockArray(contentBlocks, entityMap);
+            //setEditorState(EditorState.createWithContent(contentState));
         }
         console.log("In state, write in localstorage...")
-        localStorage.setItem("file",JSON.stringify(contentGit))
+        localStorage.setItem("file", JSON.stringify(contentGit))
         //localStorage.setItem("file2",JSON.stringify(contentGit.entityMap))
-            //console.log("convert:", convertFromHTML(contentFromHTML))
+        //console.log("convert:", convertFromHTML(contentFromHTML))
 
     }
 
@@ -198,23 +197,23 @@ const App = () => {
         //console.log("Raw:", content)
         //if (content) console.log("Convert:", convertFromRaw(JSON.parse(content)))
         //console.log(editorState)
-        setEditorState(state);
+        //setEditorState(state);
         convertContentToHTML();
     }
 
     const saveContent = (content) => {
-        window.localStorage.setItem('content', JSON.stringify(convertToRaw(content)));
+        //window.localStorage.setItem('content', JSON.stringify(convertToRaw(content)));
     }
     const convertContentToHTML = () => {
-        let currentContentAsHTML = draftToHtml(convertToRaw(editorState.getCurrentContent()));
-        setConvertedContent(currentContentAsHTML);
-        localStorage.setItem('contentHTML', currentContentAsHTML)
-        console.log("HTML: ", currentContentAsHTML)
+        //let currentContentAsHTML = draftToHtml(convertToRaw(editorState.getCurrentContent()));
+        //setConvertedContent(currentContentAsHTML);
+        //localStorage.setItem('contentHTML', currentContentAsHTML)
+        //console.log("HTML: ", currentContentAsHTML)
 
     }
 
-    async function saveContentInGit (owner:string, repo:string, treeFromName:string,
-                                     file:any, path:string, messageCommit:string, treeToName:string) {
+    async function saveContentInGit(owner: string, repo: string, treeFromName: string,
+                                    file: any, path: string, messageCommit: string, treeToName: string) {
         let lastCommitSha
         let getLastTree = await getSingleTree(owner, repo, treeFromName)
             .then(response => {
@@ -236,7 +235,7 @@ const App = () => {
                 return newCommit
             })
             .then(newCommit => {
-                let updRef = updateRef(owner, repo, treeToName, newCommit.sha )
+                let updRef = updateRef(owner, repo, treeToName, newCommit.sha)
             })
             .catch(error => {
                 console.log(error);
@@ -245,42 +244,66 @@ const App = () => {
     }
 
     const saveGitContent = () => {
-        let htmlFile = draftToHtml(convertToRaw(editorState.getCurrentContent()))
+        let htmlFile = state
         let owner = "uniquenik"
         let treeFromName = "save"
         let path = "index.html"
         let messageCommit = "new commit!"
         let treeToName = "save"
         saveContentInGit(owner, repo, treeFromName, htmlFile, path, messageCommit, treeToName)
-        console.log("File:", htmlFile)
     }
 
-    const createMarkup = (html) => {
-        return  {
-            __html: html
-        }
+    /*let modules = {
+        toolbar: [[{ font: [] }],
+        [{ header: [1, 2, 3, 4, 5, 6, false] }],
+        ["bold", "italic", "underline", "strike"],
+            [{ color: [] }, { background: [] }],
+        [{ script:  "sub" }, { script:  "super" }],
+        ["blockquote", "code-block"],
+            [{ direction: "rtl" }],
+        [{ list:  "ordered" }, { list:  "bullet" }],
+        [{ indent:  "-1" }, { indent:  "+1" }, { align: [] }],
+        ["link", "image", "video"],
+        ["clean"]],// remove formatting
     }
+
+
+    let formats = [
+        'header', 'font', 'background', 'color', 'code', 'size',
+        'bold', 'italic', 'underline', 'strike', 'blockquote',
+        'list', 'bullet', 'indent', 'script', 'align', 'direction',
+        'link', 'image', 'code-block', 'formula', 'width'
+        ]*/
+
+    const handleChange = value => {
+        setState({ value });
+    };
+
 
     return (
-        <div className="App">
-            <BranchesContainer/>
-            <header className="App-header">
-                Rich Text Editor Example
-            </header>
-            <Editor
-                editorState={editorState}
-                onEditorStateChange={handleEditorChange}
-                //onChange={handleChange}
-                wrapperClassName="wrapper-class"
-                editorClassName="editor-class"
-                toolbarClassName="toolbar-class"
-            />
-            <div className="preview" dangerouslySetInnerHTML={createMarkup(convertedContent)}></div>
+        <div className="text-editor">
+            <Editor/>
+            {/*<BranchesContainer/>*/}
+            {/*<EditorToolbar />
+
+            <ReactQuill theme="snow"        // @ts-ignore
+                value={state.value} modules={modules} formats={formats} placeholder={"Write something awesome..."}
+                        onChange={handleChange}/>*/}
+          {/*  <ReactQuill
+                value={value}
+                readOnly={true}
+                theme={"snow"}
+            />*/}
+            <div>
+                {state.value}
+            </div>
+
             <button placeholder={'sas'} onClick={saveGitContent} name={'sas1'} type={'button'}>Save Content</button>
             <button placeholder={'sas'} onClick={reviveFromStorage} name={'sas2'} type={'button'}>Revive from localStorage</button>
             <button placeholder={'sas'} onClick={reviveFromGit} name={'sas3'} type={'button'}>Revive from GitHub</button>
         </div>
     )
 }
+
 
 export default App;
