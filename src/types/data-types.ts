@@ -7,6 +7,14 @@ export interface commitInfo {
     commitMessage:string,
 }
 
+export interface branchesCompareCommitInfo {
+    sha: string,
+    committerAuthorLogin: string,
+    commitAuthorDate:string,
+    committerAuthorAvatarURL:string
+    commitMessage:string,
+}
+
 export interface branchInfo {
     name: string,
     color: string,

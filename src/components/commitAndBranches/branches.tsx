@@ -4,13 +4,13 @@ import { useDispatch, useSelector } from "react-redux";
 import {branchInfo, commitInfo, mergeInfo} from "../../types/data-types";
 import {Gitgraph, templateExtend, TemplateName} from "@gitgraph/react";
 import {RootReducer} from "../../redux";
-import {setCommitsTree} from "../../redux/branches-state/branches-action-creators";
+import {setCommitsTree} from "../../redux/branches-state";
 import {ReactComponent as TreeDot} from "./../other/dot.svg";
-import {ReactComponent} from "*.svg";
 
 
 export const Branches = (
     props: {
+        isMounted: boolean,
         listBranches:branchInfo[],
         listCommits:Array<commitInfo>,
         listMerge:Array<mergeInfo>,
@@ -19,7 +19,7 @@ export const Branches = (
     ) => {
 
     const [displayTreeInfo, setDisplayTreeInfo] =
-        useState<branchInfo[]>(() => new Array())
+        useState<branchInfo[]>(() => [])
 
     const branchesStatus: any = useSelector<RootReducer>(state => state.branches);
     const dispatch = useDispatch();
@@ -39,7 +39,7 @@ export const Branches = (
             dot: {
                 size:10
             },
-            spacing:104,
+            spacing: 88,
             message: {
                 display:false
             },
@@ -51,11 +51,10 @@ export const Branches = (
     };
 
     const gitGraphCreate = (gitgraph) => {
-
+        dispatch(setCommitsTree(false))
         console.log(props.listCommits)
-        debugger
-        let branches:any[] = new Array()
-        let displayTree:string[] = new Array()
+        let branches:any[] = []
+        let displayTree:string[] = []
         gitgraph._graph.template.colors = new Array(0)
 /*        console.log("Br: ",props.listBranches)*/
         props.listBranches.forEach(function (item){
@@ -65,10 +64,9 @@ export const Branches = (
         })
 /*        console.log(branches)*/
         for (let q = props.listCommits.length-1; q >= 0; q-=1){
-            console.log(gitgraph)
-            let merge = false
+            //let merge = false
             let index1 = -1
-            let index2 = -1
+            //let index2 = -1
             props.listMerge.forEach(function(item){
                 if (item.from === props.listCommits[q].sha) {
 /*                    console.log(item.from)*/
@@ -80,11 +78,11 @@ export const Branches = (
                         while (!props.listCommits[q - 1].checkTrees[index2])
                     }*/
                     //q -= 1
-                    merge = true
+                    //merge = true
                 }
             })
             let check = props.listCommits[q].checkTrees.slice()
-            if (check.every(i => i === true)) {
+            if (check.every(i => i)) {
                 if (!displayTree.includes(branches[props.mainBranch].name))
                     displayTree.push(branches[props.mainBranch].name)
                 branches[props.mainBranch].commit({hash: props.listCommits[q].sha})
@@ -97,8 +95,8 @@ export const Branches = (
                         counter += 1
                         index = i
                     }
-                if (index1 != -1) index = index1
-                if (counter == 1) {
+                if (index1 !== -1) index = index1
+                if (counter === 1) {
                     if (q + 1 < props.listCommits.length && props.listCommits[q + 1].checkTrees[index]) {
                         let br = gitgraph.branch({
                             name: branches[index].name,
@@ -110,7 +108,7 @@ export const Branches = (
                             hash: props.listCommits[q].sha
                         })
                     } else {
-                        let find = q + 1
+                        let find = q
                         while (!props.listCommits[find].checkTrees[index]
                             && find < props.listCommits.length - 1) {
                             find++
@@ -170,7 +168,7 @@ export const Branches = (
             }*/
         }
         gitgraph._graph.template.branch.spacing = (150/(displayTree.length))
-        let displayTreeGraph:branchInfo[] = new Array()
+        let displayTreeGraph:branchInfo[] = []
         for(let i = 0; i< displayTree.length; i++){
             displayTreeGraph.push({
                 name: displayTree[i],
@@ -184,7 +182,7 @@ export const Branches = (
         return (
             <div className={"w-full bg-dark"}>
                 <div className={"flex"}>
-                    <div className={"text-white text-3xl px-2"}>
+                    <div className={"text-white text-xl px-2"}>
                         Branches:
                     </div>
                     {branchesStatus.getTrees &&
@@ -198,30 +196,32 @@ export const Branches = (
                     </div>
                 }
                 </div>
+                { branchesStatus.getCommits && props.isMounted &&
                 <div className={"flex"}>
                     <div className={"w-150px pt-8"}>
-                        <Gitgraph options={options}>
+                        <Gitgraph  options={options}>
                             {(gitgraph) => {
                                 gitGraphCreate(gitgraph)
                             }}
                         </Gitgraph>
                     </div>
                     <div className={"w-full"}>
-                        { props.listCommits.map((branch )=>
+                        {props.listCommits.map((branch) =>
                             <div className={"text-xs"} key={branch.sha}>
                                 <InfoList
                                     listBranches={props.listBranches}
                                     checkTrees={branch.checkTrees}
                                     commitMessage={branch.commitMessage}
-                                    sha = {branch.sha}
-                                    committerAuthorLogin = {branch.committerAuthorLogin}
-                                    committerAuthorAvatarURL= {branch.committerAuthorAvatarURL}
-                                    commitAuthorDate = {branch.commitAuthorDate}
+                                    sha={branch.sha}
+                                    committerAuthorLogin={branch.committerAuthorLogin}
+                                    committerAuthorAvatarURL={branch.committerAuthorAvatarURL}
+                                    commitAuthorDate={branch.commitAuthorDate}
                                 />
                             </div>
                         )}
                     </div>
                 </div>
+                }
             </div>
         );
 

@@ -1,5 +1,5 @@
 import {octokit} from "../api/auth-token";
-import {Endpoints, OctokitResponse} from "@octokit/types";
+import {Endpoints} from "@octokit/types";
 
 export const useBranches = () => {
     const getAllBranches = (owner:string, repo:string) => {
@@ -42,7 +42,7 @@ export const useBranches = () => {
                 owner: owner,
                 repo: repo,
                 //path: '/',
-                //per_page: per_page
+                per_page: per_page
             })
                 .then((response:any) => {
                     resolve(response.data)
@@ -53,7 +53,7 @@ export const useBranches = () => {
         })
     }
 
-    const getTreeSha = (refName:string, owner:string, repo:string) => {
+    const getTreeFromSha = (refName:string, owner:string, repo:string) => {
         return new Promise<Endpoints['GET /repos/{owner}/{repo}/git/trees/{tree_sha}']["response"]["data"]>((resolve, reject) => {
             octokit.request('GET /repos/{owner}/{repo}/git/trees/{tree_sha}', {
                 owner: owner,
@@ -140,7 +140,7 @@ export const useBranches = () => {
     return {
         getAllBranches: getAllBranches,
         getAllCommits: getAllCommits,
-        getTreeSha: getTreeSha,
+        getTreeFromSha: getTreeFromSha,
         getCommitSha: getCommitSha,
         createNewBranch: createNewBranch,
         getTreesCommits: getTreesCommits,

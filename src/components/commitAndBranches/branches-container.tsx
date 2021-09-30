@@ -1,20 +1,35 @@
-import react, {useEffect, useState} from "react"
+import {useEffect, useState} from "react"
 import { useDispatch, useSelector } from "react-redux";
+import parse from 'html-react-parser';
 import {Branches} from "./branches";
 import {useBranches} from "../../hooks/branches-hook";
 import {branchInfo, commitInfo, mergeInfo} from "../../types/data-types";
 import {getRandomColor} from "../other/randomColor";
 import React from "react";
 import {RootReducer} from "../../redux";
-import {setCommitsTrue} from "../../redux/branches-state/branches-action-creators";
+import {setCommits, setOpenCommits} from "../../redux/branches-state/branches-action-creators";
+import {BranchesListButton} from "../../buttons/brancheslist-button";
+import {useCommits} from "../../hooks/commits-hook";
 
 
-export const BranchesContainer = () => {
+export const BranchesContainer = (commit:string) => {
     const branchesStatus: any = useSelector<RootReducer>(state => state.branches);
+    const mainStatus: any = useSelector<RootReducer>(state => state.main);
     const dispatch = useDispatch();
 
+    const { getAllBranches, getPullRequest, getCommitSha,
+        getTreeFromSha, getTreesCommits, getAllPullRequests} = useBranches();
+
+    const {getBlobFromFileSha} = useCommits();
+
+    const [isMounted, setIsMounted] = useState(false)
+
+    const [loadCommit, setLoadCommit] = useState(false)
+
+    const [compareContent, setCompareContent] = useState("")
+
     const commitInfoInitState = {
-        checkTrees:new Array(),
+        checkTrees:[],
         sha:"",
         committerAuthorLogin:"",
         commitAuthorDate:"",
@@ -30,8 +45,58 @@ export const BranchesContainer = () => {
         to: ""
     }
 
-    const { getAllBranches, getPullRequest, createNewBranch, getCommitSha,
-        getTreeSha, getTreesCommits, getAllPullRequests} = useBranches();
+    useEffect(() => {
+        setLoadCommit(false)
+        let owner = "uniquenik"
+        let repo = "uniquenik.github.io"
+        let path = "index.html"
+        //@ts-ignore
+        getCommitFromTreeSha(commit.match.params.commitSha, owner, repo, path)
+            .then((compareCommit) => {
+                setCompareContent(compareCommit)
+                setLoadCommit(true)
+            })
+            .catch((error) => {
+                console.log(error)
+                setLoadCommit(true)
+            })
+    },[commit])
+
+    function b64DecodeUnicode(str: any) {
+        // Going backwards: from bytestream, to percent-encoding, to original string.
+        return decodeURIComponent(atob(str).split('').map(function (c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+    }
+
+    async function getCommitFromTreeSha (commitSha:string, owner:string, repo:string, path:string) {
+        let commitInfo
+        let file
+        await getCommitSha(commitSha, owner, repo)
+            .then((treeSha) => {
+                console.log(treeSha)
+                return getTreeFromSha(treeSha.tree.sha, owner, repo)
+            })
+            .then((tree) => {
+                console.log(tree)
+                let fileSha = ""
+                for (let i = 0; i < tree.tree.length; i++){
+                    if (tree.tree[i].path === path && tree.tree[i].sha !== undefined)
+                        fileSha = tree.tree[i].sha!
+                }
+                return getBlobFromFileSha(owner,repo, fileSha)
+            })
+            .then((fileContent) => {
+                console.log(fileContent)
+                file = b64DecodeUnicode(fileContent.content)
+            })
+            .catch((error) => {
+                    console.log(error)
+                }
+            )
+        console.log(file)
+        return file
+    }
 
     const [listBranches, setListBranches] =
         useState<branchInfo[]>(() => new Array(branchInfoInitState))
@@ -42,6 +107,7 @@ export const BranchesContainer = () => {
     const [listMerge, setListMerge] = useState<Array<mergeInfo>>(() => new Array(mergeInfoInitState))
 
     useEffect(() => {
+        dispatch(setCommits(false))
         getCommitAndBranches('uniquenik', 'uniquenik.github.io',30)
 
     },[])
@@ -75,7 +141,7 @@ export const BranchesContainer = () => {
                     }
                 )
             console.log(treeCommits)
-            let checkTrees:boolean[] = new Array();
+            let checkTrees:boolean[] = [];
             for (let k = 0; k < getBranches.length; ++k) checkTrees.push(false);
             checkTrees[0] = true
             if (treeCommits) treeCommits.forEach(function (item) {
@@ -127,7 +193,7 @@ export const BranchesContainer = () => {
                         }
                             if (!check && getBranches) {
                                 console.log("new:", i)
-                                let checkTrees:boolean[] = new Array()
+                                let checkTrees:boolean[] = []
                                 for (let w = 0; w < getBranches.length; ++w) checkTrees.push(false)
                                 checkTrees[i] = true
                                 let k = 0
@@ -159,7 +225,7 @@ export const BranchesContainer = () => {
             setListCommits(commitsInfo.slice(0,per_page))
             setMainBranch(thismainBranch)
             let result = await getAllPullRequests(owner, repo)
-            let newListMerge:mergeInfo[] = new Array()
+            let newListMerge:mergeInfo[] = []
             result.forEach(function (item) {
                 if(item.state === 'closed'){
                     newListMerge.push({
@@ -170,13 +236,15 @@ export const BranchesContainer = () => {
 
                 }
             })
+            if (!isMounted)
             setListMerge(newListMerge)
-            dispatch(setCommitsTrue())
+            dispatch(setCommits(true))
+            setIsMounted(true)
         }
     }
 
-    async function createBranch(owner:string, repo:string, branchFrom:string, branchTo:string){
-        let treeSha = await getTreeSha(branchFrom, owner, repo)
+    /*async function createBranch(owner:string, repo:string, branchFrom:string, branchTo:string){
+        let treeSha = await getTreeFromSha(branchFrom, owner, repo)
             .then(response => {
                 let commitSha = getCommitSha(response.sha, owner, repo)
                 return commitSha
@@ -188,18 +256,42 @@ export const BranchesContainer = () => {
             .catch(error => {
                 console.log(error);
             });
+    }*/
+
+    const onListCommitsButton = () => {
+        dispatch(setOpenCommits(!branchesStatus.isOpenListCommits))
     }
 
     return (
         <>
             {branchesStatus.getCommits &&
-            <div>
-                <Branches listBranches={listBranches}
-                          listCommits={listCommits}
-                          listMerge={listMerge}
-                          mainBranch={mainBranch}
-                />
-            </div>}
+            <div className={"h-screen relative"}>
+                <div className={`grid grid-cols-2 h-${branchesStatus.isOpenListCommits ? "3/5" : "full" }`}>
+                    <div className={"overflow-y-auto"}>
+                        <div className={""}>
+                        { parse(mainStatus.currentValue) }
+                        </div>
+                    </div>
+                    <div className={"h-full overflow-y-auto"}>
+                        {loadCommit && typeof (compareContent) == "string" &&
+                        parse(compareContent)
+                        }
+                    </div>
+                </div>
+                {branchesStatus.isOpenListCommits &&
+                    <div className={"h-2/5 overflow-y-auto"}>
+                    <Branches listBranches={listBranches}
+                              listCommits={listCommits}
+                              listMerge={listMerge}
+                              mainBranch={mainBranch}
+                              isMounted={isMounted}
+                    />
+                    </div> }
+            <div className={"absolute left-2/4 bottom-0"}>
+                <BranchesListButton callback={onListCommitsButton} selected={branchesStatus.isOpenListCommits}/>
+            </div>
+            </div>
+            }
         </>
     )
 }

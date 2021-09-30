@@ -3,7 +3,8 @@ import {branchesActionTypes} from "./branches-action-types";
 
 const defaultState: branchesState = {
     getCommits: false,
-    getTrees: false
+    getTrees: false,
+    isOpenListCommits: true
 }
 
 export function branchesReducer(state:branchesState = defaultState, action:Action){
@@ -13,12 +14,16 @@ export function branchesReducer(state:branchesState = defaultState, action:Actio
                 ...state,
                 getTrees: action.payload
             };
-        case branchesActionTypes.SET_COMMITS_TRUE:
+        case branchesActionTypes.SET_COMMITS:
             return {
                 ...state,
-                getCommits: true
+                getCommits: action.payload
             };
-
+        case branchesActionTypes.SET_LIST_COMMITS:
+            return {
+                ...state,
+                isOpenListCommits: action.payload
+            }
         default:
             return state
     }

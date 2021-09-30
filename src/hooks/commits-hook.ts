@@ -118,12 +118,63 @@ export const useCommits = () => {
         })
     }
 
+    const getAllRepAuth = () => {
+        return new Promise<Endpoints['GET /user/repos']["response"]["data"]>
+        ((resolve, reject) => {
+            octokit.request('GET /user/repos')
+                .then((response: any) => {
+                    resolve(response.data)
+                })
+                .catch((error:any) => {
+                    reject(error)
+                })
+        })
+    }
+
+    const getBlob = (owner:string, repo:string, path:string, ref:string) => {
+        return new Promise<Endpoints['GET /repos/{owner}/{repo}/contents/{path}']["response"]["data"]>
+        ((resolve, reject) => {
+            octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
+                owner: owner,
+                repo: repo,
+                path: path,
+                ref: ref
+            })
+                .then((response: any) => {
+                    resolve(response.data)
+                })
+                .catch((error:any) => {
+                    reject(error)
+                })
+        })
+    }
+
+    const getBlobFromFileSha = (owner:string, repo:string, fileSha:string) => {
+        return new Promise<Endpoints['GET /repos/{owner}/{repo}/git/blobs/{file_sha}']["response"]["data"]>
+        ((resolve, reject) => {
+            octokit.request('GET /repos/{owner}/{repo}/git/blobs/{file_sha}', {
+                owner: owner,
+                repo: repo,
+                file_sha: fileSha
+            })
+                .then((response: any) => {
+                    resolve(response.data)
+                })
+                .catch((error:any) => {
+                    reject(error)
+                })
+        })
+    }
+
     return {
         getSingleTree: getSingleTree,
         getSingleCommit: getSingleCommit,
         createBlob: createBlob,
         createTree: createTree,
         createCommit: createCommit,
-        updateRef: updateRef
+        updateRef: updateRef,
+        getAllRepAuth: getAllRepAuth,
+        getBlob: getBlob,
+        getBlobFromFileSha: getBlobFromFileSha
     }
 }

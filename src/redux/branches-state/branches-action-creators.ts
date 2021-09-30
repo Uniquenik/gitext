@@ -7,8 +7,16 @@ export const setCommitsTree = (set: boolean) => {
     }
 }
 
-export const setCommitsTrue = () => {
+export const setCommits = (bool: boolean) => {
     return {
-        type: branchesActionTypes.SET_COMMITS_TRUE,
+        type: branchesActionTypes.SET_COMMITS,
+        payload: bool
+    }
+}
+
+export const setOpenCommits = (bool:boolean) => {
+    return {
+        type: branchesActionTypes.SET_LIST_COMMITS,
+        payload: bool
     }
 }
