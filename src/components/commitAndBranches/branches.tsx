@@ -39,7 +39,7 @@ export const Branches = (
             dot: {
                 size:10
             },
-            spacing: 88,
+            spacing: 78,
             message: {
                 display:false
             },
@@ -180,7 +180,7 @@ export const Branches = (
         dispatch(setCommitsTree(true))
     }
         return (
-            <div className={"w-full bg-dark"}>
+            <div className={"w-full"}>
                 <div className={"flex"}>
                     <div className={"text-white text-xl px-2"}>
                         Branches:

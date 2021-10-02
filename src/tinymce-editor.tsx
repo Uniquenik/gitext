@@ -1,31 +1,5 @@
-import 'tinymce/tinymce';
-import 'tinymce/icons/default';
-import 'tinymce/themes/silver';
-import 'tinymce/plugins/advlist';
-import 'tinymce/plugins/autolink';
-import 'tinymce/plugins/lists';
-import 'tinymce/plugins/link';
-import 'tinymce/plugins/image';
-import 'tinymce/plugins/charmap';
-import 'tinymce/plugins/print';
-import 'tinymce/plugins/preview';
-import 'tinymce/plugins/anchor';
-import 'tinymce/plugins/help';
-import 'tinymce/plugins/searchreplace';
-import 'tinymce/plugins/visualblocks';
-import 'tinymce/plugins/code';
-import 'tinymce/plugins/insertdatetime';
-import 'tinymce/plugins/media';
-import 'tinymce/plugins/table';
-import 'tinymce/plugins/paste';
-import 'tinymce/plugins/wordcount';
-import 'tinymce/plugins/codesample';
-
-import 'tinymce/skins/ui/oxide-dark/skin.min.css';
-import 'tinymce/skins/ui/oxide-dark/content.min.css';
-import 'tinymce/skins/content/dark/content.min.css';
 import { Editor } from '@tinymce/tinymce-react';
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useCommits} from "./hooks/commits-hook";
 import getClient from "././api/auth-token"
 import {useDispatch, useSelector} from "react-redux";
@@ -136,6 +110,7 @@ const TinyMCEEditor = () => {
                 {//@ts-ignore
                 }
                 <Editor
+                    tinymceScriptSrc={process.env.PUBLIC_URL + '/tinymce/tinymce.min.js'}
                 apiKey="6sj9lh4fa3acjffyyeebh3ri1xe4hwbky5jflqg05tlhu50d"
                 value = {value}
                 onFocusOut={() => {
@@ -212,17 +187,29 @@ const TinyMCEEditor = () => {
                     },
                     branding: false,
                     skin: "oxide-dark",
-                    content_css: "dark",
-                    plugins: [
+                    content_css: "light",
+                    plugins: [ 'codesample code',
                         'advlist autolink lists link image',
                         'charmap print preview anchor help',
-                        'searchreplace visualblocks code',
-                        'insertdatetime media table paste wordcount codesample'
+                        'searchreplace visualblocks',
+                        'insertdatetime media table paste wordcoun'
                     ],
-                    toolbar:
-                        'undo redo | formatselect fontselect | bold italic | \
+                    codesample_languages: [
+                        {text: 'HTML/XML', value: 'markup'},
+                        {text: 'JavaScript', value: 'javascript'},
+                        {text: 'CSS', value: 'css'},
+                        {text: 'PHP', value: 'php'},
+                        {text: 'Ruby', value: 'ruby'},
+                        {text: 'Python', value: 'python'},
+                        {text: 'Java', value: 'java'},
+                        {text: 'C', value: 'c'},
+                        {text: 'C#', value: 'csharp'},
+                        {text: 'C++', value: 'cpp'}
+                    ],
+                    toolbar: 'codesample \
+                       undo redo | codesample code | formatselect fontselect | bold italic | \
                         alignleft aligncenter alignright | \
-                        bullist numlist outdent indent | help codesample image'
+                        bullist numlist outdent indent | help codesample code image'
                 }}
                 //onChange={handleEditorChange}
                 />

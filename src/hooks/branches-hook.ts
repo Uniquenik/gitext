@@ -1,10 +1,17 @@
 import {octokit} from "../api/auth-token";
 import {Endpoints} from "@octokit/types";
+import {
+    getAllBranches404, getAllPullReq304, getAllPullReq422,
+    getTreesCommits400,
+    getTreesCommits404,
+    getTreesCommits409, getTreesCommits500,
+    getUser404
+} from "../types/errors-const";
 
 export const useBranches = () => {
     const getAllBranches = (owner:string, repo:string) => {
         return new Promise<Endpoints['GET /repos/{owner}/{repo}/branches']["response"]["data"]>((resolve, reject) => {
-            octokit.request('GET /repos/{owner}/{repo}/branches', {
+                octokit.request('GET /repos/{owner}/{repo}/branches', {
                 owner: owner,
                 repo: repo
             })
@@ -12,7 +19,8 @@ export const useBranches = () => {
                     resolve(response.data)
                 })
                 .catch((error:any) => {
-                    reject(error)
+                    if (error.response && error.response.status === 404) reject(getAllBranches404);
+                    else reject("Unhandled:\n" + error.response.data.message)
                 })
         })
     }
@@ -30,7 +38,23 @@ export const useBranches = () => {
                     resolve(response.data)
                 })
                 .catch((error:any) => {
-                    reject(error)
+                    if(error.response) {
+                        switch (error.response.status) {
+                            case 400:
+                                reject(getTreesCommits400)
+                                break;
+                            case 404:
+                                reject(getTreesCommits404)
+                                break;
+                            case 409:
+                                reject(getTreesCommits409)
+                                break;
+                            case 500:
+                                reject(getTreesCommits500)
+                                break;
+                        }
+                    }
+                    reject("Unhandled:\n" + error.response.data.message)
                 })
         })
     }
@@ -131,10 +155,36 @@ export const useBranches = () => {
                     resolve(response.data)
                 })
                 .catch((error:any) => {
-                    reject(error)
+                    if(error.response) {
+                        switch (error.response.status) {
+                            case 304:
+                                reject(getAllPullReq304)
+                                break;
+                            case 422:
+                                reject(getAllPullReq422)
+                                break;
+                        }
+                    }
+                    reject("Unhandled:\n" + error.response.data.message)
                 })
         })
     }
+
+    const getUser = (username:string) => {
+        return new Promise<Endpoints['GET /users/{username}']["response"]["data"]>((resolve, reject) => {
+            octokit.request('GET /users/{username}', {
+                username: username
+            })
+                .then((response:any) => {
+                    resolve(response.data)
+                })
+                .catch((error:any) => {
+                    if (error.response && error.response.status === 404) reject(getUser404);
+                    else reject(error);
+                })
+        })
+    }
+
 
 
     return {
@@ -145,7 +195,8 @@ export const useBranches = () => {
         createNewBranch: createNewBranch,
         getTreesCommits: getTreesCommits,
         getPullRequest: getPullRequest,
-        getAllPullRequests: getAllPullRequests
+        getAllPullRequests: getAllPullRequests,
+        getUser: getUser
 
     }
 

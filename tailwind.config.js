@@ -2,6 +2,13 @@ module.exports = {
   purge: ['./src/**/*.{js,jsx,ts,tsx}', './public/index.html'],
   darkMode: false, // or 'media' or 'class'
   theme: {
+    extend: {
+      spacing: {
+        "m90px": "-90px",
+        "m125px": "-125px",
+        "35px": "35px",
+      }
+    },
     fontSize: {
       'xs': '.75rem',
       'sm': '.875rem',
@@ -18,25 +25,34 @@ module.exports = {
     },
     height: {
       "20px":"20px",
+      "38px":"38px",
       "48px":"48px",
       "72px":"72px",
-      "88px":"88px",
+      "78px":"78px",
+      "80px":"80px",
       "104px":"104px",
+      "180px":"180px",
       "1/2": "50%",
       "3/5": "60%",
       "2/5": "40%",
-      max: "max-content",
       full: "100%",
+      min: "min-content",
+      max: "max-content",
       screen: "100vh"
     },
     width: {
       "250px":"250px",
-      "300px":"300px"
+      "300px":"300px",
+      full: "100%",
     },
     colors: {
       black: {
         DEFAULT: "#0E0E0F",
         second: "#171717",
+      },
+      accent: {
+        DEFAULT: "#2f3742",
+        second: "#222f3e"
       },
       dark: {
         DEFAULT: "#303030",
@@ -49,8 +65,12 @@ module.exports = {
         middle: "#ABABAB",
         light: "#ECECEC",
       },
+      error: {
+        DEFAULT: "#f65656"
+      },
       white: {
         DEFAULT: "#F6F6F6",
+        light: "#FFFFFF"
       },
     }
   },

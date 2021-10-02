@@ -2,30 +2,57 @@ import {useEffect, useState} from "react"
 import { useDispatch, useSelector } from "react-redux";
 import parse from 'html-react-parser';
 import {Branches} from "./branches";
+import { CSSTransition } from 'react-transition-group'
+import styles from './loading-styles.module.css'
+
+import Prism from "prismjs";
+import './../../prism/prism.css'
+
 import {useBranches} from "../../hooks/branches-hook";
-import {branchInfo, commitInfo, mergeInfo} from "../../types/data-types";
+import {
+    branchesCompareCommitInfo,
+    branchInfo,
+    commitInfo,
+    defaultBranchesCompareCommitInfo,
+    mergeInfo
+} from "../../types/data-types";
 import {getRandomColor} from "../other/randomColor";
 import React from "react";
 import {RootReducer} from "../../redux";
 import {setCommits, setOpenCommits} from "../../redux/branches-state/branches-action-creators";
 import {BranchesListButton} from "../../buttons/brancheslist-button";
 import {useCommits} from "../../hooks/commits-hook";
+import {LoadingContainer} from "../../loading/loading-container";
+import {
+    emptyFileError,
+    fileExistError, getAllBranches404,
+    getUser404,
+    nameNotResolve,
+    openFileMsg, unhandledError,
+} from "../../types/errors-const";
 
+interface MatchParams {
+    owner: string;
+    repo: string;
+    path: string;
+    commitSha: string;
+}
 
-export const BranchesContainer = (commit:string) => {
+export const BranchesContainer = (commit:MatchParams) => {
     const branchesStatus: any = useSelector<RootReducer>(state => state.branches);
     const mainStatus: any = useSelector<RootReducer>(state => state.main);
     const dispatch = useDispatch();
 
     const { getAllBranches, getPullRequest, getCommitSha,
-        getTreeFromSha, getTreesCommits, getAllPullRequests} = useBranches();
+        getTreeFromSha, getTreesCommits, getAllPullRequests, getUser } = useBranches();
 
     const {getBlobFromFileSha} = useCommits();
 
+    const [globalError, setGlobalError] = useState("");
     const [isMounted, setIsMounted] = useState(false)
 
     const [loadCommit, setLoadCommit] = useState(false)
-
+    const [infoCompareCommit, setInfoCompareCommit] = useState<branchesCompareCommitInfo>(defaultBranchesCompareCommitInfo)
     const [compareContent, setCompareContent] = useState("")
 
     const commitInfoInitState = {
@@ -45,22 +72,38 @@ export const BranchesContainer = (commit:string) => {
         to: ""
     }
 
+    useEffect(()=> {
+        let owner = commit.owner;
+        let repo = commit.repo;
+        dispatch(setCommits(false))
+        getCommitAndBranches(owner, repo,30)
+            .catch((error)=> {
+                console.log("Global error")
+            })
+    },[commit.owner, commit.repo, commit.path])
+
     useEffect(() => {
+        console.log("props: ",commit)
         setLoadCommit(false)
-        let owner = "uniquenik"
-        let repo = "uniquenik.github.io"
+        let owner = commit.owner
+        let repo = commit.repo
         let path = "index.html"
-        //@ts-ignore
-        getCommitFromTreeSha(commit.match.params.commitSha, owner, repo, path)
-            .then((compareCommit) => {
-                setCompareContent(compareCommit)
-                setLoadCommit(true)
-            })
-            .catch((error) => {
-                console.log(error)
-                setLoadCommit(true)
-            })
-    },[commit])
+
+        if (commit.commitSha) {
+            getCommitFromTreeSha(commit.commitSha, owner, repo, path)
+                .then((compareCommit) => {
+                    if (compareCommit !== "") setCompareContent(compareCommit)
+                    else setCompareContent(emptyFileError)
+                })
+                .catch((error) => {
+                    console.log("error:", error)
+                    setCompareContent(fileExistError)
+                })
+        }
+        else setCompareContent(openFileMsg)
+        setLoadCommit(true)
+        Prism.highlightAll();
+    },[commit.commitSha])
 
     function b64DecodeUnicode(str: any) {
         // Going backwards: from bytestream, to percent-encoding, to original string.
@@ -70,11 +113,17 @@ export const BranchesContainer = (commit:string) => {
     }
 
     async function getCommitFromTreeSha (commitSha:string, owner:string, repo:string, path:string) {
-        let commitInfo
+        let currentCommitInfo:branchesCompareCommitInfo = defaultBranchesCompareCommitInfo
         let file
         await getCommitSha(commitSha, owner, repo)
             .then((treeSha) => {
                 console.log(treeSha)
+                currentCommitInfo = {
+                    sha:treeSha.sha,
+                    commitAuthorDate: treeSha.author.date,
+                    commitMessage: treeSha.message,
+                    committerAuthorLogin: treeSha.author.name
+                }
                 return getTreeFromSha(treeSha.tree.sha, owner, repo)
             })
             .then((tree) => {
@@ -92,9 +141,11 @@ export const BranchesContainer = (commit:string) => {
             })
             .catch((error) => {
                     console.log(error)
+                    //throw new Error("404")
                 }
             )
         console.log(file)
+        setInfoCompareCommit(currentCommitInfo)
         return file
     }
 
@@ -106,26 +157,15 @@ export const BranchesContainer = (commit:string) => {
 
     const [listMerge, setListMerge] = useState<Array<mergeInfo>>(() => new Array(mergeInfoInitState))
 
-    useEffect(() => {
-        dispatch(setCommits(false))
-        getCommitAndBranches('uniquenik', 'uniquenik.github.io',30)
-
-    },[])
-
     async function getCommitAndBranches(owner:string, repo:string, per_page:number) {
         let getBranches = await getAllBranches(owner, repo)
             .catch((error) => {
-                    console.log(error)
-                }
-            )
+                setGlobalError(error)
+                throw new Error(error)
+            })
         //get some data and create new array for commits on every branch
         let commitsInfo = new Array<commitInfo>()
-        let getOnePullRequest = await getPullRequest(owner,repo,1)
-            .catch((error) => {
-                    console.log(error)
-                }
-            )
-        console.log(getOnePullRequest)
+        //console.log(getOnePullRequest)
         let thismainBranch = 0
         if (getBranches) {
             console.log(getBranches)
@@ -135,11 +175,12 @@ export const BranchesContainer = (commit:string) => {
                 name: getBranches[0].name,
                 color: getRandomColor()
             })
+            //0 branch
             let treeCommits = await getTreesCommits(owner, repo, getBranches[0].name, per_page)
                 .catch((error) => {
-                        console.log(error)
-                    }
-                )
+                    setGlobalError(error)
+                    throw new Error(error)
+                })
             console.log(treeCommits)
             let checkTrees:boolean[] = [];
             for (let k = 0; k < getBranches.length; ++k) checkTrees.push(false);
@@ -168,12 +209,12 @@ export const BranchesContainer = (commit:string) => {
                     name: getBranches[i].name,
                     color: getRandomColor()
                 })
-                //send response for commits on tree
+                //1... branch
                 let treeCommits = await getTreesCommits(owner, repo, getBranches[i].name, per_page)
                     .catch((error) => {
-                            console.log(error)
-                        }
-                    )
+                        setGlobalError(error);
+                        throw new Error(error);
+                    })
                 console.log(getBranches[i].name, treeCommits)
                 if (treeCommits) {
                     for (let j = 0; j < treeCommits.length; j++) {
@@ -225,6 +266,10 @@ export const BranchesContainer = (commit:string) => {
             setListCommits(commitsInfo.slice(0,per_page))
             setMainBranch(thismainBranch)
             let result = await getAllPullRequests(owner, repo)
+                .catch((error)=> {
+                    setGlobalError(error);
+                    throw new Error(error);
+                })
             let newListMerge:mergeInfo[] = []
             result.forEach(function (item) {
                 if(item.state === 'closed'){
@@ -262,36 +307,71 @@ export const BranchesContainer = (commit:string) => {
         dispatch(setOpenCommits(!branchesStatus.isOpenListCommits))
     }
 
+    const nodeRef = React.useRef(null);
+
     return (
         <>
-            {branchesStatus.getCommits &&
-            <div className={"h-screen relative"}>
-                <div className={`grid grid-cols-2 h-${branchesStatus.isOpenListCommits ? "3/5" : "full" }`}>
-                    <div className={"overflow-y-auto"}>
-                        <div className={""}>
-                        { parse(mainStatus.currentValue) }
+            <LoadingContainer show={!branchesStatus.getCommits} errorMsg={globalError}>
+                <div className={"h-screen relative bg-accent-second overflow-hidden"}>
+                    <div className={`grid grid-cols-2 gap-x-2 h-${branchesStatus.isOpenListCommits ? "3/5" : "max" }`}>
+                        <div className={"col-span-2"}>
+                            <div className={"flex"}>
+                                <div className={"px-2 py-1 flex-grow text-base text-white overflow-ellipsis overflow-hidden max-h-48px"}>
+                                    {infoCompareCommit.commitMessage}
+                                </div>
+                            </div>
+                            <div className={"flex text-xs text-gray"}>
+                                <button className={"mx-1 px-4 py-2 rounded-md text-sm font-medium border-0 focus:outline-none focus:ring transition text-white bg-dark hover:bg-gray-dark active:bg-gray focus:ring-gray"}
+                                        placeholder={'sas'} type={'button'}>Back</button>
+                                <div className={"flex-grow"}></div>
+                                {infoCompareCommit.commitAuthorDate &&
+                                <div className={"text-right"}>
+                                    <div> {infoCompareCommit.sha} </div>
+                                    <div> {infoCompareCommit.commitAuthorDate}/{infoCompareCommit.committerAuthorLogin}  </div>
+                                </div>
+                                }
+                                <div>
+                                    <button className={"mx-1 px-4 py-2 rounded-md text-sm font-medium border-0 focus:outline-none focus:ring transition text-white bg-black-second hover:bg-gray-dark active:bg-gray focus:ring-gray"}
+                                            placeholder={'sas'} type={'button'}>Edit</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div className={"text-black h-full overflow-y-auto bg-white"}>
+                            <div className={""}>
+                            { parse(mainStatus.currentValue) }
+                            </div>
+                        </div>
+                        <div className={"text-black h-full overflow-y-auto bg-white"}>
+                            <LoadingContainer show={!loadCommit } errorMsg={""}>
+                                {typeof(compareContent)=="string" && parse(compareContent)}
+                            </LoadingContainer>
                         </div>
                     </div>
-                    <div className={"h-full overflow-y-auto"}>
-                        {loadCommit && typeof (compareContent) == "string" &&
-                        parse(compareContent)
-                        }
-                    </div>
+                    <CSSTransition in={ branchesStatus.isOpenListCommits && branchesStatus.getCommits}
+                                   nodeRef={ nodeRef }
+                                   classNames={{
+                                       enter: styles.enter,
+                                       enterActive: styles.enterActive,
+                                       exit: styles.exit,
+                                       exitActive: styles.exitActive
+                                   }}
+                                   timeout={ 1000 }
+                                   unmountOnExit>
+                    {/*{ &&*/}
+                        <div ref={ nodeRef } className={"h-2/5 bg-accent-second overflow-y-auto"}>
+                        <Branches listBranches={listBranches}
+                                  listCommits={listCommits}
+                                  listMerge={listMerge}
+                                  mainBranch={mainBranch}
+                                  isMounted={isMounted}
+                        />
+                        </div>
+                    </CSSTransition>
+                <div className={"absolute left-2/4 bottom-0 bg-accent"}>
+                    <BranchesListButton callback={onListCommitsButton} selected={branchesStatus.isOpenListCommits}/>
                 </div>
-                {branchesStatus.isOpenListCommits &&
-                    <div className={"h-2/5 overflow-y-auto"}>
-                    <Branches listBranches={listBranches}
-                              listCommits={listCommits}
-                              listMerge={listMerge}
-                              mainBranch={mainBranch}
-                              isMounted={isMounted}
-                    />
-                    </div> }
-            <div className={"absolute left-2/4 bottom-0"}>
-                <BranchesListButton callback={onListCommitsButton} selected={branchesStatus.isOpenListCommits}/>
-            </div>
-            </div>
-            }
+                </div>
+            </LoadingContainer>
         </>
     )
 }
