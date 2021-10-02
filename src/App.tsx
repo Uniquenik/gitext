@@ -40,15 +40,15 @@ const App = () => {
         <Router>
             <div>
                 <Switch>
-                    <Route path="/:owner/:repo/:path/branches/" render={({match}) =>
-                        (<BranchesContainer
-                            commitSha={""}
-                            owner={match.params.owner}
-                            repo={match.params.repo}
-                            path={match.params.path}/>)}/>
                     <Route path="/:owner/:repo/:path/branches/:commitSha" render={({match}) =>
                         (<BranchesContainer
                             commitSha={match.params.commitSha}
+                            owner={match.params.owner}
+                            repo={match.params.repo}
+                            path={match.params.path}/>)}/>
+                    <Route path="/:owner/:repo/:path/branches/" render={({match}) =>
+                        (<BranchesContainer
+                            commitSha={""}
                             owner={match.params.owner}
                             repo={match.params.repo}
                             path={match.params.path}/>)}/>

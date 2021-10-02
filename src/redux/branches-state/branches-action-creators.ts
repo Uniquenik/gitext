@@ -20,3 +20,10 @@ export const setOpenCommits = (bool:boolean) => {
         payload: bool
     }
 }
+
+export const setVisibleCurrentValue = (bool:boolean) => {
+    return {
+        type: branchesActionTypes.SET_VISIBLE_CURRENT_VALUE,
+        payload: bool
+    }
+}

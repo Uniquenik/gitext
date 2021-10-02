@@ -1,5 +1,6 @@
 import {Endpoints} from "@octokit/types";
 import {octokit} from "../api/auth-token";
+import {getBlob403, getBlob404, getBlob422, getTree404, getTree422} from "../types/errors-const";
 
 export const useCommits = () => {
     const getSingleTree = (owner:string, repo:string, tree_sha:string) => {
@@ -161,7 +162,20 @@ export const useCommits = () => {
                     resolve(response.data)
                 })
                 .catch((error:any) => {
-                    reject(error)
+                    if(error.response) {
+                        switch (error.response.status) {
+                            case 403:
+                                reject(getBlob403)
+                                break;
+                            case 404:
+                                reject(getBlob404)
+                                break;
+                            case 422:
+                                reject(getBlob422)
+                                break;
+                        }
+                    }
+                    reject("Unhandled:\n" + error.response.data.message)
                 })
         })
     }

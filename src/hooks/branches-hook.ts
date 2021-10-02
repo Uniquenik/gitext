@@ -1,7 +1,7 @@
 import {octokit} from "../api/auth-token";
 import {Endpoints} from "@octokit/types";
 import {
-    getAllBranches404, getAllPullReq304, getAllPullReq422,
+    getAllBranches404, getAllPullReq304, getAllPullReq422, getCommit404, getTree404, getTree422,
     getTreesCommits400,
     getTreesCommits404,
     getTreesCommits409, getTreesCommits500,
@@ -88,7 +88,17 @@ export const useBranches = () => {
                     resolve(response.data)
                 })
                 .catch((error:any) => {
-                    reject(error)
+                    if(error.response) {
+                        switch (error.response.status) {
+                            case 404:
+                                reject(getTree404)
+                                break;
+                            case 422:
+                                reject(getTree422)
+                                break;
+                        }
+                    }
+                    reject("Unhandled:\n" + error.response.data.message)
                 })
         })
     }
@@ -104,7 +114,8 @@ export const useBranches = () => {
                     resolve(response.data)
                 })
                 .catch((error:any) => {
-                    reject(error)
+                    if(error.response && error.response.status === 404) reject(getCommit404)
+                    reject("Unhandled:\n" + error.response.data.message)
                 })
         })
     }

@@ -16,10 +16,10 @@ export const BranchesListButton = ({...props}: ButtonCallback & {selected:boolea
 
     return (
         <button
-            className={"bg-white rounded-md"}
-            onClick={ onClick } style={{transition: "all 0.3s ease-out",
-            transform: clicked ? "" : `rotate(180deg)`}}>
-            <img width={30} src={arrow} alt={"arrow"}/>
+            className={"py-2 px-8 rounded-tl-lg bg-gray bg-opacity-80"}
+            onClick={ onClick } >
+            <img width={25} src={arrow} alt={"arrow"} style={{transition: "all 0.3s ease-out",
+                transform: clicked ? "" : `rotate(180deg)`}}/>
         </button>
     );
 }

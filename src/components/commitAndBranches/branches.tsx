@@ -189,7 +189,7 @@ export const Branches = (
                     <div className={"flex w-full"}>
                         {displayTreeInfo.map((tree, key) =>
                             <div key={key} className={"text-center p-1"}>
-                                <TreeDot key={key} fill={tree.color} width={"40"} className={"mx-auto px-2"}/>
+                                <TreeDot key={key} fill={tree.color} width={"35"} className={"mx-auto px-2"}/>
                                 <span className={"text-xs text-white"}> {tree.name} </span>
                              </div>
                         )}
