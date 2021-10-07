@@ -1,18 +1,27 @@
 @tailwind base;
 h1 {
-  @apply text-4xl;
+  @apply text-4xl font-semibold my-3;
 }
 h2 {
-  @apply text-3xl;
+  @apply text-3xl font-semibold my-4;
 }
 h3 {
-  @apply text-2xl;
+  @apply text-2xl font-semibold my-5;
 }
 ul {
   @apply list-disc list-inside;
 }
 ol {
   @apply list-decimal list-inside;
+}
+a {
+  @apply underline;
+}
+table {
+  @apply border-2 border-black;
+}
+td {
+  @apply border border-black;
 }
 
 

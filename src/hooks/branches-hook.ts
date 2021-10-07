@@ -20,7 +20,7 @@ export const useBranches = () => {
                 })
                 .catch((error:any) => {
                     if (error.response && error.response.status === 404) reject(getAllBranches404);
-                    else reject("Unhandled:\n" + error.response.data.message)
+                    else reject("Unhandled:\n" + error)
                 })
         })
     }
@@ -54,7 +54,7 @@ export const useBranches = () => {
                                 break;
                         }
                     }
-                    reject("Unhandled:\n" + error.response.data.message)
+                    reject("Unhandled:\n" + error)
                 })
         })
     }
@@ -98,7 +98,7 @@ export const useBranches = () => {
                                 break;
                         }
                     }
-                    reject("Unhandled:\n" + error.response.data.message)
+                    reject("Unhandled:\n" + error)
                 })
         })
     }
@@ -115,7 +115,7 @@ export const useBranches = () => {
                 })
                 .catch((error:any) => {
                     if(error.response && error.response.status === 404) reject(getCommit404)
-                    reject("Unhandled:\n" + error.response.data.message)
+                    reject("Unhandled:\n" + error)
                 })
         })
     }
@@ -176,7 +176,7 @@ export const useBranches = () => {
                                 break;
                         }
                     }
-                    reject("Unhandled:\n" + error.response.data.message)
+                    reject("Unhandled:\n" + error)
                 })
         })
     }

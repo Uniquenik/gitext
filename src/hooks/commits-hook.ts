@@ -1,6 +1,15 @@
 import {Endpoints} from "@octokit/types";
 import {octokit} from "../api/auth-token";
-import {getBlob403, getBlob404, getBlob422, getTree404, getTree422} from "../types/errors-const";
+import {
+    getBlob403,
+    getBlob404,
+    getBlob422,
+    getRep301,
+    getRep403,
+    getRep404,
+    getTree404,
+    getTree422
+} from "../types/errors-const";
 
 export const useCommits = () => {
     const getSingleTree = (owner:string, repo:string, tree_sha:string) => {
@@ -175,7 +184,36 @@ export const useCommits = () => {
                                 break;
                         }
                     }
-                    reject("Unhandled:\n" + error.response.data.message)
+                    reject("Unhandled:\n" + error)
+                })
+        })
+    }
+
+    const getRep = (owner:string, repo:string) => {
+        return new Promise<Endpoints['GET /repos/{owner}/{repo}']["response"]["data"]>
+        ((resolve, reject) => {
+            octokit.request('GET /repos/{owner}/{repo}', {
+                owner: owner,
+                repo: repo
+            })
+                .then((response: any) => {
+                    resolve(response.data)
+                })
+                .catch((error:any) => {
+                    if(error.response) {
+                        switch (error.response.status) {
+                            case 301:
+                                reject(getRep301)
+                                break;
+                            case 403:
+                                reject(getRep403)
+                                break;
+                            case 404:
+                                reject(getRep404)
+                                break;
+                        }
+                    }
+                    reject("Unhandled:\n" + error)
                 })
         })
     }
@@ -189,6 +227,7 @@ export const useCommits = () => {
         updateRef: updateRef,
         getAllRepAuth: getAllRepAuth,
         getBlob: getBlob,
-        getBlobFromFileSha: getBlobFromFileSha
+        getBlobFromFileSha: getBlobFromFileSha,
+        getRep: getRep
     }
 }

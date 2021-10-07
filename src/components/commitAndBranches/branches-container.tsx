@@ -8,12 +8,13 @@ import styles from './loading-styles.module.css'
 import Prism from "prismjs";
 import './../../prism/prism.css'
 
+import {useHistory} from 'react-router-dom';
 import {useBranches} from "../../hooks/branches-hook";
 import {
     branchesCompareCommitInfo,
     branchInfo,
     commitInfo,
-    defaultBranchesCompareCommitInfo,
+    defaultBranchesCompareCommitInfo, MatchParams,
     mergeInfo
 } from "../../types/data-types";
 import {getRandomColor} from "../other/randomColor";
@@ -27,23 +28,19 @@ import {
     emptyFileError,
     openFileMsg, wrongExtension
 } from "../../types/errors-const";
+import {CompareButton} from "../../buttons/compare-button";
 
-interface MatchParams {
-    owner: string;
-    repo: string;
-    path: string;
-    commitSha: string;
-}
 
 export const BranchesContainer = (commit:MatchParams) => {
     const branchesStatus: any = useSelector<RootReducer>(state => state.branches);
-    const mainStatus: any = useSelector<RootReducer>(state => state.main);
+    const editorStatus: any = useSelector<RootReducer>(state => state.editor);
     const dispatch = useDispatch();
 
     const { getAllBranches, getPullRequest, getCommitSha,
         getTreeFromSha, getTreesCommits, getAllPullRequests, getUser } = useBranches();
 
     const {getBlobFromFileSha} = useCommits();
+    const history = useHistory()
 
     const [globalError, setGlobalError] = useState("");
     const [isMounted, setIsMounted] = useState(false)
@@ -70,17 +67,21 @@ export const BranchesContainer = (commit:MatchParams) => {
     }
 
     useEffect(()=> {
+        setLoadCommit(false)
         let owner = commit.owner;
         let repo = commit.repo;
         dispatch(setCommits(false))
         getCommitAndBranches(owner, repo,30)
+            .then(()=> {
+                setLoadCommit(true)
+            })
             .catch((error)=> {
+                setLoadCommit(true)
                 console.log("Global error")
             })
     },[commit.owner, commit.repo, commit.path])
 
     useEffect(() => {
-        //console.log("props: ",commit)
         setLoadCommit(false)
         let owner = commit.owner
         let repo = commit.repo
@@ -100,7 +101,10 @@ export const BranchesContainer = (commit:MatchParams) => {
                     //setCompareContent(fileExistError)
                 })
         }
-        else setCompareContent(openFileMsg)
+        else {
+            setCompareContent(openFileMsg)
+            setLoadCommit(true)
+        }
     },[commit])
 
     function b64DecodeUnicode(str: any) {
@@ -145,8 +149,7 @@ export const BranchesContainer = (commit:MatchParams) => {
                 setCompareContent(error)
                 throw new Error(error)
                 //console.log(error)
-                }
-            )
+            })
         //console.log(file)
         setInfoCompareCommit(currentCommitInfo)
         return file
@@ -315,21 +318,29 @@ export const BranchesContainer = (commit:MatchParams) => {
         Prism.highlightAll();
     }
 
+    const editCommit = () => {
+        if (commit.commitSha) history.push(`../editor/${commit.commitSha}`)
+    }
+
+    const backEditor = () => {
+        history.push(`../editor/`)
+    }
+
     const nodeRef = React.useRef(null);
 
     return (
         <>
             <LoadingContainer show={!branchesStatus.getCommits} errorMsg={globalError}>
-                <div className={"h-screen relative overflow-hidden"}>
-                    <div className={`grid grid-cols-2 px-1 gap-x-1 bg-accent-second h-${branchesStatus.isOpenListCommits ? "3/5" : "full" }`}>
-                        <div className={"col-span-2"}>
+                <div className={"h-screen relative overflow-hidden bg-accent"}>
+                    <div className={`grid grid-cols-2 px-1 gap-x-1 gap-y-1 h-${branchesStatus.isOpenListCommits ? "3/5" : "full" }`}>
+                        <div className={"col-span-2 h-min"}>
                             <div className={"flex"}>
                                 <div className={"py-1 flex-grow text-base text-white overflow-ellipsis overflow-hidden max-h-48px"}>
                                     {infoCompareCommit.commitMessage}
                                 </div>
                             </div>
                             <div className={"flex text-xs text-gray"}>
-                                <button className={"mr-2 px-4 py-2 rounded-sm text-sm font-medium border-0 transition text-white bg-gray-dark hover:bg-gray"}
+                                <button onClick={backEditor} className={"mr-2 px-4 py-2 rounded-sm text-sm font-medium border-0 transition text-white bg-gray-dark hover:bg-gray"}
                                         placeholder={'sas'} type={'button'}>Back</button>
                                 <div className={"flex-grow"}></div>
                                 {infoCompareCommit.commitAuthorDate &&
@@ -339,22 +350,21 @@ export const BranchesContainer = (commit:MatchParams) => {
                                 </div>
                                 }
                                 <div>
-                                    <button className={"ml-2 px-4 py-2 rounded-sm text-sm font-medium border-0 transition text-white bg-black-second hover:bg-gray"}
+                                    <button onClick={editCommit} disabled={commit.commitSha===""} className={"ml-2 px-4 py-2 disabled:opacity-70 rounded-sm text-sm font-medium border-0 transition text-white bg-black-second hover:bg-gray"}
                                             placeholder={'sas'} type={'button'}>Edit</button>
                                 </div>
                             </div>
                         </div>
                         {branchesStatus.isOpenCurrentValue &&
-                        <div className={"bg-white h-full overflow-y-auto"}>
-                            {parse(mainStatus.currentValue)}
+                        <div className={"font-sans bg-white h-full overflow-y-auto"}>
+                            {parse(editorStatus.currentValue)}
                         </div>
                         }
-                        <div className={`${!branchesStatus.isOpenCurrentValue && "col-span-2"} h-full overflow-y-auto bg-white`}>
+                        <div className={`${!branchesStatus.isOpenCurrentValue && "col-span-2 " || ""}h-full font-sans overflow-y-auto bg-white`}>
                             <LoadingContainer show={!loadCommit} errorMsg={""}>
                                 {typeof(compareContent)=="string" && parse(compareContent)}
                             </LoadingContainer>
                         </div>
-                        <div></div>
                     </div>
                     <CSSTransition in={ branchesStatus.isOpenListCommits && branchesStatus.getCommits}
                                    nodeRef={ nodeRef }
@@ -366,7 +376,7 @@ export const BranchesContainer = (commit:MatchParams) => {
                                    }}
                                    timeout={ 1000 }
                                    unmountOnExit>
-                        <div ref={ nodeRef } className={"h-2/5 bg-accent-second overflow-y-auto"}>
+                        <div ref={ nodeRef } className={"h-2/5 overflow-y-auto bg-accent-second border-t-2 border-black-second"}>
                         <Branches listBranches={listBranches}
                                   listCommits={listCommits}
                                   listMerge={listMerge}
@@ -375,12 +385,11 @@ export const BranchesContainer = (commit:MatchParams) => {
                         />
                         </div>
                     </CSSTransition>
-
                     <div className={"absolute right-0 bottom-0"}>
                         <BranchesListButton callback={onListCommitsButton} selected={branchesStatus.isOpenListCommits}/>
                     </div>
                     <div className={"absolute left-0 bottom-0"}>
-                        <BranchesListButton callback={onVisibleCurrentValueButton} selected={branchesStatus.isOpenListCommits}/>
+                        <CompareButton callback={onVisibleCurrentValueButton} selected={branchesStatus.isOpenListCommits}/>
                     </div>
                 </div>
             </LoadingContainer>

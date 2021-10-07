@@ -24,25 +24,38 @@ module.exports = {
       '7xl': '5rem',
     },
     height: {
+      "100vh":"100vh",
       "20px":"20px",
       "38px":"38px",
       "48px":"48px",
       "72px":"72px",
       "78px":"78px",
       "80px":"80px",
+      "93px":"93px",
       "104px":"104px",
       "180px":"180px",
       "1/2": "50%",
+      "1/4": "25%",
       "3/5": "60%",
       "2/5": "40%",
+      "40vh": "40vh",
+      "50vh": "50vh",
+      "100vh": "100vh",
       full: "100%",
       min: "min-content",
       max: "max-content",
       screen: "100vh"
     },
     width: {
+      '100vw': '100vw',
       "250px":"250px",
       "300px":"300px",
+      "40vw": "40vw",
+      "50vw": "50vw",
+      "1/2": '50%',
+      "1/4": '25%',
+      min: "min-content",
+      max: "max-content",
       full: "100%",
     },
     colors: {
@@ -75,7 +88,9 @@ module.exports = {
     }
   },
   variants: {
-    extend: {},
+    extend: {
+      opacity: ['disabled'],
+    },
   },
   plugins: [],
 }

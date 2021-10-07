@@ -3,8 +3,8 @@ import { createStore, applyMiddleware } from "redux";
 import { createLogger } from "redux-logger";
 import {branchesReducer} from "./branches-state";
 import {branchesState} from "./branches-state/data-types";
-import {mainState} from "./main-state/data-types";
-import {mainReducer} from "./main-state/main-reducer";
+import {editorState} from "./editor-state/data-types";
+import {editorReducer} from "./editor-state/editor-reducer";
 
 import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
@@ -19,12 +19,12 @@ const persistConfig = {
 
 export interface RootReducer {
     branches:branchesState,
-    main: mainState
+    editor: editorState
 }
 
 const rootReducer = combineReducers({
     branches: branchesReducer,
-    main: mainReducer
+    editor: editorReducer
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer)

@@ -13,18 +13,29 @@ export const getTreesCommits500 = "500\n Problem with server";
 export const getAllPullReq304 = "304\n ???";
 export const getAllPullReq422 = "422\n Entity (?)";
 
+export const getRep301 = "301\n Moved";
+export const getRep403 = "403\n Where new?";
+export const getRep404 = "404\n Problem with repo/owner";
+export const getRepPermission = "Permission error\n You can't edit this repo"
+
 //get commit in branches (output on screen)
-export const getCommit404 = `<div style="text-align:center;"><h1 style="color:red">Error 404</h1><h2>This commit not found</h2></div>`
-export const emptyFileError = `<div style="text-align:center;"><h1 style="color:red">Error file</h1><h2>This file is empty</h2></div>`
+export const getCommit404 = `<div style="text-align:center;"><h2 style="color:red; margin:0">Error 404</h2><p>This commit/file not found</p></div>`
+export const emptyFileError = `<div style="text-align:center;"><h2 style="color:red; margin:0">Error file</h2><p>This file is empty</p></div>`
 
-export const getTree404 = `<div style="text-align:center;"><h1 style="color:red">Error 404</h1><h2>Problem with tree</h2></div>`
-export const getTree422 = `<div style="text-align:center;"><h1 style="color:red">Error 422</h1><h2>?</h2></div>`
+export const getTree404 = `<div style="text-align:center;"><h2 style="color:red; margin:0">Error 404</h2><p>Problem with tree</p></div>`
+export const getTree422 = `<div style="text-align:center;"><h2 style="color:red; margin:0">Error 422</h2><p>?</p></div>`
 
-export const getBlob403 = `<div style="text-align:center;"><h1 style="color:red">Error 403</h1><h2>Forbidden</h2></div>`
-export const getBlob404 = `<div style="text-align:center;"><h1 style="color:red">Error 404</h1><h2>Blob not found. Maybe wrong directory?</h2></div>`
-export const getBlob422 = `<div style="text-align:center;"><h1 style="color:red">Error 422</h1><h2>?</h2></div>`
+export const getBlob403 = `<div style="text-align:center;"><h2 style="color:red; margin:0">Error 403</h2><p>Forbidden</p></div>`
+export const getBlob404 = `<div style="text-align:center;"><h2 style="color:red; margin:0">Error 404</h2><p>Blob not found. Maybe wrong directory?</p></div>`
+export const getBlob422 = `<div style="text-align:center;"><h2 style="color:red; margin:0">Error 422</h2><p>?</p></div>`
 
-export const wrongExtension = `<div style="text-align:center;"><h1 style="color:red">Error with extension</h1><h2>We can work only with .html files</h2></div>`
+export const wrongExtension = `<div style="text-align:center;"><h2 style="color:red; margin:0">Error with extension</h2><p>We can work only with .html files</p></div>`
+export const wrongExtensionLine = `Error with extension\n We can work only with .html files`
+
+export const getUserRep304 = `<div style="text-align:center;"><h2 style="color:red; margin:0">Error 304</h2><p>Not modified (?)</p></div>`
+export const getUserRep401 = `<div style="text-align:center;"><h2 style="color:red; margin:0">Error 401</h2><p>Please, authorize</p></div>`
+export const getUserRep403 = `<div style="text-align:center;"><h2 style="color:red; margin:0">Error 403</h2><p>Forbidden (?)</p></div>`
+export const getUserRep422 = `<div style="text-align:center;"><h2 style="color:red; margin:0">Error 422</h2><p>Unprocessable Entity (?)</p></div>`
 
 export const unhandledError = "Unknown error\n Please, try again"
 

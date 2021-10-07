@@ -15,7 +15,7 @@ export const InfoList = (
 ) => {
     return (
         <div className={"w-full text-white h-78px"}>
-            <Link to={`./../branches/${props.sha}`}>
+            <Link to={`../branches/${props.sha}`} className={"no-underline"}>
                 <div className={"flex flex-col px-1 py-2"}>
                     <div className={"text-tiny text-white hover:text-gray"}>
                         <div className={"overflow-ellipsis overflow-hidden h-38px w-full"}>

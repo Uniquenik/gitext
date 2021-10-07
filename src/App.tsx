@@ -2,12 +2,14 @@ import React, {useEffect} from 'react';
 import './App.css';
 
 import {BranchesContainer} from "./components/commitAndBranches/branches-container";
-import TinyMCEEditor from "./tinymce-editor"
+import TinyMCEEditor from "./components/tinyMCEeditor/tinymce-editor"
 import {
     BrowserRouter as Router,
     Switch,
     Route
 } from "react-router-dom";
+import {ChangeRepoContainer} from "./components/chooseRepo/change-repo-container";
+import {ChoosePathContainer} from "./components/choosePath/choose-path-container";
 
 //const { Octokit } = require("@octokit/core");
 //const octokit = new Octokit({ auth: `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` });
@@ -52,12 +54,26 @@ const App = () => {
                             owner={match.params.owner}
                             repo={match.params.repo}
                             path={match.params.path}/>)}/>
-                    <Route path="/branches/" component={BranchesContainer} />
-                    {/*    <BranchesContainer/>
-                    </Route>*/}
-                    <Route path="/">
-                        <TinyMCEEditor/>
-                    </Route>
+                    <Route path="/:owner/:repo/:path/editor/:commitSha" render={({match}) =>
+                        (<TinyMCEEditor
+                            commitSha={match.params.commitSha}
+                            owner={match.params.owner}
+                            repo={match.params.repo}
+                            path={match.params.path}/>)}/>
+                    <Route path="/:owner/:repo/:path/editor/" render={({match}) =>
+                        (<TinyMCEEditor
+                            commitSha={""}
+                            owner={match.params.owner}
+                            repo={match.params.repo}
+                            path={match.params.path}/>)}/>
+                    <Route path= "/:owner/:repo" render={({match}) => (
+                        <ChoosePathContainer owner={match.params.owner}
+                                             repo={match.params.repo}
+                        />
+                    )}/>
+                    <Route path= "/:owner/" render={({match}) => (
+                        <ChangeRepoContainer owner={match.params.owner}/>
+                    )}/>
                 </Switch>
             {/**/}
             </div>
