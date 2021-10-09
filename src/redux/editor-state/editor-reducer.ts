@@ -2,8 +2,6 @@ import {Action, editorState} from "./data-types";
 import {editorActionTypes} from "./editor-action-types";
 
 const defaultState:editorState = {
-    isAuth: false,
-    authToken: "",
     currentValue: "",
     isSaveCurrentValue: false,
     isSaveCurrentValueGit: false,
@@ -16,12 +14,6 @@ const defaultState:editorState = {
 
 export function editorReducer(state:editorState = defaultState, action:Action){
     switch (action.type){
-        case editorActionTypes.SET_AUTH:
-            return {
-                ...state,
-                authToken: action.payload,
-                isAuth: true
-            };
         case editorActionTypes.SET_VALUE:
             return {
                 ...state,

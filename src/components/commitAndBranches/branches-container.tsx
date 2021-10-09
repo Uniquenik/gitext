@@ -8,7 +8,7 @@ import styles from './loading-styles.module.css'
 import Prism from "prismjs";
 import './../../prism/prism.css'
 
-import {useHistory} from 'react-router-dom';
+import {useHistory, useParams} from 'react-router-dom';
 import {useBranches} from "../../hooks/branches-hook";
 import {
     branchesCompareCommitInfo,
@@ -29,9 +29,15 @@ import {
     openFileMsg, wrongExtension
 } from "../../types/errors-const";
 import {CompareButton} from "../../buttons/compare-button";
+import {ErrorModal} from "../../modalPortal/error-modal";
+import {ModalPortal} from "../../modalPortal/modal-portal";
 
 
-export const BranchesContainer = (commit:MatchParams) => {
+export const BranchesContainer = () => {
+    let {owner,
+        repo,
+        path,
+        commitSha } = useParams()
     const branchesStatus: any = useSelector<RootReducer>(state => state.branches);
     const editorStatus: any = useSelector<RootReducer>(state => state.editor);
     const dispatch = useDispatch();
@@ -68,8 +74,6 @@ export const BranchesContainer = (commit:MatchParams) => {
 
     useEffect(()=> {
         setLoadCommit(false)
-        let owner = commit.owner;
-        let repo = commit.repo;
         dispatch(setCommits(false))
         getCommitAndBranches(owner, repo,30)
             .then(()=> {
@@ -79,16 +83,13 @@ export const BranchesContainer = (commit:MatchParams) => {
                 setLoadCommit(true)
                 console.log("Global error")
             })
-    },[commit.owner, commit.repo, commit.path])
+    },[owner, repo, path])
 
     useEffect(() => {
         setLoadCommit(false)
-        let owner = commit.owner
-        let repo = commit.repo
-        let path = commit.path
-        path = path.replace("$","/")
-        if (commit.commitSha) {
-            getCommitFromTreeSha(commit.commitSha, owner, repo, path)
+        let pathNew = path.replace("$","/")
+        if (commitSha) {
+            getCommitFromTreeSha(commitSha, owner, repo, pathNew)
                 .then((compareCommit) => {
                     if (compareCommit !== "") setCompareContent(compareCommit)
                     else setCompareContent(emptyFileError)
@@ -105,7 +106,7 @@ export const BranchesContainer = (commit:MatchParams) => {
             setCompareContent(openFileMsg)
             setLoadCommit(true)
         }
-    },[commit])
+    },[owner, repo, path, commitSha])
 
     function b64DecodeUnicode(str: any) {
         // Going backwards: from bytestream, to percent-encoding, to original string.
@@ -166,6 +167,7 @@ export const BranchesContainer = (commit:MatchParams) => {
     async function getCommitAndBranches(owner:string, repo:string, per_page:number) {
         let getBranches = await getAllBranches(owner, repo)
             .catch((error) => {
+                console.log(error)
                 setGlobalError(error)
                 throw new Error(error)
             })
@@ -319,7 +321,7 @@ export const BranchesContainer = (commit:MatchParams) => {
     }
 
     const editCommit = () => {
-        if (commit.commitSha) history.push(`../editor/${commit.commitSha}`)
+        if (commitSha) history.push(`../editor/${commitSha}`)
     }
 
     const backEditor = () => {
@@ -328,9 +330,21 @@ export const BranchesContainer = (commit:MatchParams) => {
 
     const nodeRef = React.useRef(null);
 
+    const onBackError = () => {
+        history.push('/')
+    }
+
     return (
         <>
-            <LoadingContainer show={!branchesStatus.getCommits} errorMsg={globalError}>
+            <LoadingContainer show={!branchesStatus.getCommits} errorMsg={""}>
+                <ModalPortal
+                    show={globalError !== ""}
+                    onClose={""}
+                    selector={'#modal'}
+                    closable={false}
+                >
+                    <ErrorModal errorMsg={globalError} onBack={onBackError}/>
+                </ModalPortal>
                 <div className={"h-screen relative overflow-hidden bg-accent"}>
                     <div className={`grid grid-cols-2 px-1 gap-x-1 gap-y-1 h-${branchesStatus.isOpenListCommits ? "3/5" : "full" }`}>
                         <div className={"col-span-2 h-min"}>
@@ -350,7 +364,7 @@ export const BranchesContainer = (commit:MatchParams) => {
                                 </div>
                                 }
                                 <div>
-                                    <button onClick={editCommit} disabled={commit.commitSha===""} className={"ml-2 px-4 py-2 disabled:opacity-70 rounded-sm text-sm font-medium border-0 transition text-white bg-black-second hover:bg-gray"}
+                                    <button onClick={editCommit} disabled={commitSha===""} className={"ml-2 px-4 py-2 disabled:opacity-70 rounded-sm text-sm font-medium border-0 transition text-white bg-black-second hover:bg-gray"}
                                             placeholder={'sas'} type={'button'}>Edit</button>
                                 </div>
                             </div>

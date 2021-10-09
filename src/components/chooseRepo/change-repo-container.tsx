@@ -4,6 +4,9 @@ import {ChangeRepo} from "./change-repo"
 import {LoadingContainer} from "../../loading/loading-container";
 import {ErrorModal} from "../../modalPortal/error-modal";
 import {ModalPortal} from "../../modalPortal/modal-portal";
+import {useHistory} from "react-router-dom"
+import {useSelector} from "react-redux";
+import {RootReducer} from "../../redux";
 
 export interface repoInfo {
     created_at: string,
@@ -19,21 +22,11 @@ export interface repoInfo {
     //admin/pull/push
 }
 
-/*export const defaultStateRepoInfo = {
-    created_at: "",
-    pushed_at: "",
-    id_project: 0,
-    language: "",
-    name: "",
-    description: "",
-    owner_login: "",
-    owner_avatar: "",
-    visibility: "",
-    permissions: [],
-}*/
-
-export const ChangeRepoContainer = (props: {owner:string}) => {
+export const ChangeRepoContainer = () => {
+    const mainStatus: any = useSelector<RootReducer>(state => state.main);
     const {getUserRepo} = useRepo()
+
+    let history = useHistory()
 
     const [repos, setRepos] = useState<repoInfo[]>([])
     const [isFetching, setIsFetching] = useState(true)
@@ -54,7 +47,6 @@ export const ChangeRepoContainer = (props: {owner:string}) => {
 
     async function getRepos () {
         let repoArr:repoInfo[] = []
-        console.log(props.owner)
         await getUserRepo()
             .then((response)=>{
                 console.log(response)
@@ -75,6 +67,7 @@ export const ChangeRepoContainer = (props: {owner:string}) => {
                 )
             })
             .catch((error)=>{
+                console.log(error)
                 setTypeModal(error)
                 throw new Error(error)
             })
@@ -91,10 +84,10 @@ export const ChangeRepoContainer = (props: {owner:string}) => {
                     selector={'#modal'}
                     closable={false}
                 >
-                    <ErrorModal errorMsg={typeModal}/>
+                    <ErrorModal errorMsg={typeModal} onBack={() => history.push('/')}/>
                 </ModalPortal>
                     {(!isFetching &&
-                    <ChangeRepo owner={props.owner}
+                    <ChangeRepo owner={mainStatus.username}
                                 repos={repos}/>
                     )
                     || (<div className={"h-screen w-screen"}/>)

@@ -1,6 +1,4 @@
 export interface editorState {
-    isAuth: boolean,
-    authToken: string,
     currentValue:string,
     isSaveCurrentValue: boolean,
     isSaveCurrentValueGit: boolean,

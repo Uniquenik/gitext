@@ -1,13 +1,6 @@
 import {editorActionTypes} from "./editor-action-types";
 import {fileInfo} from "./data-types";
 
-export const setAuth = (token: string) => {
-    return {
-        type: editorActionTypes.SET_AUTH,
-        payload: token
-    }
-}
-
 export const setValueText = (value: string) => {
     return {
         type: editorActionTypes.SET_VALUE,

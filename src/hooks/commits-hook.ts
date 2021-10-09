@@ -1,5 +1,4 @@
 import {Endpoints} from "@octokit/types";
-import {octokit} from "../api/auth-token";
 import {
     getBlob403,
     getBlob404,
@@ -10,8 +9,12 @@ import {
     getTree404,
     getTree422
 } from "../types/errors-const";
+import {useAuth} from "./auth-hook";
 
 export const useCommits = () => {
+    const {getOcto} = useAuth()
+    const octokit = getOcto()!
+
     const getSingleTree = (owner:string, repo:string, tree_sha:string) => {
         return new Promise<Endpoints['GET /repos/{owner}/{repo}/git/trees/{tree_sha}']["response"]["data"]>
         ((resolve, reject) => {

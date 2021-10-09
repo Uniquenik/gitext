@@ -1,14 +1,17 @@
-import {octokit} from "../api/auth-token";
+
 import {Endpoints} from "@octokit/types";
 import {
     getAllBranches404, getAllPullReq304, getAllPullReq422, getCommit404, getTree404, getTree422,
     getTreesCommits400,
     getTreesCommits404,
     getTreesCommits409, getTreesCommits500,
-    getUser404
+    getUser404, universal401
 } from "../types/errors-const";
+import {useAuth} from "./auth-hook";
 
 export const useBranches = () => {
+    const {getOcto} = useAuth()
+    const octokit = getOcto()!
     const getAllBranches = (owner:string, repo:string) => {
         return new Promise<Endpoints['GET /repos/{owner}/{repo}/branches']["response"]["data"]>((resolve, reject) => {
                 octokit.request('GET /repos/{owner}/{repo}/branches', {
@@ -21,6 +24,7 @@ export const useBranches = () => {
                 })
                 .catch((error:any) => {
                     if (error.response && error.response.status === 404) reject(getAllBranches404);
+                    else if (error.response && error.response.status === 401) reject(universal401)
                     else reject("Unhandled:\n" + error)
                 })
         })
@@ -116,7 +120,8 @@ export const useBranches = () => {
                     resolve(response.data)
                 })
                 .catch((error:any) => {
-                    if(error.response && error.response.status === 404) reject(getCommit404)
+                    if (error.response && error.response.status === 404) reject(getCommit404)
+                    else if (error.response && error.response.status === 401) reject(universal401)
                     reject("Unhandled:\n" + error)
                 })
         })

@@ -1,5 +1,4 @@
 import {Endpoints} from "@octokit/types";
-import {octokit} from "../api/auth-token";
 import {
     getBlob403,
     getBlob404,
@@ -9,8 +8,11 @@ import {
     getUserRep403,
     getUserRep422
 } from "../types/errors-const";
+import {useAuth} from "./auth-hook";
 
 export const useRepo = () => {
+    const {getOcto} = useAuth()
+    const octokit = getOcto()!
 
     const getUserRepo = () => {
         return new Promise<Endpoints['GET /user/repos']["response"]["data"]>((resolve, reject) => {

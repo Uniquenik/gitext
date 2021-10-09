@@ -4,7 +4,8 @@ import {useBranches} from "../../hooks/branches-hook";
 import {LoadingContainer} from "../../loading/loading-container";
 import {ErrorModal} from "../../modalPortal/error-modal";
 import {ModalPortal} from "../../modalPortal/modal-portal";
-import {useHistory} from 'react-router-dom';
+import {useHistory, useParams} from 'react-router-dom';
+import {nameNotResolve} from "../../types/errors-const";
 
 export interface filePath {
     type:string,
@@ -19,10 +20,9 @@ export interface branch {
     resp: filePath[]
 }
 
-export const ChoosePathContainer = (props:{
-    owner:string,
-    repo:string
-}) => {
+export const ChoosePathContainer = () => {
+    let {owner,
+        repo} = useParams()
     const { getTreeFromSha, getAllBranches, getCommitSha } = useBranches()
 
     const [branches, setBranches] = useState<branch[]>([])
@@ -36,23 +36,7 @@ export const ChoosePathContainer = (props:{
     const history = useHistory()
 
     useEffect(()=>{
-        setIsFetching(true)
-        getBranches(props.owner, props.repo)
-            .then((resp)=> {
-                setBranches(resp)
-                console.log(resp)
-                let localTree:filePath[] = []
-                branches[indexBranch].resp.forEach((item) => {
-                    if (item.path.indexOf("/") == -1) localTree.push(item)
-                })
-                setCurrentTree(localTree)
-                setCurrentDir("")
-                setIsFetching(false)
-            })
-            .catch((error)=>{
-                setIsFetching(false)
-                console.log("Global error")
-            })
+       getStartInfo()
     },[])
 
     /*useEffect(() => {
@@ -60,6 +44,30 @@ export const ChoosePathContainer = (props:{
 
         setIsFetching(false)
     },[indexBranch])*/
+
+    async function getStartInfo(){
+        setIsFetching(true)
+        await getBranches(owner, repo)
+            .then((response)=> {
+                console.log(response)
+                setBranches(response)
+                //do not work from function here
+                let localTree:filePath[] = []
+                response[indexBranch].resp.forEach((item) => {
+                    if (item.path.indexOf("/") == -1) localTree.push(item)
+                })
+                localTree.sort(compareLocalTree)
+                setCurrentTree(localTree)
+                //
+                setCurrentDir("")
+                setIsFetching(false)
+            })
+            .catch((error)=>{
+                //setTypeModal(nameNotResolve)
+                setIsFetching(false)
+                console.log(error)
+            })
+    }
 
     async function getBranches(owner:string,repo:string) {
         let branchesList:branch[] = []
@@ -80,18 +88,20 @@ export const ChoosePathContainer = (props:{
                 throw new Error(error)
             })
         for (let i = 0; i < branchesList.length; i++){
-            await getCommitSha(branchesList[i].lastCommitSha, props.owner, props.repo)
+            await getCommitSha(branchesList[i].lastCommitSha, owner, repo)
                 .then((resp)=> {
                     branchesList[i].lastCommitShaTree = resp.tree.sha
-                    getTreeFromSha(resp.tree.sha, props.owner, props.repo)
+                    getTreeFromSha(resp.tree.sha, owner, repo)
                         .then((resp)=> {
                             branchesList[i].resp = resp.tree.map(arr => ({path: arr.path!, type:arr.type!}))
                         })
                         .catch((error)=>{
+                            setTypeModal(error)
                             console.log(error)
                         })
                 })
                 .catch((error)=> {
+                    setTypeModal(error)
                     console.log(error)
                 })
         }
@@ -104,11 +114,22 @@ export const ChoosePathContainer = (props:{
         setIndexBranch(num)
     }
 
+    const compareLocalTree = (a:filePath, b:filePath) => {
+        if ( a.type < b.type ){
+            return 1;
+        }
+        if ( a.type > b.type ){
+            return -1;
+        }
+        return 0;
+    }
+
     const getFilePath = (index:number) => {
         let localTree:filePath[] = []
         branches[index].resp.forEach((item) => {
             if (item.path.indexOf("/") == -1) localTree.push(item)
         })
+        localTree.sort(compareLocalTree)
         return localTree
     }
 
@@ -127,12 +148,13 @@ export const ChoosePathContainer = (props:{
         else {
             localTree = getFilePath(indexBranch)
         }
+        localTree.sort(compareLocalTree)
         setCurrentTree(localTree)
     }
 
     const setFile = (str:string) => {
         str = str.replace("$","/")
-        history.push(`./${str}/`)
+        history.push(`./${str}/editor/${branches[indexBranch].lastCommitSha}`)
     }
 
     const backDir = () => {
@@ -144,7 +166,7 @@ export const ChoosePathContainer = (props:{
         let localTree:filePath[] = []
         if (path!==""){
             branches[indexBranch].resp.forEach((item) => {
-                if(item.path.indexOf(path) == 0 &&
+                if (item.path.indexOf(path) == 0 &&
                     item.path.slice(path.length, item.path.length).indexOf("/") == -1)
                     localTree.push({path: item.path.slice(path.length, item.path.length),
                         type: item.type
@@ -154,7 +176,12 @@ export const ChoosePathContainer = (props:{
         else {
             localTree = getFilePath(indexBranch)
         }
+        localTree.sort(compareLocalTree)
         setCurrentTree(localTree)
+    }
+
+    const onReturnToList = () => {
+        history.push('/userrepos')
     }
 
     return(
@@ -166,15 +193,18 @@ export const ChoosePathContainer = (props:{
                     selector={'#modal'}
                     closable={false}
                 >
-                    <ErrorModal errorMsg={typeModal}/>
+                    <ErrorModal errorMsg={typeModal} onBack={() => history.push('/')}/>
                 </ModalPortal>
-                {(!isFetching && <ChoosePath branchesList={branches}
+                {(!isFetching && typeModal==="" && <ChoosePath branchesList={branches}
                             indexBranch={indexBranch} setIndexBranch={setBranch}
                                              setCurrDir={setDir}
                                              setFile={setFile}
                                              currDir={currentDir}
                                              currTree={currentTree}
                                              backDir = {backDir}
+                                             owner={owner}
+                                             repo={repo}
+                                             onReturnToList={onReturnToList}
                 />) ||
                 <div className={"h-screen w-screen"}></div>}
             </div>

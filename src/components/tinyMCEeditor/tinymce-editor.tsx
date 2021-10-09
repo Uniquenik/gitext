@@ -1,10 +1,8 @@
 import { Editor } from '@tinymce/tinymce-react';
 import React, {useEffect, useState} from "react";
 import {useCommits} from "../../hooks/commits-hook";
-import getClient from "../../api/auth-token"
 import {useDispatch, useSelector} from "react-redux";
 import {RootReducer} from "../../redux";
-import parse from "html-react-parser";
 import {
     setCurrentValueInfo,
     setIsSaveCurrentValue, setIsSaveCurrentValueGit,
@@ -21,19 +19,22 @@ import {getRepPermission, wrongExtensionLine} from "../../types/errors-const";
 import {LoadingContainer} from "../../loading/loading-container";
 import {ModalPortal} from "../../modalPortal/modal-portal";
 import {OverrideSaveMsg} from "../../modalPortal/modalContent/override-save-msg";
-import {useHistory} from 'react-router-dom'
+import {useHistory, useParams} from 'react-router-dom'
 import {ErrorModal} from "../../modalPortal/error-modal";
 import {ChangeRepoMsg} from "../../modalPortal/modalContent/change-repo-msg";
-import {current} from "@reduxjs/toolkit";
 
-const TinyMCEEditor = (addressInfo:MatchParams) => {
+const TinyMCEEditor = () => {
     const per_page = 100;
+    let {owner,
+        repo,
+        path,
+        commitSha } = useParams()
 
     const editorStatus: any = useSelector<RootReducer>(state => state.editor);
     const dispatch = useDispatch();
 
     const [value, setValue] = useState(() => editorStatus.currentValue)
-    const [globalError, setGlobalError] = useState("")
+    //const [globalError, setGlobalError] = useState("")
     const [isFetching, setIsFetching] = useState(true)
     const [showModal, setShowModal] = useState(false)
     const [typeModal, setTypeModal] = useState("")
@@ -49,21 +50,20 @@ const TinyMCEEditor = (addressInfo:MatchParams) => {
 
     useEffect(() => {
        onStart()
-    },[addressInfo])
+    },[owner, repo, path, commitSha])
 
     async function onStart () {
         setIsFetching(true)
-        let owner = addressInfo.owner
-        let repo = addressInfo.repo
-        let path = addressInfo.path
-        path = path.replace("$","/")
-        console.log(addressInfo.commitSha)
-        if (addressInfo.commitSha) {
+        let pathNew = path.replace("$","/")
+        console.log(commitSha)
+        if (!editorStatus.currentValueOwner && !editorStatus.currentValueRepo && !editorStatus.currentValuePath) onOverride()
+        else {
+            if (commitSha) {
                 checkCorrectData(owner, repo)
                     .then(() => {
                         if (owner !== editorStatus.currentValueOwner ||
                             repo !== editorStatus.currentValueRepo ||
-                            path !== editorStatus.currentValuePath
+                            pathNew !== editorStatus.currentValuePath
                         ) setTypeModal(CHANGE_REPO_MSG)
                         else setTypeModal(OVERRIDE_VALUE)
                         setShowModal(true)
@@ -77,34 +77,34 @@ const TinyMCEEditor = (addressInfo:MatchParams) => {
                         }))*/
                     })
                     .catch((error) => {
+                        //setTypeModal(error)
                         setIsFetching(false)
                         console.log(error)
                     })
-        }
-        else {
-            if (editorStatus.currentValueOwner !== owner ||
-                editorStatus.currentValueRepo !== repo ||
-                editorStatus.currentValuePath !== path
-            ) {
-                setTypeModal(OVERRIDE_VALUE)
-                setShowModal(true)
-            }
-            else {
-                /*getCommitFileAndBranch(owner, repo, path, addressInfo.commitSha)
-                    .then((branch) => {
-                        dispatch(setCurrentValueInfo({
-                            currentValueOwner: owner,
-                            currentValuePath: path,
-                            currentValueRepo:repo,
-                            currentValueParentCommit: addressInfo.commitSha,
-                            currentValueBranch: branch!
-                        }))
-                    })
-                    .catch((error) => {
-                        console.log(error)
-                    })
-                console.log(editorStatus.currentValueBranch)*/
-                setIsFetching(false)
+            } else {
+                if (editorStatus.currentValueOwner !== owner ||
+                    editorStatus.currentValueRepo !== repo ||
+                    editorStatus.currentValuePath !== pathNew
+                ) {
+                    setTypeModal(OVERRIDE_VALUE)
+                    setShowModal(true)
+                } else {
+                    /*getCommitFileAndBranch(owner, repo, path, addressInfo.commitSha)
+                        .then((branch) => {
+                            dispatch(setCurrentValueInfo({
+                                currentValueOwner: owner,
+                                currentValuePath: path,
+                                currentValueRepo:repo,
+                                currentValueParentCommit: addressInfo.commitSha,
+                                currentValueBranch: branch!
+                            }))
+                        })
+                        .catch((error) => {
+                            console.log(error)
+                        })
+                    console.log(editorStatus.currentValueBranch)*/
+                    setIsFetching(false)
+                }
             }
         }
     }
@@ -112,11 +112,11 @@ const TinyMCEEditor = (addressInfo:MatchParams) => {
     async function checkCorrectData (owner:string, repo:string) {
         let repInfo  = await getRep(owner, repo)
             .catch((error) => {
-                setGlobalError(error)
+                setTypeModal(error)
                 throw new Error(error)
             })
-        if(!repInfo.permissions || !repInfo.permissions.pull || !repInfo.permissions.push){
-            setGlobalError(getRepPermission)
+        if (!repInfo.permissions || !repInfo.permissions.pull || !repInfo.permissions.push){
+            setTypeModal(getRepPermission)
             throw new Error("Permissions error")
         }
     }
@@ -124,7 +124,7 @@ const TinyMCEEditor = (addressInfo:MatchParams) => {
     async function getCommitFileAndBranch(owner:string, repo:string, path:string, commitSha:string) {
         let branch:string = ""
             if (path.split('.').pop() !== 'html') {
-                setGlobalError(wrongExtensionLine)
+                setTypeModal(wrongExtensionLine)
                 throw new Error(wrongExtensionLine)
             }
             let currentCommitInfo: branchesCompareCommitInfo = defaultBranchesCompareCommitInfo
@@ -155,13 +155,13 @@ const TinyMCEEditor = (addressInfo:MatchParams) => {
                 })
                 .catch((error) => {
                     console.log(error)
-                    setGlobalError(error)
+                    setTypeModal(error)
                     throw new Error(error)
                 })
             //search branch for this commit
             let treeMainCommits = await getTreesCommits(owner, repo, 'main', per_page)
                 .catch((error) => {
-                    setGlobalError(error);
+                    setTypeModal(error)
                     throw new Error(error);
                 })
             for (let i=0; i<treeMainCommits.length && branch === ""; i++){
@@ -170,14 +170,14 @@ const TinyMCEEditor = (addressInfo:MatchParams) => {
             if (branch === "") {
                 let getBranches = await getAllBranches(owner, repo)
                     .catch((error) => {
-                        setGlobalError(error)
+                        setTypeModal(error)
                         throw new Error(error)
                     })
                 let i = 0;
                 while(branch === "" && getBranches.length > i) {
                     let treeCommits = await getTreesCommits(owner, repo, getBranches[i].name, per_page)
                         .catch((error) => {
-                            setGlobalError(error);
+                            setTypeModal(error)
                             throw new Error(error);
                         })
                     for (let j = 0; j<treeCommits.length && branch === ""; j++){
@@ -283,13 +283,14 @@ const TinyMCEEditor = (addressInfo:MatchParams) => {
         setIsFetching(true)
         setTypeModal("")
         setShowModal(false)
-        getCommitFileAndBranch(addressInfo.owner, addressInfo.repo, addressInfo.path, addressInfo.commitSha)
+        let pathNew = path.replace("$","/")
+        getCommitFileAndBranch(owner, repo, pathNew, commitSha)
             .then((branch) => {
                 dispatch(setCurrentValueInfo({
-                    currentValueOwner: addressInfo.owner,
-                    currentValuePath: addressInfo.path,
-                    currentValueRepo: addressInfo.repo,
-                    currentValueParentCommit: addressInfo.commitSha,
+                    currentValueOwner: owner,
+                    currentValuePath: pathNew,
+                    currentValueRepo: repo,
+                    currentValueParentCommit: commitSha,
                     currentValueBranch: branch!
                 }))
                 setIsFetching(false)
@@ -304,27 +305,28 @@ const TinyMCEEditor = (addressInfo:MatchParams) => {
         setIsFetching(true)
         setShowModal(false)
         setTypeModal("")
-        if (!addressInfo.commitSha){
+        let pathNew = path.replace("$","/")
+        if (!commitSha){
             setValue("")
             dispatch(setValueText(""))
             dispatch(setIsSaveCurrentValue(true))
             dispatch(setCurrentValueInfo({
-                currentValueOwner: addressInfo.owner,
-                currentValuePath: addressInfo.path,
-                currentValueRepo: addressInfo.repo,
+                currentValueOwner: owner,
+                currentValuePath: pathNew,
+                currentValueRepo: repo,
                 currentValueParentCommit: "",
                 currentValueBranch: ""
             }))
             setIsFetching(false)
         }
         else {
-            getCommitFileAndBranch(addressInfo.owner, addressInfo.repo, addressInfo.path, addressInfo.commitSha)
+            getCommitFileAndBranch(owner, repo, pathNew, commitSha)
                 .then((branch) => {
                     dispatch(setCurrentValueInfo({
-                        currentValueOwner: addressInfo.owner,
-                        currentValuePath: addressInfo.path,
-                        currentValueRepo: addressInfo.repo,
-                        currentValueParentCommit: addressInfo.commitSha,
+                        currentValueOwner: owner,
+                        currentValuePath: pathNew,
+                        currentValueRepo: repo,
+                        currentValueParentCommit: commitSha,
                         currentValueBranch: branch!
                     }))
                     setIsFetching(false)
@@ -337,17 +339,21 @@ const TinyMCEEditor = (addressInfo:MatchParams) => {
         }
     }
 
+    const onBackError = () => {
+        history.goBack()
+    }
+
     return (
         <>
             <LoadingContainer errorMsg={""} show={isFetching}>
                 <div className={"h-screen"}>
                 <ModalPortal
-                    show={globalError !== ""}
+                    show={typeModal !== ""}
                     onClose={""}
                     selector={'#modal'}
                     closable={false}
                 >
-                    <ErrorModal errorMsg={globalError}/>
+                    <ErrorModal errorMsg={typeModal} onBack={onBackError}/>
                 </ModalPortal>
                 <ModalPortal
                     show={showModal}
@@ -366,10 +372,10 @@ const TinyMCEEditor = (addressInfo:MatchParams) => {
                                      }}
                                      to={{
                                          currentValueBranch: "",
-                                         currentValueOwner: addressInfo.owner,
-                                         currentValuePath: addressInfo.path,
-                                         currentValueRepo: addressInfo.repo,
-                                         currentValueParentCommit: addressInfo.commitSha
+                                         currentValueOwner: owner,
+                                         currentValuePath: path.replace("$","/"),
+                                         currentValueRepo: repo,
+                                         currentValueParentCommit: commitSha
                                      }}
                                      onReturnOld={onReturnOld}
                                      onOverride={onOverride}
@@ -386,10 +392,10 @@ const TinyMCEEditor = (addressInfo:MatchParams) => {
                                        }}
                                        to={{
                                            currentValueBranch: "",
-                                           currentValueOwner: addressInfo.owner,
-                                           currentValuePath: addressInfo.path,
-                                           currentValueRepo: addressInfo.repo,
-                                           currentValueParentCommit: addressInfo.commitSha
+                                           currentValueOwner: owner,
+                                           currentValuePath: path.replace("$","/"),
+                                           currentValueRepo: repo,
+                                           currentValueParentCommit: commitSha
                                        }}
                                        onReturn={onReturn}
                                        onEdit={onEdit}

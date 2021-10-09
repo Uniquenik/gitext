@@ -39,4 +39,6 @@ export const getUserRep422 = `<div style="text-align:center;"><h2 style="color:r
 
 export const unhandledError = "Unknown error\n Please, try again"
 
+export const universal401 = `<div style="text-align:center;"><h2 style="color:red; margin:0">Error 401</h2><p>Please, authorize</p></div>`
+
 export const nameNotResolve = "Unknown error\n Check your connection";

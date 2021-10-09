@@ -1,4 +1,7 @@
 @tailwind base;
+body {
+  @apply bg-accent;
+}
 h1 {
   @apply text-4xl font-semibold my-3;
 }

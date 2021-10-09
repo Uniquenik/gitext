@@ -3,7 +3,10 @@ import React from "react";
 import parse from "html-react-parser";
 import {Link} from "react-router-dom";
 
-export const ErrorModal = (props: {errorMsg:string}) => {
+export const ErrorModal = (props: {
+    errorMsg:string,
+    onBack:(event:any)=>void
+}) => {
 
     return (
         <div>
@@ -16,7 +19,7 @@ export const ErrorModal = (props: {errorMsg:string}) => {
                 {parse(props.errorMsg)}
             </div>
             <Link to={"/"}>
-                <button className={"w-full p-2 bg-error hover:bg-gray"}>Go back</button>
+                <button className={"w-full p-2 bg-error hover:bg-gray"} onClick={props.onBack}>Go back</button>
             </Link>
         </div>
     )
