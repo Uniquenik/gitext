@@ -16,6 +16,7 @@ export const useBranches = () => {
                 repo: repo
             })
                 .then((response: any) => {
+                    console.log("Resp:",response)
                     resolve(response.data)
                 })
                 .catch((error:any) => {
@@ -82,7 +83,8 @@ export const useBranches = () => {
             octokit.request('GET /repos/{owner}/{repo}/git/trees/{tree_sha}', {
                 owner: owner,
                 repo: repo,
-                tree_sha: refName
+                tree_sha: refName,
+                recursive: "true"
             })
                 .then((response:any) => {
                     resolve(response.data)

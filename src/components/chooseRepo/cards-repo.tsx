@@ -9,7 +9,7 @@ export const CardsRepo = (props: {
             <div className={"text-xs"}>{props.rep.language || "none"}</div>
             <p className={"text-gray pb-3 text-sm"}>{props.rep.description || "none"}</p>
             <div className={"flex items-end"}>
-                <img width={"25"} className={"rounded-sm"} src={props.rep.owner_avatar}/>
+                <img width={"25"} className={"rounded-sm"} alt="avatar" src={props.rep.owner_avatar}/>
                 <span className={"text-white px-1 text-base"}>{props.rep.owner_login}</span>
             </div>
             <div className={"text-xs pt-1 text-white flex flex-wrap"}>

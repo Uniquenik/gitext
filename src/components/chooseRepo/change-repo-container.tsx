@@ -4,7 +4,6 @@ import {ChangeRepo} from "./change-repo"
 import {LoadingContainer} from "../../loading/loading-container";
 import {ErrorModal} from "../../modalPortal/error-modal";
 import {ModalPortal} from "../../modalPortal/modal-portal";
-import {getUserRep401} from "../../types/errors-const";
 
 export interface repoInfo {
     created_at: string,
@@ -74,7 +73,6 @@ export const ChangeRepoContainer = (props: {owner:string}) => {
                         })
                     }
                 )
-                //console.log(response)
             })
             .catch((error)=>{
                 setTypeModal(error)
