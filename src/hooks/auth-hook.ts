@@ -3,12 +3,13 @@ import {Octokit} from "@octokit/core";
 import {auth} from "@octokit/auth-app/dist-types/auth";
 import {useDispatch, useSelector} from "react-redux";
 import {RootReducer} from "../redux";
-import {setAuthToken} from "../redux/main-state/main-action-creators";
+import {deleteAuthToken, setAuthToken} from "../redux/main-state/main-action-creators";
 
 export const useAuth = () => {
+    const defaultOctokit = new Octokit({auth:"1"})
     const dispatch = useDispatch();
     const mainStatus: any = useSelector<RootReducer>(state => state.main);
-    const [octo, setOcto] = useState<Octokit>()
+    const [octo, setOcto] = useState<Octokit>(defaultOctokit)
 
     const isOcto = () => {
         console.log(octo)
@@ -21,7 +22,7 @@ export const useAuth = () => {
     }
 
     const getOcto = () => {
-        if (!octo && mainStatus.isAuth) {
+        if (octo === defaultOctokit && mainStatus.isAuth) {
             let tempOcto = new Octokit({auth:mainStatus.authToken})
             setOcto(tempOcto)
             return tempOcto
@@ -30,10 +31,16 @@ export const useAuth = () => {
         else return octo
     }
 
+    const deleteOcto = () => {
+        dispatch(deleteAuthToken())
+        setOcto(defaultOctokit)
+    }
+
     return {
         isOcto: isOcto,
         setToken: setToken,
-        getOcto: getOcto
+        getOcto: getOcto,
+        deleteOcto: deleteOcto
     }
 
 

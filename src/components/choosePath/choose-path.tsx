@@ -28,7 +28,7 @@ export const ChoosePath = (props:{
         <div className={"bg-accent text-white p-2 px-3 w-full h-full"}>
             <div className={""}>
                 <button onClick={props.onReturnToList} className={"mr-2 px-4 py-2 rounded-sm text-sm font-medium border-0 transition text-white bg-gray-dark hover:bg-gray"}
-                        placeholder={'sas'} type={'button'}>Back</button>
+                         type={'button'}>Back</button>
                 <h3 className={"m-0 text-gray"}>Choose file from repo:</h3>
                 <div className={"flex flex-wrap"}>
                     <h3 className={"m-0"}>{props.owner}/ </h3>

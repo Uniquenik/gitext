@@ -7,6 +7,7 @@ import {ModalPortal} from "../../modalPortal/modal-portal";
 import {useHistory} from "react-router-dom"
 import {useSelector} from "react-redux";
 import {RootReducer} from "../../redux";
+import {useAuth} from "../../hooks/auth-hook";
 
 export interface repoInfo {
     created_at: string,
@@ -25,6 +26,7 @@ export interface repoInfo {
 export const ChangeRepoContainer = () => {
     const mainStatus: any = useSelector<RootReducer>(state => state.main);
     const {getUserRepo} = useRepo()
+    const {deleteOcto} = useAuth()
 
     let history = useHistory()
 
@@ -74,6 +76,9 @@ export const ChangeRepoContainer = () => {
         return repoArr
     }
 
+    const onLogout = () => {
+        deleteOcto()
+    }
 
     return(
         <LoadingContainer show={isFetching} errorMsg={""}>
@@ -88,7 +93,9 @@ export const ChangeRepoContainer = () => {
                 </ModalPortal>
                     {(!isFetching &&
                     <ChangeRepo owner={mainStatus.username}
-                                repos={repos}/>
+                                repos={repos}
+                                onLogout={onLogout}
+                    />
                     )
                     || (<div className={"h-screen w-screen"}/>)
                     }

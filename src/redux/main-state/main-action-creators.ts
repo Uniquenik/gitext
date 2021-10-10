@@ -6,3 +6,16 @@ export const setAuthToken = (value: string) => {
         payload: value
     }
 }
+
+export const deleteAuthToken = () => {
+    return {
+        type: mainActionTypes.DELETE_AUTH_TOKEN,
+    }
+}
+
+export const setUsername = (name:string) => {
+    return{
+        type: mainActionTypes.SET_USERNAME,
+        payload: name
+    }
+}

@@ -15,6 +15,17 @@ export function mainReducer(state:mainState = defaultState, action:Action){
                 isAuth: true,
                 authToken: action.payload
             }
+        case mainActionTypes.SET_USERNAME:
+            return {
+                ...state,
+                username: action.payload
+            }
+        case mainActionTypes.DELETE_AUTH_TOKEN:
+            return {
+                ...state,
+                isAuth: false,
+                authToken: ""
+            }
 
 
         default: return state
