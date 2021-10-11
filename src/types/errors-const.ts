@@ -16,7 +16,8 @@ export const getAllPullReq422 = "422\n Entity (?)";
 export const getRep301 = "301\n Moved";
 export const getRep403 = "403\n Where new?";
 export const getRep404 = "404\n Problem with repo/owner";
-export const getRepPermission = "Permission error\n You can't edit this repo"
+export const badCredentials = "<div style=\"text-align:center;\"><h2 style=\"color:red; margin:0\">Bad credentials</h2><p>Incorrect token</p></div>";
+export const getRepPermission = "<div style=\"text-align:center;\"><h2 style=\"color:red; margin:0\">Permission error</h2><p>You can't edit this repo</p></div>"
 
 //get commit in branches (output on screen)
 export const getCommit404 = `<div style="text-align:center;"><h2 style="color:red; margin:0">Error 404</h2><p>This commit/file not found</p></div>`

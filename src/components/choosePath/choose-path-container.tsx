@@ -22,7 +22,7 @@ export interface branch {
 
 export const ChoosePathContainer = () => {
     let {owner,
-        repo} = useParams()
+        repo, option} = useParams()
     const { getTreeFromSha, getAllBranches, getCommitSha } = useBranches()
 
     const [branches, setBranches] = useState<branch[]>([])
@@ -33,20 +33,23 @@ export const ChoosePathContainer = () => {
     const [currentDir, setCurrentDir] = useState<string>("")
     const [currentTree, setCurrentTree] = useState<filePath[]>([])
 
+    const [isEdit, setIsEdit] = useState(true)
+
     const history = useHistory()
 
     useEffect(()=>{
-       getStartInfo()
+        if (option==='branches') setIsEdit(false)
+        console.log(option)
+        getStartInfo()
+           .catch((error)=>{
+               console.log(error)
+           })
     },[])
-
-    /*useEffect(() => {
-        setIsFetching(true)
-
-        setIsFetching(false)
-    },[indexBranch])*/
 
     async function getStartInfo(){
         setIsFetching(true)
+        setIndexBranch(0)
+        console.log(owner,repo)
         await getBranches(owner, repo)
             .then((response)=> {
                 console.log(response)
@@ -54,7 +57,7 @@ export const ChoosePathContainer = () => {
                 //do not work from function here
                 let localTree:filePath[] = []
                 response[indexBranch].resp.forEach((item) => {
-                    if (item.path.indexOf("/") == -1) localTree.push(item)
+                    if (item.path.indexOf("/") === -1) localTree.push(item)
                 })
                 localTree.sort(compareLocalTree)
                 setCurrentTree(localTree)
@@ -63,9 +66,9 @@ export const ChoosePathContainer = () => {
                 setIsFetching(false)
             })
             .catch((error)=>{
-                //setTypeModal(nameNotResolve)
+                setTypeModal(nameNotResolve)
                 setIsFetching(false)
-                console.log(error)
+                throw new Error(error)
             })
     }
 
@@ -127,7 +130,7 @@ export const ChoosePathContainer = () => {
     const getFilePath = (index:number) => {
         let localTree:filePath[] = []
         branches[index].resp.forEach((item) => {
-            if (item.path.indexOf("/") == -1) localTree.push(item)
+            if (item.path.indexOf("/") === -1) localTree.push(item)
         })
         localTree.sort(compareLocalTree)
         return localTree
@@ -136,10 +139,10 @@ export const ChoosePathContainer = () => {
     const setDir = (str:string) => {
         setCurrentDir(currentDir+str+"/")
         let localTree:filePath[] = []
-        if (currentDir+str+"/"!==""){
+        if (currentDir+str+"/" !== ""){
             branches[indexBranch].resp.forEach((item) => {
-                if(item.path.indexOf(currentDir+str+"/") == 0 &&
-                    item.path.slice((currentDir+str+"/").length, item.path.length).indexOf("/") == -1)
+                if(item.path.indexOf(currentDir+str+"/") === 0 &&
+                    item.path.slice((currentDir+str+"/").length, item.path.length).indexOf("/") === -1)
                     localTree.push({path: item.path.slice((currentDir+str+"/").length, item.path.length),
                                     type: item.type
                     })
@@ -154,20 +157,21 @@ export const ChoosePathContainer = () => {
 
     const setFile = (str:string) => {
         str = str.replace("$","/")
-        history.push(`./${str}/editor/${branches[indexBranch].lastCommitSha}`)
+        if (isEdit) history.push(`./${str}/editor/${branches[indexBranch].lastCommitSha}`)
+        else history.push(`../${str}/branches/${branches[indexBranch].lastCommitSha}`)
     }
 
     const backDir = () => {
         let path
-        if (currentDir.indexOf('/') != currentDir.length)
+        if (currentDir.indexOf('/') !== currentDir.length)
             path = currentDir.slice(0, currentDir.slice(0,-1).lastIndexOf('/')+1)
         else path = ""
         setCurrentDir(path)
         let localTree:filePath[] = []
         if (path!==""){
             branches[indexBranch].resp.forEach((item) => {
-                if (item.path.indexOf(path) == 0 &&
-                    item.path.slice(path.length, item.path.length).indexOf("/") == -1)
+                if (item.path.indexOf(path) === 0 &&
+                    item.path.slice(path.length, item.path.length).indexOf("/") === -1)
                     localTree.push({path: item.path.slice(path.length, item.path.length),
                         type: item.type
                     })
@@ -206,7 +210,7 @@ export const ChoosePathContainer = () => {
                                              repo={repo}
                                              onReturnToList={onReturnToList}
                 />) ||
-                <div className={"h-screen w-screen"}></div>}
+                <div className={"h-screen w-screen"}/>}
             </div>
         </LoadingContainer>
     )

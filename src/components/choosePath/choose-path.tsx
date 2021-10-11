@@ -1,6 +1,5 @@
 import {branch, filePath} from "./choose-path-container";
 import {FileInfo} from "./file-info";
-import {set} from "@octokit/auth-app/dist-types/cache";
 import up from './image/up.svg'
 import React from "react";
 
@@ -27,8 +26,9 @@ export const ChoosePath = (props:{
     return (
         <div className={"bg-accent text-white p-2 px-3 w-full h-full"}>
             <div className={""}>
-                <button onClick={props.onReturnToList} className={"mr-2 px-4 py-2 rounded-sm text-sm font-medium border-0 transition text-white bg-gray-dark hover:bg-gray"}
-                         type={'button'}>Back</button>
+                <button onClick={props.onReturnToList}
+                        className={"mr-2 px-4 py-2 rounded-sm text-sm font-medium border-0 transition text-white bg-gray-dark hover:bg-gray"}
+                        type={'button'}>Back</button>
                 <h3 className={"m-0 text-gray"}>Choose file from repo:</h3>
                 <div className={"flex flex-wrap"}>
                     <h3 className={"m-0"}>{props.owner}/ </h3>
@@ -50,7 +50,7 @@ export const ChoosePath = (props:{
                 )}
             </div>
             <div className={""}>
-                {(props.currDir!="" &&
+                {(props.currDir !== "" &&
                     <div className={"px-2 hover:bg-accent-second border border-gray m-0.5"}>
                         <button className={"w-full h-full"} onClick={props.backDir}>
                             <img className={"pt-2"} width={"20"} alt="..." src={up}/>

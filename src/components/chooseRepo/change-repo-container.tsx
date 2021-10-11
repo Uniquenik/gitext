@@ -1,5 +1,5 @@
 import {useRepo} from "../../hooks/repo-hook";
-import React, {useEffect, useState} from "react";
+import React, {ChangeEvent, useEffect, useState} from "react";
 import {ChangeRepo} from "./change-repo"
 import {LoadingContainer} from "../../loading/loading-container";
 import {ErrorModal} from "../../modalPortal/error-modal";
@@ -8,6 +8,7 @@ import {useHistory} from "react-router-dom"
 import {useSelector} from "react-redux";
 import {RootReducer} from "../../redux";
 import {useAuth} from "../../hooks/auth-hook";
+import {LoadingOverlay} from "../../loading/loading-overlay";
 
 export interface repoInfo {
     created_at: string,
@@ -23,6 +24,16 @@ export interface repoInfo {
     //admin/pull/push
 }
 
+export interface ownerRepoValue {
+    owner:string,
+    repo:string
+}
+
+export const defaultOwnerRepoValue = {
+    owner: "",
+    repo: "",
+}
+
 export const ChangeRepoContainer = () => {
     const mainStatus: any = useSelector<RootReducer>(state => state.main);
     const {getUserRepo} = useRepo()
@@ -33,15 +44,24 @@ export const ChangeRepoContainer = () => {
     const [repos, setRepos] = useState<repoInfo[]>([])
     const [isFetching, setIsFetching] = useState(true)
     const [typeModal, setTypeModal] = useState("")
+    const [ownerRepo, setOwnerRepo] = useState<ownerRepoValue>(defaultOwnerRepoValue)
+
+    const onChange = ({ target: { name, value } }: ChangeEvent<HTMLInputElement>) => {
+        setOwnerRepo( {...ownerRepo, [name]: value} )
+    }
+
+    const onViewBranches = () => {
+        history.push(`/${ownerRepo.owner}/${ownerRepo.repo}/branches/`)
+    }
 
     useEffect(() => {
         setIsFetching(true)
-        let a = getRepos()
+        getRepos()
             .then((resp)=>{
                 setRepos(resp)
                 setIsFetching(false)
             })
-            .catch((error)=> {
+            .catch(()=> {
                 setIsFetching(false)
                 console.log("Global error")
             })
@@ -67,6 +87,11 @@ export const ChangeRepoContainer = () => {
                         })
                     }
                 )
+                repoArr.sort(function (a,b) {
+                    if(a.pushed_at! > b.pushed_at!) return -1
+                    if(a.pushed_at! < b.pushed_at!) return 1
+                    else return 0
+                })
             })
             .catch((error)=>{
                 console.log(error)
@@ -80,26 +105,47 @@ export const ChangeRepoContainer = () => {
         deleteOcto()
     }
 
+    const onBack = () => {
+        history.push("/")
+    }
+
     return(
-        <LoadingContainer show={isFetching} errorMsg={""}>
-            <div className={"w-full h-full bg-accent"}>
-                <ModalPortal
-                    show={typeModal !== ""}
-                    onClose={""}
-                    selector={'#modal'}
-                    closable={false}
-                >
-                    <ErrorModal errorMsg={typeModal} onBack={() => history.push('/')}/>
-                </ModalPortal>
+        <>
+        <ModalPortal
+            show={typeModal!=="" || isFetching}
+            closable={false}
+            onClose={()=>{}}
+            selector={"#modal"}
+        >
+            <div>
+                {(typeModal !=="" &&
+                    <ErrorModal errorMsg={typeModal} onBack={onBack}/> ) ||
+                (isFetching &&
+                    <LoadingOverlay show={isFetching}/>)}
+            </div>
+        </ModalPortal>
+        {/*<LoadingContainer show={isFetching} errorMsg={""}>*/}
+        {/*    <div className={"w-full h-full bg-accent"}>*/}
+        {/*        <ModalPortal*/}
+        {/*            show={typeModal !== ""}*/}
+        {/*            onClose={""}*/}
+        {/*            selector={'#modal'}*/}
+        {/*            closable={false}*/}
+        {/*        >*/}
+        {/*            <ErrorModal errorMsg={typeModal} onBack={() => history.push('/')}/>*/}
+        {/*        </ModalPortal>*/}
                     {(!isFetching &&
                     <ChangeRepo owner={mainStatus.username}
                                 repos={repos}
                                 onLogout={onLogout}
+                                onChange={onChange}
+                                onViewBranches={onViewBranches}
+                                ownerValue={ownerRepo.owner}
+                                repoValue={ownerRepo.repo}
                     />
                     )
                     || (<div className={"h-screen w-screen"}/>)
                     }
-            </div>
-        </LoadingContainer>
+        </>
     )
 }

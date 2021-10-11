@@ -27,6 +27,7 @@ module.exports = {
       "100vh":"100vh",
       "20px":"20px",
       "28px":"28px",
+      "30px":"30px",
       "38px":"38px",
       "48px":"48px",
       "72px":"72px",
@@ -48,9 +49,11 @@ module.exports = {
       screen: "100vh"
     },
     width: {
+      "30px":"30px",
       '100vw': '100vw',
       "250px":"250px",
       "300px":"300px",
+      "400px":"400px",
       "40vw": "40vw",
       "50vw": "50vw",
       "1/2": '50%',

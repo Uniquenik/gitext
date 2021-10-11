@@ -25,7 +25,7 @@ export const InfoList = (
                     <div className={"text-right"}>
                         <div className={"flex justify-end text-base text-gray-middle"}>
                             {props.committerAuthorLogin}
-                            <img alt={"icon"}className={"h-20px pl-2"} src={props.committerAuthorAvatarURL}/>
+                            <img alt={"icon"} className={"h-20px pl-2"} src={props.committerAuthorAvatarURL}/>
                         </div>
                         <div className={"flex text-xs text-gray"}>
                             <span>

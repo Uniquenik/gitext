@@ -55,7 +55,8 @@ const App = () => {
                     <PrivateRoute path="/:owner/:repo/:path/branches/" children={<BranchesContainer/>}/>
                     <PrivateRoute path="/:owner/:repo/:path/editor/:commitSha" children={<TinyMCEEditor/>}/>
                     <PrivateRoute path="/:owner/:repo/:path/editor/" children={<TinyMCEEditor/>}/>
-                    <PrivateRoute path= "/:owner/:repo" children={<ChoosePathContainer/>}/>
+                    <PrivateRoute path= "/:owner/:repo/:option/" children={<ChoosePathContainer/>}/>
+                    <PrivateRoute path= "/:owner/:repo/" children={<ChoosePathContainer/>}/>
                     <PrivateRoute path= "/userrepos" children={<ChangeRepoContainer/>}/>
                     <Route path="/auth" children={<AuthContainer/>}/>
                 </Switch>

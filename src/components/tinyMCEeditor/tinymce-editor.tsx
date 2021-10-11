@@ -15,7 +15,7 @@ import {
     OVERRIDE_VALUE
 } from "../../types/data-types";
 import {useBranches} from "../../hooks/branches-hook";
-import {getRepPermission, wrongExtensionLine} from "../../types/errors-const";
+import {getCommit404, getRepPermission, wrongExtensionLine} from "../../types/errors-const";
 import {LoadingContainer} from "../../loading/loading-container";
 import {ModalPortal} from "../../modalPortal/modal-portal";
 import {OverrideSaveMsg} from "../../modalPortal/modalContent/override-save-msg";
@@ -56,15 +56,38 @@ const TinyMCEEditor = () => {
         setIsFetching(true)
         let pathNew = path.replace("$","/")
         console.log(commitSha)
-        if (!editorStatus.currentValueOwner && !editorStatus.currentValueRepo && !editorStatus.currentValuePath) onOverride()
+        if (!commitSha && editorStatus.currentValueOwner === owner &&
+            editorStatus.currentValuePath === path &&
+            editorStatus.currentValueRepo === repo
+        ){
+            setIsFetching(false)
+        }
         else {
-            if (commitSha) {
-                checkCorrectData(owner, repo)
-                    .then(() => {
+            //if (!editorStatus.currentValueOwner && !editorStatus.currentValueRepo && !editorStatus.currentValuePath) reviveFromGit(owner, repo, pathNew, commitSha)
+            //if (commitSha) {
+            checkCorrectData(owner, repo)
+                .then(() => {
+                    if (!editorStatus.currentValueOwner && !editorStatus.currentValueRepo && !editorStatus.currentValuePath)
+                        getCommitFileAndBranch(owner, repo, pathNew, commitSha)
+                            .then((branch) => {
+                                dispatch(setCurrentValueInfo({
+                                    currentValueOwner: owner,
+                                    currentValuePath: pathNew,
+                                    currentValueRepo: repo,
+                                    currentValueParentCommit: commitSha,
+                                    currentValueBranch: branch!
+                                }))
+                                setIsFetching(false)
+                            })
+                            .catch((error) => {
+                                console.log(error)
+                                setIsFetching(false)
+                            })
+                    else {
                         if (owner !== editorStatus.currentValueOwner ||
                             repo !== editorStatus.currentValueRepo ||
-                            pathNew !== editorStatus.currentValuePath
-                        ) setTypeModal(CHANGE_REPO_MSG)
+                            pathNew !== editorStatus.currentValuePath)
+                            setTypeModal(CHANGE_REPO_MSG)
                         else setTypeModal(OVERRIDE_VALUE)
                         setShowModal(true)
                         setIsFetching(false)
@@ -75,37 +98,39 @@ const TinyMCEEditor = () => {
                             currentValueParentCommit: "",
                             currentValueBranch: ""
                         }))*/
-                    })
-                    .catch((error) => {
-                        //setTypeModal(error)
-                        setIsFetching(false)
-                        console.log(error)
-                    })
-            } else {
-                if (editorStatus.currentValueOwner !== owner ||
-                    editorStatus.currentValueRepo !== repo ||
-                    editorStatus.currentValuePath !== pathNew
-                ) {
-                    setTypeModal(OVERRIDE_VALUE)
-                    setShowModal(true)
-                } else {
-                    /*getCommitFileAndBranch(owner, repo, path, addressInfo.commitSha)
-                        .then((branch) => {
-                            dispatch(setCurrentValueInfo({
-                                currentValueOwner: owner,
-                                currentValuePath: path,
-                                currentValueRepo:repo,
-                                currentValueParentCommit: addressInfo.commitSha,
-                                currentValueBranch: branch!
-                            }))
-                        })
-                        .catch((error) => {
-                            console.log(error)
-                        })
-                    console.log(editorStatus.currentValueBranch)*/
+                    }
+                })
+                .catch((error) => {
+                    //setTypeModal(error)
                     setIsFetching(false)
-                }
-            }
+                    console.log(error)
+                })
+            //}
+            //else {
+            //     if (editorStatus.currentValueOwner !== owner ||
+            //         editorStatus.currentValueRepo !== repo ||
+            //         editorStatus.currentValuePath !== pathNew
+            //     ) {
+            //         setTypeModal(OVERRIDE_VALUE)
+            //         setShowModal(true)
+            //     } else {
+            //         /*getCommitFileAndBranch(owner, repo, path, addressInfo.commitSha)
+            //             .then((branch) => {
+            //                 dispatch(setCurrentValueInfo({
+            //                     currentValueOwner: owner,
+            //                     currentValuePath: path,
+            //                     currentValueRepo:repo,
+            //                     currentValueParentCommit: addressInfo.commitSha,
+            //                     currentValueBranch: branch!
+            //                 }))
+            //             })
+            //             .catch((error) => {
+            //                 console.log(error)
+            //             })
+            //         console.log(editorStatus.currentValueBranch)*/
+            //         setIsFetching(false)
+            //}
+            //}
         }
     }
 
@@ -196,13 +221,14 @@ const TinyMCEEditor = () => {
     async function saveContentInGit(val:string) {
         let file = val
         console.log(val)
-        let owner = "uniquenik"
-        let repo = 'uniquenik.github.io'
-        let treeFromName = "save"
-        let path = "index.html"
+        // let owner = "uniquenik"
+        // let repo = 'uniquenik.github.io'
+        let treeFromName = "main"
+        let pathNew = path.replace("$","/")
         let messageCommit = "new commit!"
-        let treeToName = "save"
+        let treeToName = "main"
         let lastCommitSha
+        console.log(owner, repo, treeFromName)
         await getSingleTree(owner, repo, treeFromName)
             .then(response => {
                 let getCommitFromTree = getSingleCommit(owner, repo, response.sha)
@@ -213,7 +239,7 @@ const TinyMCEEditor = () => {
                 return createBlob(owner, repo, file)
             })
             .then(newBlob => {
-                return createTree(lastCommitSha, owner, repo, newBlob.sha, path)
+                return createTree(lastCommitSha, owner, repo, newBlob.sha, pathNew)
             })
             .then(newTree => {
                 return createCommit(owner, repo, messageCommit, lastCommitSha, newTree.sha)
@@ -238,18 +264,18 @@ const TinyMCEEditor = () => {
 
     // @ts-ignore
     async function reviveFromGit(owner: string, repo:string, path:string, ref:string):Promise<string> {
-        let result = "error"
-        await getAllRepAuth()
+        let result = `<h3>Error</h3>`
+        await getRep(owner, repo)
             .then(reps => {
                 console.log(reps)
-                for (let i = 0; i<reps.length; i++){
-                    if (reps[i].name === repo){
-                        // @ts-ignore
-                        if (reps[i].permissions && reps[i].permissions.pull && reps[i].permissions.push){
-                            return reps[i].owner.login
-                        }
-                    }
+                if (reps.permissions && reps.permissions.pull && reps.permissions.push){
+                    return reps.owner.login
                 }
+                else if (reps.permissions && (!reps.permissions.pull || !reps.permissions.push)) {
+                    setTypeModal(getRepPermission)
+                    throw new Error("Permission Error")
+                }
+                setTypeModal(getCommit404)
                 throw new Error ("Not found")
             })
             //searching files and find html for editor
@@ -421,7 +447,7 @@ const TinyMCEEditor = () => {
                         height: '100%',
                         menubar: "file edit insert view format table tools help branches custom",
                         menu: {
-                            file: { title: 'File', items: 'newdocument restoredraft | preview | print | chooseRepo | saveCommit getCommit ' },
+                            file: { title: 'File', items: 'print | chooseRepo | saveCommit getCommit ' },
                             edit: { title: 'Edit', items: 'undo redo | cut copy paste | selectall | searchreplace' },
                             view: { title: 'View', items: 'code | visualaid visualchars visualblocks | spellchecker | preview fullscreen' },
                             insert: { title: 'Insert', items: 'image link media template codesample inserttable | charmap emoticons hr | pagebreak nonbreaking anchor toc | insertdatetime' },
@@ -458,7 +484,7 @@ const TinyMCEEditor = () => {
                             editor.ui.registry.addMenuItem('chooseRepo', {
                                 text: 'Change repo...',
                                 onAction: function () {
-                                    history.push(`/${editorStatus.currentValueOwner}/`)
+                                    history.push(`/userrepos/`)
                                 }
                             });
 
@@ -528,10 +554,9 @@ const TinyMCEEditor = () => {
                             {text: 'C#', value: 'csharp'},
                             {text: 'C++', value: 'cpp'}
                         ],
-                        toolbar: 'codesample \
-                           undo redo | codesample code | formatselect fontselect | bold italic | \
+                        toolbar: 'undo redo | formatselect fontselect | bold italic | \
                             alignleft aligncenter alignright | \
-                            bullist numlist outdent indent | help codesample code image'
+                            bullist numlist | outdent indent | image | codesample'
                     }}
                     //onChange={handleEditorChange}
                     />

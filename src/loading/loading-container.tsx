@@ -3,7 +3,7 @@ import {Link} from "react-router-dom"
 import spinner from "./images/spinner.svg"
 import error from './images/error.svg'
 import { CSSTransition } from 'react-transition-group'
-import styles from './loading-styles.module.css'
+import styles from '../modalPortal/loading-styles.module.css'
 
 export const LoadingContainer = ({show, children, errorMsg}) => {
     const nodeRef = React.useRef(null);

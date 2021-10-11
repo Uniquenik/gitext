@@ -14,7 +14,7 @@ import {
     branchesCompareCommitInfo,
     branchInfo,
     commitInfo,
-    defaultBranchesCompareCommitInfo, MatchParams,
+    defaultBranchesCompareCommitInfo,
     mergeInfo
 } from "../../types/data-types";
 import {getRandomColor} from "../other/randomColor";
@@ -42,8 +42,8 @@ export const BranchesContainer = () => {
     const editorStatus: any = useSelector<RootReducer>(state => state.editor);
     const dispatch = useDispatch();
 
-    const { getAllBranches, getPullRequest, getCommitSha,
-        getTreeFromSha, getTreesCommits, getAllPullRequests, getUser } = useBranches();
+    const { getAllBranches, getCommitSha,
+        getTreeFromSha, getTreesCommits, getAllPullRequests} = useBranches();
 
     const {getBlobFromFileSha} = useCommits();
     const history = useHistory()
@@ -79,7 +79,7 @@ export const BranchesContainer = () => {
             .then(()=> {
                 setLoadCommit(true)
             })
-            .catch((error)=> {
+            .catch(()=> {
                 setLoadCommit(true)
                 console.log("Global error")
             })
@@ -96,7 +96,7 @@ export const BranchesContainer = () => {
                     Prism.highlightAll();
                     setLoadCommit(true)
                 })
-                .catch((error) => {
+                .catch(() => {
                     console.log("Global error")
                     setLoadCommit(true)
                     //setCompareContent(fileExistError)
@@ -356,7 +356,7 @@ export const BranchesContainer = () => {
                             <div className={"flex text-xs text-gray"}>
                                 <button onClick={backEditor} className={"mr-2 px-4 py-2 rounded-sm text-sm font-medium border-0 transition text-white bg-gray-dark hover:bg-gray"}
                                         placeholder={'sas'} type={'button'}>Back</button>
-                                <div className={"flex-grow"}></div>
+                                <div className={"flex-grow"}/>
                                 {infoCompareCommit.commitAuthorDate &&
                                 <div className={"text-right"}>
                                     <div> {infoCompareCommit.sha} </div>
@@ -374,9 +374,9 @@ export const BranchesContainer = () => {
                             {parse(editorStatus.currentValue)}
                         </div>
                         }
-                        <div className={`${!branchesStatus.isOpenCurrentValue && "col-span-2 " || ""}h-full font-sans overflow-y-auto bg-white`}>
+                        <div className={`${(!branchesStatus.isOpenCurrentValue && "col-span-2 ") || ""}h-full font-sans overflow-y-auto bg-white`}>
                             <LoadingContainer show={!loadCommit} errorMsg={""}>
-                                {typeof(compareContent)=="string" && parse(compareContent)}
+                                {parse(compareContent)}
                             </LoadingContainer>
                         </div>
                     </div>

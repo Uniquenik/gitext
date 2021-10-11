@@ -24,7 +24,7 @@ export const CardsRepo = (props: {
             <div className={"text-xs text-gray flex flex-wrap"}>
                 <div>id:{props.rep.id_project}</div>
                 <div className={"flex-grow"}/>
-                <div>{props.rep.created_at} / {props.rep.pushed_at}</div>
+                <div>{props.rep.created_at} / <span className={"text-white"}>{props.rep.pushed_at}</span></div>
             </div>
         </div>
     )

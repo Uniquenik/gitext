@@ -28,7 +28,6 @@ export const Branches = (
     const withoutAuthor = templateExtend(TemplateName.Metro, {
         branch: {
             lineWidth: 5,
-            //spacing:
             label: {
                 display:false
             },
@@ -56,13 +55,10 @@ export const Branches = (
         let branches:any[] = []
         let displayTree:string[] = []
         gitgraph._graph.template.colors = new Array(0)
-/*        console.log("Br: ",props.listBranches)*/
         props.listBranches.forEach(function (item){
-            //@ts-ignore
             branches.push(gitgraph.branch({name: item.name}))
             gitgraph._graph.template.colors.push(item.color)
         })
-/*        console.log(branches)*/
         for (let q = props.listCommits.length-1; q >= 0; q-=1){
             //let merge = false
             let index1 = -1
@@ -87,7 +83,7 @@ export const Branches = (
                     displayTree.push(branches[props.mainBranch].name)
                 branches[props.mainBranch].commit({hash: props.listCommits[q].sha})
             } else {
-                //только один
+                //only one
                 let counter = 0
                 let index = -1
                 for (let i = 0; i < check.length; i++)
