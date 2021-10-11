@@ -14,11 +14,11 @@ export const InfoList = (
     }
 ) => {
     return (
-        <div className={"w-full text-white h-78px"}>
+        <div className={"w-full text-white"}>
             <Link to={`../branches/${props.sha}`} className={"no-underline"}>
-                <div className={"flex flex-col px-1 py-2"}>
+                <div className={"flex flex-col px-1 py-1"}>
                     <div className={"text-tiny text-white hover:text-gray"}>
-                        <div className={"overflow-ellipsis overflow-hidden h-38px w-full"}>
+                        <div className={"overflow-ellipsis overflow-hidden h-40px w-full"}>
                             {props.commitMessage}
                         </div>
                     </div>
@@ -27,7 +27,7 @@ export const InfoList = (
                             {props.committerAuthorLogin}
                             <img alt={"icon"} className={"h-20px pl-2"} src={props.committerAuthorAvatarURL}/>
                         </div>
-                        <div className={"flex text-xs text-gray"}>
+                        <div className={"flex flex-wrap text-xs text-gray"}>
                             <span>
                             {props.sha}
                             </span>
@@ -36,7 +36,6 @@ export const InfoList = (
                             {props.commitAuthorDate}
                             </span>
                         </div>
-
                     </div>
                 </div>
             </Link>

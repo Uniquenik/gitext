@@ -1,7 +1,6 @@
 import {useRepo} from "../../hooks/repo-hook";
 import React, {ChangeEvent, useEffect, useState} from "react";
 import {ChangeRepo} from "./change-repo"
-import {LoadingContainer} from "../../loading/loading-container";
 import {ErrorModal} from "../../modalPortal/error-modal";
 import {ModalPortal} from "../../modalPortal/modal-portal";
 import {useHistory} from "react-router-dom"
@@ -25,8 +24,8 @@ export interface repoInfo {
 }
 
 export interface ownerRepoValue {
-    owner:string,
-    repo:string
+    owner: string,
+    repo: string
 }
 
 export const defaultOwnerRepoValue = {
@@ -46,8 +45,8 @@ export const ChangeRepoContainer = () => {
     const [typeModal, setTypeModal] = useState("")
     const [ownerRepo, setOwnerRepo] = useState<ownerRepoValue>(defaultOwnerRepoValue)
 
-    const onChange = ({ target: { name, value } }: ChangeEvent<HTMLInputElement>) => {
-        setOwnerRepo( {...ownerRepo, [name]: value} )
+    const onChange = ({target: {name, value}}: ChangeEvent<HTMLInputElement>) => {
+        setOwnerRepo({...ownerRepo, [name]: value})
     }
 
     const onViewBranches = () => {
@@ -57,20 +56,20 @@ export const ChangeRepoContainer = () => {
     useEffect(() => {
         setIsFetching(true)
         getRepos()
-            .then((resp)=>{
+            .then((resp) => {
                 setRepos(resp)
                 setIsFetching(false)
             })
-            .catch(()=> {
+            .catch(() => {
                 setIsFetching(false)
                 console.log("Global error")
             })
-    },[])
+    }, [])
 
-    async function getRepos () {
-        let repoArr:repoInfo[] = []
+    async function getRepos() {
+        let repoArr: repoInfo[] = []
         await getUserRepo()
-            .then((response)=>{
+            .then((response) => {
                 console.log(response)
                 response.forEach((item) => {
                         repoArr.push({
@@ -87,13 +86,13 @@ export const ChangeRepoContainer = () => {
                         })
                     }
                 )
-                repoArr.sort(function (a,b) {
-                    if(a.pushed_at! > b.pushed_at!) return -1
-                    if(a.pushed_at! < b.pushed_at!) return 1
+                repoArr.sort(function (a, b) {
+                    if (a.pushed_at! > b.pushed_at!) return -1
+                    if (a.pushed_at! < b.pushed_at!) return 1
                     else return 0
                 })
             })
-            .catch((error)=>{
+            .catch((error) => {
                 console.log(error)
                 setTypeModal(error)
                 throw new Error(error)
@@ -109,43 +108,28 @@ export const ChangeRepoContainer = () => {
         history.push("/")
     }
 
-    return(
+    return (
         <>
-        <ModalPortal
-            show={typeModal!=="" || isFetching}
-            closable={false}
-            onClose={()=>{}}
-            selector={"#modal"}
-        >
-            <div>
-                {(typeModal !=="" &&
-                    <ErrorModal errorMsg={typeModal} onBack={onBack}/> ) ||
+            <ModalPortal
+                show={typeModal !== "" || isFetching}
+                closable={false}
+                onClose={() => {
+                }}
+                selector={"#modal"}
+            >
+                {(typeModal !== "" &&
+                    <ErrorModal errorMsg={typeModal} onBack={onBack}/>) ||
                 (isFetching &&
                     <LoadingOverlay show={isFetching}/>)}
-            </div>
-        </ModalPortal>
-        {/*<LoadingContainer show={isFetching} errorMsg={""}>*/}
-        {/*    <div className={"w-full h-full bg-accent"}>*/}
-        {/*        <ModalPortal*/}
-        {/*            show={typeModal !== ""}*/}
-        {/*            onClose={""}*/}
-        {/*            selector={'#modal'}*/}
-        {/*            closable={false}*/}
-        {/*        >*/}
-        {/*            <ErrorModal errorMsg={typeModal} onBack={() => history.push('/')}/>*/}
-        {/*        </ModalPortal>*/}
-                    {(!isFetching &&
-                    <ChangeRepo owner={mainStatus.username}
-                                repos={repos}
-                                onLogout={onLogout}
-                                onChange={onChange}
-                                onViewBranches={onViewBranches}
-                                ownerValue={ownerRepo.owner}
-                                repoValue={ownerRepo.repo}
-                    />
-                    )
-                    || (<div className={"h-screen w-screen"}/>)
-                    }
+            </ModalPortal>
+            <ChangeRepo owner={mainStatus.username}
+                        repos={repos}
+                        onLogout={onLogout}
+                        onChange={onChange}
+                        onViewBranches={onViewBranches}
+                        ownerValue={ownerRepo.owner}
+                        repoValue={ownerRepo.repo}
+            />
         </>
     )
 }

@@ -24,11 +24,11 @@ module.exports = {
       '7xl': '5rem',
     },
     height: {
-      "100vh":"100vh",
       "20px":"20px",
       "28px":"28px",
       "30px":"30px",
       "38px":"38px",
+      "40px":"40px",
       "48px":"48px",
       "72px":"72px",
       "78px":"78px",
@@ -46,10 +46,13 @@ module.exports = {
       full: "100%",
       min: "min-content",
       max: "max-content",
-      screen: "100vh"
+      screen: "100vh",
+      auto: "auto"
     },
     width: {
       "30px":"30px",
+      '80px': '80px',
+      '150px': '150px',
       '100vw': '100vw',
       "250px":"250px",
       "300px":"300px",

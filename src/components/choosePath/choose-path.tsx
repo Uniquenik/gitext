@@ -21,7 +21,7 @@ export const ChoosePath = (props:{
         props.setIndexBranch((props.branchesList.map(arr => arr.name)).indexOf(name))
     }
 
-    console.log(props.currTree)
+    console.log(props.branchesList)
 
     return (
         <div className={"bg-accent text-white p-2 px-3 w-full h-full"}>
@@ -34,7 +34,8 @@ export const ChoosePath = (props:{
                     <h3 className={"m-0"}>{props.owner}/ </h3>
                     <h3 className={"m-0"}>{props.repo}/</h3>
                 </div>
-                <p className={"text-xs text-gray pb-2"}>Commit: {props.branchesList[props.indexBranch].lastCommitSha}</p>
+                <p className={"text-xs text-gray pb-2"}>Commit:
+                    {(props.branchesList[props.indexBranch] && props.branchesList[props.indexBranch].lastCommitSha) || ""}</p>
                 /{props.currDir}
             </div>
             <div className={"flex flex-wrap py-2 text-gray"}>

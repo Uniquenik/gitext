@@ -23,7 +23,6 @@ import {RootReducer} from "../../redux";
 import {setCommits, setOpenCommits, setVisibleCurrentValue} from "../../redux/branches-state/branches-action-creators";
 import {BranchesListButton} from "../../buttons/brancheslist-button";
 import {useCommits} from "../../hooks/commits-hook";
-import {LoadingContainer} from "../../loading/loading-container";
 import {
     emptyFileError,
     openFileMsg, wrongExtension
@@ -31,6 +30,7 @@ import {
 import {CompareButton} from "../../buttons/compare-button";
 import {ErrorModal} from "../../modalPortal/error-modal";
 import {ModalPortal} from "../../modalPortal/modal-portal";
+import {LoadingOverlay} from "../../loading/loading-overlay";
 
 
 export const BranchesContainer = () => {
@@ -87,7 +87,7 @@ export const BranchesContainer = () => {
 
     useEffect(() => {
         setLoadCommit(false)
-        let pathNew = path.replace("$","/")
+        let pathNew = path.replaceAll("$","/")
         if (commitSha) {
             getCommitFromTreeSha(commitSha, owner, repo, pathNew)
                 .then((compareCommit) => {
@@ -134,7 +134,7 @@ export const BranchesContainer = () => {
                 return getTreeFromSha(treeSha.tree.sha, owner, repo)
             })
             .then((tree) => {
-                //console.log(tree)
+                console.log(path)
                 let fileSha = ""
                 for (let i = 0; i < tree.tree.length; i++){
                     if (tree.tree[i].path === path && tree.tree[i].sha !== undefined)
@@ -163,6 +163,8 @@ export const BranchesContainer = () => {
     const [mainBranch, setMainBranch] = useState<number> (0)
 
     const [listMerge, setListMerge] = useState<Array<mergeInfo>>(() => new Array(mergeInfoInitState))
+
+
 
     async function getCommitAndBranches(owner:string, repo:string, per_page:number) {
         let getBranches = await getAllBranches(owner, repo)
@@ -336,18 +338,21 @@ export const BranchesContainer = () => {
 
     return (
         <>
-            <LoadingContainer show={!branchesStatus.getCommits} errorMsg={""}>
-                <ModalPortal
-                    show={globalError !== ""}
-                    onClose={""}
-                    selector={'#modal'}
-                    closable={false}
-                >
-                    <ErrorModal errorMsg={globalError} onBack={onBackError}/>
-                </ModalPortal>
+            <ModalPortal
+                show={globalError !== "" || !branchesStatus.getCommits || !loadCommit}
+                closable={false}
+                onClose={() => {
+                }}
+                selector={"#modal"}
+            >
+                {(globalError !== "" &&
+                    <ErrorModal errorMsg={globalError} onBack={onBackError}/>) ||
+                ((!branchesStatus.getCommits || !loadCommit )&&
+                    <LoadingOverlay show={!branchesStatus.getCommits}/>)}
+            </ModalPortal>
                 <div className={"h-screen relative overflow-hidden bg-accent"}>
-                    <div className={`grid grid-cols-2 px-1 gap-x-1 gap-y-1 h-${branchesStatus.isOpenListCommits ? "3/5" : "full" }`}>
-                        <div className={"col-span-2 h-min"}>
+                    <div className={`flex flex-col px-1 h-full`}>
+                        <div className={"w-full h-min"}>
                             <div className={"flex"}>
                                 <div className={"py-1 flex-grow text-base text-white overflow-ellipsis overflow-hidden max-h-48px"}>
                                     {infoCompareCommit.commitMessage}
@@ -359,7 +364,7 @@ export const BranchesContainer = () => {
                                 <div className={"flex-grow"}/>
                                 {infoCompareCommit.commitAuthorDate &&
                                 <div className={"text-right"}>
-                                    <div> {infoCompareCommit.sha} </div>
+                                    <div className={"hidden sm:block"}> {infoCompareCommit.sha} </div>
                                     <div> {infoCompareCommit.commitAuthorDate}/{infoCompareCommit.committerAuthorLogin}  </div>
                                 </div>
                                 }
@@ -369,15 +374,17 @@ export const BranchesContainer = () => {
                                 </div>
                             </div>
                         </div>
-                        {branchesStatus.isOpenCurrentValue &&
-                        <div className={"font-sans bg-white h-full overflow-y-auto"}>
-                            {parse(editorStatus.currentValue)}
-                        </div>
-                        }
-                        <div className={`${(!branchesStatus.isOpenCurrentValue && "col-span-2 ") || ""}h-full font-sans overflow-y-auto bg-white`}>
-                            <LoadingContainer show={!loadCommit} errorMsg={""}>
+                        <div className={"flex flex-wrap h-full"}>
+                            {branchesStatus.isOpenCurrentValue &&
+                            <div className={"font-sans bg-white h-1/2 sm:h-full w-full sm:w-1/2 overflow-y-auto border-2 border-accent"}>
+                                {parse(editorStatus.currentValue)}
+                                <div className={"h-72px"}/>
+                            </div>
+                            }
+                            <div className={`${(!branchesStatus.isOpenCurrentValue && "w-full h-full ") || "w-full sm:w-1/2 h-1/2 sm:h-full "} font-sans overflow-y-auto bg-white border-2 border-accent`}>
                                 {parse(compareContent)}
-                            </LoadingContainer>
+                                <div className={"h-72px"}/>
+                            </div>
                         </div>
                     </div>
                     <CSSTransition in={ branchesStatus.isOpenListCommits && branchesStatus.getCommits}
@@ -390,13 +397,15 @@ export const BranchesContainer = () => {
                                    }}
                                    timeout={ 1000 }
                                    unmountOnExit>
-                        <div ref={ nodeRef } className={"h-2/5 overflow-y-auto bg-accent-second border-t-2 border-black-second"}>
-                        <Branches listBranches={listBranches}
-                                  listCommits={listCommits}
-                                  listMerge={listMerge}
-                                  mainBranch={mainBranch}
-                                  isMounted={isMounted}
-                        />
+                        <div ref={ nodeRef } className={"absolute bottom-0 left-0 h-2/5 w-full bg-accent-second border-t-2 border-black-second"}>
+                            <div className={"overflow-y-auto h-full"}>
+                                <Branches listBranches={listBranches}
+                                          listCommits={listCommits}
+                                          listMerge={listMerge}
+                                          mainBranch={mainBranch}
+                                          isMounted={isMounted}
+                                />
+                            </div>
                         </div>
                     </CSSTransition>
                     <div className={"absolute right-0 bottom-0"}>
@@ -406,7 +415,6 @@ export const BranchesContainer = () => {
                         <CompareButton callback={onVisibleCurrentValueButton} selected={branchesStatus.isOpenListCommits}/>
                     </div>
                 </div>
-            </LoadingContainer>
         </>
     )
 }

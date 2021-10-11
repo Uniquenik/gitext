@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {InfoList} from "./infoList";
 import { useDispatch, useSelector } from "react-redux";
 import {branchInfo, commitInfo, mergeInfo} from "../../types/data-types";
@@ -20,10 +20,16 @@ export const Branches = (
 
     const [displayTreeInfo, setDisplayTreeInfo] =
         useState<branchInfo[]>(() => [])
+    const [isDisplay, setIsDisplay] = useState(true)
 
     const branchesStatus: any = useSelector<RootReducer>(state => state.branches);
     const dispatch = useDispatch();
 
+    useEffect(()=>{
+        console.log("here")
+        setIsDisplay(false)
+        setIsDisplay(true)
+    }, [document.documentElement.clientWidth])
 
     const withoutAuthor = templateExtend(TemplateName.Metro, {
         branch: {
@@ -38,7 +44,7 @@ export const Branches = (
             dot: {
                 size:10
             },
-            spacing: 78,
+            spacing: 90,
             message: {
                 display:false
             },
@@ -163,7 +169,9 @@ export const Branches = (
                 q -= 1
             }*/
         }
-        gitgraph._graph.template.branch.spacing = (150/(displayTree.length))
+        let containerGraph = 100
+        //if (document.documentElement.clientWidth < 640) containerGraph = 80
+        gitgraph._graph.template.branch.spacing = (containerGraph/(displayTree.length))
         let displayTreeGraph:branchInfo[] = []
         for(let i = 0; i< displayTree.length; i++){
             displayTreeGraph.push({
@@ -192,10 +200,10 @@ export const Branches = (
                     </div>
                 }
                 </div>
-                { branchesStatus.getCommits && props.isMounted &&
+                { branchesStatus.getCommits && props.isMounted && isDisplay &&
                 <div className={"flex"}>
-                    <div className={"w-150px pt-8"}>
-                        <Gitgraph  options={options}>
+                    <div className={"w-80px sm:w-150px pt-8"}>
+                        <Gitgraph options={options}>
                             {(gitgraph) => {
                                 gitGraphCreate(gitgraph)
                             }}
