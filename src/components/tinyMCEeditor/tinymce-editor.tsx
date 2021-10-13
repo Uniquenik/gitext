@@ -9,18 +9,18 @@ import {
     setValueText
 } from "../../redux/editor-state/editor-action-creators";
 import {
-    branchesCompareCommitInfo, CHANGE_REPO_MSG,
+    branchesCompareCommitInfo, CHANGE_REPO_MSG, CHANGE_BRANCH,
     defaultBranchesCompareCommitInfo,
     OVERRIDE_VALUE
 } from "../../types/data-types";
 import {useBranches} from "../../hooks/branches-hook";
 import {getCommit404, getRepPermission, wrongExtensionLine} from "../../types/errors-const";
 import {ModalPortal} from "../../modalPortal/modal-portal";
-import {OverrideSaveMsg} from "../../modalPortal/modalContent/override-save-msg";
 import {useHistory, useParams} from 'react-router-dom'
 import {ErrorModal} from "../../modalPortal/error-modal";
-import {ChangeRepoMsg} from "../../modalPortal/modalContent/change-repo-msg";
+import {ChangeOverrideMsg} from "../../modalPortal/modalContent/change-override-msg";
 import {LoadingOverlay} from "../../loading/loading-overlay";
+import {ChangeBranch} from "../../modalPortal/modalContent/change-branch";
 
 const TinyMCEEditor = () => {
     const per_page = 100;
@@ -34,15 +34,7 @@ const TinyMCEEditor = () => {
     const [typeModal, setTypeModal] = useState("")
 
     const {
-        getSingleTree,
-        getSingleCommit,
-        createBlob,
-        createTree,
-        createCommit,
-        updateRef,
-        getBlob,
-        getRep,
-        getBlobFromFileSha
+        getSingleTree, getSingleCommit, createBlob, createTree, createCommit, updateRef, getBlob, getRep, getBlobFromFileSha
     } = useCommits()
     const {getCommitSha, getTreeFromSha, getAllBranches, getTreesCommits} = useBranches()
 
@@ -61,14 +53,12 @@ const TinyMCEEditor = () => {
         let pathNew = path.replaceAll("$", "/")
         console.log(commitSha)
         console.log(pathNew)
-        if (!commitSha && editorStatus.currentValueOwner === owner &&
-            editorStatus.currentValuePath === pathNew &&
-            editorStatus.currentValueRepo === repo
+        if (!commitSha && editorStatus.currentValueOwner.toUpperCase() === owner.toUpperCase() &&
+            editorStatus.currentValuePath.toUpperCase() === pathNew.toUpperCase() &&
+            editorStatus.currentValueRepo.toUpperCase() === repo.toUpperCase()
         ) {
             setIsFetching(false)
         } else {
-            //if (!editorStatus.currentValueOwner && !editorStatus.currentValueRepo && !editorStatus.currentValuePath) reviveFromGit(owner, repo, pathNew, commitSha)
-            //if (commitSha) {
             checkCorrectData(owner, repo)
                 .then(() => {
                     if (!editorStatus.currentValueOwner && !editorStatus.currentValueRepo && !editorStatus.currentValuePath)
@@ -88,9 +78,9 @@ const TinyMCEEditor = () => {
                                 setIsFetching(false)
                             })
                     else {
-                        if (owner !== editorStatus.currentValueOwner ||
-                            repo !== editorStatus.currentValueRepo ||
-                            pathNew !== editorStatus.currentValuePath)
+                        if (owner.toUpperCase() !== editorStatus.currentValueOwner.toUpperCase() ||
+                            repo.toUpperCase() !== editorStatus.currentValueRepo.toUpperCase() ||
+                            pathNew.toUpperCase() !== editorStatus.currentValuePath.toUpperCase())
                             setTypeModal(CHANGE_REPO_MSG)
                         else setTypeModal(OVERRIDE_VALUE)
                         setIsFetching(false)
@@ -104,7 +94,7 @@ const TinyMCEEditor = () => {
                     }
                 })
                 .catch((error) => {
-                    //setTypeModal(error)
+                    setTypeModal(error)
                     setIsFetching(false)
                     console.log(error)
                 })
@@ -273,35 +263,16 @@ const TinyMCEEditor = () => {
         return result
     }
 
-    const onReturnOld = () => {
+    const onBack = () => {
         setTypeModal("")
         history.push('./')
     }
+
     const onReturn = () => {
-        history.push('/')
+        setTypeModal("")
+        history.push(`/${editorStatus.currentValueOwner}/${editorStatus.currentValueRepo}/${editorStatus.currentValuePath.replaceAll("/", "$")}/editor`)
     }
 
-    const onEdit = () => {
-        setIsFetching(true)
-        setTypeModal("")
-        let pathNew = path.replaceAll("$", "/")
-        getCommitFileAndBranch(owner, repo, pathNew, commitSha)
-            .then((branch) => {
-                dispatch(setCurrentValueInfo({
-                    currentValueOwner: owner,
-                    currentValuePath: pathNew,
-                    currentValueRepo: repo,
-                    currentValueParentCommit: commitSha,
-                    currentValueBranch: branch!
-                }))
-                setIsFetching(false)
-            })
-            .catch((error) => {
-                console.log(error)
-                setIsFetching(false)
-            })
-        console.log(editorStatus.currentValueBranch)
-    }
     const onOverride = () => {
         setIsFetching(true)
         setTypeModal("")
@@ -347,31 +318,14 @@ const TinyMCEEditor = () => {
             <div className={"h-screen"}>
                 <ModalPortal
                     show={typeModal !== "" || isFetching}
-                    onClose={""}
+                    onClose={() => {if (typeModal === CHANGE_BRANCH) setTypeModal("")}}
                     selector={'#modal'}
-                    closable={false}
+                    closable={(typeModal === CHANGE_BRANCH && true) || false}
                 >
-                    {(typeModal === OVERRIDE_VALUE &&
-                        <OverrideSaveMsg currentContent={value}
-                                         from={{
-                                             currentValueBranch: editorStatus.currentValueBranch,
-                                             currentValueParentCommit: editorStatus.currentValueParentCommit,
-                                             currentValueRepo: editorStatus.currentValueRepo,
-                                             currentValuePath: editorStatus.currentValuePath,
-                                             currentValueOwner: editorStatus.currentValueOwner
-                                         }}
-                                         to={{
-                                             currentValueBranch: "",
-                                             currentValueOwner: owner,
-                                             currentValuePath: path.replace("$", "/"),
-                                             currentValueRepo: repo,
-                                             currentValueParentCommit: commitSha
-                                         }}
-                                         onReturnOld={onReturnOld}
-                                         onOverride={onOverride}
-                        />) ||
-                    (typeModal === CHANGE_REPO_MSG &&
-                        <ChangeRepoMsg currentContent={value}
+                    {((typeModal === CHANGE_REPO_MSG || typeModal === OVERRIDE_VALUE) &&
+                        <ChangeOverrideMsg
+                                       isChange={(CHANGE_REPO_MSG && true) || false}
+                                       currentContent={value}
                                        saveGit={editorStatus.isSaveCurrentValueGit}
                                        from={{
                                            currentValueBranch: editorStatus.currentValueBranch,
@@ -387,9 +341,22 @@ const TinyMCEEditor = () => {
                                            currentValueRepo: repo,
                                            currentValueParentCommit: commitSha
                                        }}
+                                       onBack={onBack}
                                        onReturn={onReturn}
-                                       onEdit={onEdit}
-                        />) ||
+                                       onEdit={onOverride}
+                        />) || (
+                       typeModal === CHANGE_BRANCH &&
+                       <ChangeBranch
+                           onBack={()=> {setTypeModal("")}}
+                           repo={{
+                               currentValueBranch: editorStatus.currentValueBranch,
+                               currentValueParentCommit: editorStatus.currentValueParentCommit,
+                               currentValueRepo: editorStatus.currentValueRepo,
+                               currentValuePath: editorStatus.currentValuePath,
+                               currentValueOwner: editorStatus.currentValueOwner
+                           }}
+                       />
+                    ) ||
                     (typeModal &&
                         <ErrorModal errorMsg={typeModal} onBack={onBackError}/>) ||
                     (isFetching &&
@@ -447,24 +414,21 @@ const TinyMCEEditor = () => {
                                 setup: function (editor) {
                                     let toggleState = false;
                                     editor.ui.registry.addMenuItem('getCommit', {
-                                        text: `Get last commit from ${editorStatus.currentValueBranch}`,
+                                        text: `Save in...`,
                                         onAction: function () {
-                                            reviveFromGit(editorStatus.currentValueOwner,
-                                                editorStatus.currentValueRepo,
-                                                editorStatus.currentValuePath,
-                                                editorStatus.currentValueBranch
-                                            )
-                                                .then(content => {
-                                                    //console.log(content)
-                                                    editor.setContent(content)
-                                                })
+                                            setTypeModal(CHANGE_BRANCH)
+                                            // reviveFromGit(editorStatus.currentValueOwner,
+                                            //     editorStatus.currentValueRepo,
+                                            //     editorStatus.currentValuePath,
+                                            //     editorStatus.currentValueBranch
+                                            // )
+                                            //     .then(content => {
+                                            //         //console.log(content)
+                                            //         editor.setContent(content)
+                                            //     })
 
                                             //
                                         },
-                                        //@ts-ignore
-                                        onSetup: (api) => {
-                                            api.setDisabled(editorStatus.currentValueBranch === "")
-                                        }
                                     });
 
                                     editor.ui.registry.addMenuItem('chooseRepo', {
@@ -550,10 +514,11 @@ const TinyMCEEditor = () => {
                         <div
                             className={"flex"}>:{editorStatus.currentValuePath} in {editorStatus.currentValueBranch}</div>
                         <div className={"flex-grow"}/>
-                        <div className={"flex"}>{(editorStatus.isSaveCurrentValue && <div>local save</div>) ||
-                        <div>not saved local</div>}</div>
-                        <div className={"flex"}>/{(editorStatus.isSaveCurrentValueGit && <div>git save</div>) ||
-                        <div>not save in git</div>}</div>
+                        <div className={"flex"}>{
+                            ((editorStatus.isSaveCurrentValue && "local save") ||
+                            "not saved local")}/
+                            {((editorStatus.isSaveCurrentValueGit && "git save") ||
+                        "not save in git")}</div>
                     </div>
                 </div>
             </div>

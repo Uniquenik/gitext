@@ -199,13 +199,10 @@ export const BranchesContainer = () => {
                 commitsInfo.push({
                     checkTrees: checkTrees,
                     sha: item.sha,
-                    //@ts-ignore
-                    commitAuthorDate: item.commit.committer.date,
+                    commitAuthorDate: item.commit.committer!.date!,
                     commitMessage: item.commit.message,
-                    //@ts-ignore
-                    committerAuthorLogin: item.committer.login,
-                    //@ts-ignore
-                    committerAuthorAvatarURL: item.committer.avatar_url
+                    committerAuthorLogin: item.committer!.login,
+                    committerAuthorAvatarURL: item.committer!.avatar_url
                 })
             })
 

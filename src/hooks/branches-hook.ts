@@ -1,11 +1,20 @@
 
 import {Endpoints} from "@octokit/types";
 import {
-    getAllBranches404, getAllPullReq304, getAllPullReq422, getCommit404, getTree404, getTree422,
+    getAllBranches404,
+    getAllPullReq304,
+    getAllPullReq422,
+    getBranch301,
+    getBranch404, getBranch415,
+    getCommit404,
+    getTree404,
+    getTree422,
     getTreesCommits400,
     getTreesCommits404,
-    getTreesCommits409, getTreesCommits500,
-    getUser404, universal401
+    getTreesCommits409,
+    getTreesCommits500,
+    getUser404,
+    universal401
 } from "../types/errors-const";
 import {useAuth} from "./auth-hook";
 
@@ -203,6 +212,35 @@ export const useBranches = () => {
         })
     }
 
+    const getBranch = (owner:string, repo:string, branch:string) => {
+        return new Promise<Endpoints['GET /repos/{owner}/{repo}/branches/{branch}']["response"]["data"]>((resolve, reject) => {
+            octokit.request('GET /repos/{owner}/{repo}/branches/{branch}', {
+                owner: owner,
+                repo: repo,
+                branch: branch
+            })
+                .then((response:any) => {
+                    resolve(response.data)
+                })
+                .catch((error:any) => {
+                    if(error.response) {
+                        switch (error.response.status) {
+                            case 301:
+                                reject(getBranch301)
+                                break;
+                            case 404:
+                                reject(getBranch404)
+                                break;
+                            case 415:
+                                reject(getBranch415)
+                                break;
+                        }
+                    }
+                    reject("Unhandled:\n" + error)
+                })
+        })
+    }
+
 
 
     return {
@@ -214,8 +252,8 @@ export const useBranches = () => {
         getTreesCommits: getTreesCommits,
         getPullRequest: getPullRequest,
         getAllPullRequests: getAllPullRequests,
-        getUser: getUser
-
+        getUser: getUser,
+        getBranch: getBranch
     }
 
 }

@@ -4,7 +4,7 @@ import {CardsRepo} from "./cards-repo";
 import {Link} from "react-router-dom"
 
 export const ChangeRepo = (props: {
-    owner:string,
+    owner: string,
     repos: repoInfo[],
     onLogout: (event:any)=> void
     ownerValue: string,

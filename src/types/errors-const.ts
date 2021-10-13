@@ -42,4 +42,8 @@ export const unhandledError = "Unknown error\n Please, try again"
 
 export const universal401 = `<div style="text-align:center;"><h2 style="color:red; margin:0">Error 401</h2><p>Please, authorize</p></div>`
 
+export const getBranch301 = `<div style="text-align:center;"><h2 style="color:red; margin:0">Error 301</h2><p>Moved permanently branch</p></div>`
+export const getBranch404 = `<div style="text-align:center;"><h2 style="color:red; margin:0">Error 404</h2><p>Branch not found</p></div>`
+export const getBranch415 = `<div style="text-align:center;"><h2 style="color:red; margin:0">Error 415</h2><p>Header (?)</p></div>`
+
 export const nameNotResolve = "Unknown error\n Check your connection";

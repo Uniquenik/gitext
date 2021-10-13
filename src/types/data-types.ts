@@ -40,4 +40,4 @@ export interface MatchParams {
 
 export const OVERRIDE_VALUE = "OVERRIDE_VALUE"
 export const CHANGE_REPO_MSG = "CHANGE_REPO_MSG"
-export const CHANGE_REPO = "CHANGE_REPO"
+export const CHANGE_BRANCH = "CHANGE_BRANCH"
