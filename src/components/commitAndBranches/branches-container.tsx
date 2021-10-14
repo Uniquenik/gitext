@@ -12,7 +12,7 @@ import {useHistory, useParams} from 'react-router-dom';
 import {useBranches} from "../../hooks/branches-hook";
 import {
     branchesCompareCommitInfo,
-    branchInfo,
+    branchSimpleInfo,
     commitInfo,
     defaultBranchesCompareCommitInfo,
     mergeInfo
@@ -78,6 +78,7 @@ export const BranchesContainer = () => {
         getCommitAndBranches(owner, repo,30)
             .then(()=> {
                 setLoadCommit(true)
+                Prism.highlightAll();
             })
             .catch(()=> {
                 setLoadCommit(true)
@@ -157,7 +158,7 @@ export const BranchesContainer = () => {
     }
 
     const [listBranches, setListBranches] =
-        useState<branchInfo[]>(() => new Array(branchInfoInitState))
+        useState<branchSimpleInfo[]>(() => new Array(branchInfoInitState))
     const [listCommits, setListCommits] =
         useState<Array<commitInfo>>(() => new Array(commitInfoInitState))
     const [mainBranch, setMainBranch] = useState<number> (0)
@@ -179,7 +180,7 @@ export const BranchesContainer = () => {
         let thismainBranch = 0
         if (getBranches) {
             console.log(getBranches)
-            let branchesInfo = new Array<branchInfo>()
+            let branchesInfo = new Array<branchSimpleInfo>()
             //получение первой ветки
             branchesInfo.push({
                 name: getBranches[0].name,
@@ -345,7 +346,7 @@ export const BranchesContainer = () => {
                 {(globalError !== "" &&
                     <ErrorModal errorMsg={globalError} onBack={onBackError}/>) ||
                 ((!branchesStatus.getCommits || !loadCommit )&&
-                    <LoadingOverlay show={!branchesStatus.getCommits}/>)}
+                    <LoadingOverlay/>)}
             </ModalPortal>
                 <div className={"h-screen relative overflow-hidden bg-accent"}>
                     <div className={`flex flex-col px-1 h-full`}>

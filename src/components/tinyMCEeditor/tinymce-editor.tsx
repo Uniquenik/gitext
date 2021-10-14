@@ -5,11 +5,15 @@ import {useDispatch, useSelector} from "react-redux";
 import {RootReducer} from "../../redux";
 import {
     setCurrentValueInfo,
-    setIsSaveCurrentValue, setIsSaveCurrentValueGit,
+    setIsSaveCurrentValue,
+    setIsSaveCurrentValueGit,
     setValueText
 } from "../../redux/editor-state/editor-action-creators";
 import {
-    branchesCompareCommitInfo, CHANGE_REPO_MSG, CHANGE_BRANCH,
+    branchesCompareCommitInfo,
+    CHANGE_BRANCH_GET,
+    CHANGE_BRANCH_SAVE,
+    CHANGE_REPO_MSG,
     defaultBranchesCompareCommitInfo,
     OVERRIDE_VALUE
 } from "../../types/data-types";
@@ -94,7 +98,7 @@ const TinyMCEEditor = () => {
                     }
                 })
                 .catch((error) => {
-                    setTypeModal(error)
+                    //setTypeModal(error.response)
                     setIsFetching(false)
                     console.log(error)
                 })
@@ -107,9 +111,12 @@ const TinyMCEEditor = () => {
                 setTypeModal(error)
                 throw new Error(error)
             })
+        console.log(repInfo)
         if (!repInfo.permissions || !repInfo.permissions.pull || !repInfo.permissions.push) {
             setTypeModal(getRepPermission)
-            throw new Error("Permissions error")
+            console.log(getRepPermission)
+            throw new Error(getRepPermission)
+            //throw new Error(getRepPermission)
         }
     }
 
@@ -187,18 +194,15 @@ const TinyMCEEditor = () => {
     }
 
 
-    async function saveContentInGit(val: string) {
-        let file = val
-        console.log(val)
-        // let owner = "uniquenik"
-        // let repo = 'uniquenik.github.io'
-        let treeFromName = "main"
+    async function saveContentInGit(owner:string, repo:string, currentTreeName:string, treeName:string, path:string, msg:string) {
+        setTypeModal("")
+        setIsFetching(true)
+        let file = value
+        if (currentTreeName === "") currentTreeName = treeName
         let pathNew = path.replace("$", "/")
-        let messageCommit = "new commit!"
-        let treeToName = "main"
         let lastCommitSha
-        console.log(owner, repo, treeFromName)
-        await getSingleTree(owner, repo, treeFromName)
+        console.log(owner, repo, currentTreeName)
+        await getSingleTree(owner, repo, currentTreeName)
             .then(response => {
                 return getSingleCommit(owner, repo, response.sha)
             })
@@ -210,14 +214,26 @@ const TinyMCEEditor = () => {
                 return createTree(lastCommitSha, owner, repo, newBlob.sha, pathNew)
             })
             .then(newTree => {
-                return createCommit(owner, repo, messageCommit, lastCommitSha, newTree.sha)
+                return createCommit(owner, repo, msg, lastCommitSha, newTree.sha)
             })
             .then(newCommit => {
-                updateRef(owner, repo, treeToName, newCommit.sha)
+                updateRef(owner, repo, treeName, newCommit.sha)
                 console.log("Commit added!!")
+                setIsFetching(false)
+                dispatch(setIsSaveCurrentValueGit(true))
+                dispatch(setIsSaveCurrentValue(true))
+                dispatch(setCurrentValueInfo({
+                    currentValueOwner: owner,
+                    currentValuePath: pathNew,
+                    currentValueRepo: repo,
+                    currentValueParentCommit: newCommit.sha,
+                    currentValueBranch: treeName
+                }))
             })
             .catch(error => {
+                setTypeModal(error)
                 console.log(error);
+                setIsFetching(false)
             });
 
     }
@@ -230,9 +246,10 @@ const TinyMCEEditor = () => {
         }).join(''));
     }
 
-    // @ts-ignore
-    async function reviveFromGit(owner: string, repo: string, path: string, ref: string): Promise<string> {
-        let result = `<h3>Error</h3>`
+
+    async function reviveFromGit(owner: string, repo: string, path: string, ref: string) {
+        setTypeModal("")
+        setIsFetching(true)
         await getRep(owner, repo)
             .then(reps => {
                 console.log(reps)
@@ -247,20 +264,30 @@ const TinyMCEEditor = () => {
             })
             //searching files and find html for editor
             .then(owner => {
-                console.log(owner)
                 return getBlob(owner, repo, path, ref)
             })
             .then(infoFile => {
-                console.log(infoFile)
                 //@ts-ignore
                 let file = b64DecodeUnicode(infoFile.content)
-                console.log(file)
-                result = file
+                dispatch(setValueText(file))
+                setValue(file)
+                dispatch(setIsSaveCurrentValueGit(true))
+                dispatch(setIsSaveCurrentValue(true))
+                dispatch(setCurrentValueInfo({
+                    currentValueOwner: owner,
+                    currentValuePath: path,
+                    currentValueRepo: repo,
+                    //@ts-ignore
+                    currentValueParentCommit: infoFile.sha,
+                    currentValueBranch: ref
+                }))
+                setIsFetching(false)
             })
             .catch(error => {
+                setTypeModal(error)
                 console.log(error);
+                setIsFetching(false)
             });
-        return result
     }
 
     const onBack = () => {
@@ -270,12 +297,12 @@ const TinyMCEEditor = () => {
 
     const onReturn = () => {
         setTypeModal("")
-        history.push(`/${editorStatus.currentValueOwner}/${editorStatus.currentValueRepo}/${editorStatus.currentValuePath.replaceAll("/", "$")}/editor`)
+        history.push(`/${editorStatus.currentValueOwner}/${editorStatus.currentValueRepo}/${editorStatus.currentValuePath.replaceAll("/", "$")}/editor/`)
     }
 
     const onOverride = () => {
-        setIsFetching(true)
         setTypeModal("")
+        setIsFetching(true)
         let pathNew = path.replaceAll("$", "/")
         if (!commitSha) {
             setValue("")
@@ -300,9 +327,11 @@ const TinyMCEEditor = () => {
                         currentValueBranch: branch!
                     }))
                     setIsFetching(false)
+                    history.push('./')
                     console.log(editorStatus.currentValueBranch)
                 })
                 .catch((error) => {
+                    setTypeModal(error)
                     setIsFetching(false)
                     console.log(error)
                 })
@@ -318,13 +347,13 @@ const TinyMCEEditor = () => {
             <div className={"h-screen"}>
                 <ModalPortal
                     show={typeModal !== "" || isFetching}
-                    onClose={() => {if (typeModal === CHANGE_BRANCH) setTypeModal("")}}
+                    onClose={() => {if (typeModal === CHANGE_BRANCH_SAVE || typeModal === CHANGE_BRANCH_GET) setTypeModal("")}}
                     selector={'#modal'}
-                    closable={(typeModal === CHANGE_BRANCH && true) || false}
+                    closable={((typeModal === CHANGE_BRANCH_SAVE || typeModal === CHANGE_BRANCH_GET) && true) || false}
                 >
                     {((typeModal === CHANGE_REPO_MSG || typeModal === OVERRIDE_VALUE) &&
                         <ChangeOverrideMsg
-                                       isChange={(CHANGE_REPO_MSG && true) || false}
+                                       isChange={(typeModal === CHANGE_REPO_MSG && true) || false}
                                        currentContent={value}
                                        saveGit={editorStatus.isSaveCurrentValueGit}
                                        from={{
@@ -345,9 +374,12 @@ const TinyMCEEditor = () => {
                                        onReturn={onReturn}
                                        onEdit={onOverride}
                         />) || (
-                       typeModal === CHANGE_BRANCH &&
+                        (typeModal === CHANGE_BRANCH_SAVE || typeModal === CHANGE_BRANCH_GET) &&
                        <ChangeBranch
+                           isSave={(typeModal === CHANGE_BRANCH_SAVE && true) || false}
+                           onGet={reviveFromGit}
                            onBack={()=> {setTypeModal("")}}
+                           onSave={saveContentInGit}
                            repo={{
                                currentValueBranch: editorStatus.currentValueBranch,
                                currentValueParentCommit: editorStatus.currentValueParentCommit,
@@ -360,7 +392,7 @@ const TinyMCEEditor = () => {
                     (typeModal &&
                         <ErrorModal errorMsg={typeModal} onBack={onBackError}/>) ||
                     (isFetching &&
-                        <LoadingOverlay show={isFetching}/>)
+                        <LoadingOverlay/>)
                     }
                 </ModalPortal>
                 <div className={"h-full flex flex-col"}>
@@ -382,7 +414,7 @@ const TinyMCEEditor = () => {
                                 height: '100%',
                                 menubar: "file edit insert view format table tools help branches custom",
                                 menu: {
-                                    file: {title: 'File', items: 'print | chooseRepo | saveCommit getCommit '},
+                                    file: {title: 'File', items: 'print | changeRepo | quickSave saveIn | quickRestore getFrom '},
                                     edit: {
                                         title: 'Edit',
                                         items: 'undo redo | cut copy paste | selectall | searchreplace'
@@ -408,48 +440,64 @@ const TinyMCEEditor = () => {
                                         items: 'inserttable | cell row column | tableprops deletetable'
                                     },
                                     help: {title: 'Help', items: 'help'},
-                                    branches: {title: 'Branches...', items: 'branches'},
+                                    branches: {title: 'Branches...', items: 'compareBranches'},
                                     custom: {title: 'Custom menu', items: 'nesteditem toggleitem'}
                                 },
                                 setup: function (editor) {
                                     let toggleState = false;
-                                    editor.ui.registry.addMenuItem('getCommit', {
+                                    editor.ui.registry.addMenuItem('saveIn', {
                                         text: `Save in...`,
                                         onAction: function () {
-                                            setTypeModal(CHANGE_BRANCH)
-                                            // reviveFromGit(editorStatus.currentValueOwner,
-                                            //     editorStatus.currentValueRepo,
-                                            //     editorStatus.currentValuePath,
-                                            //     editorStatus.currentValueBranch
-                                            // )
-                                            //     .then(content => {
-                                            //         //console.log(content)
-                                            //         editor.setContent(content)
-                                            //     })
-
-                                            //
+                                            setTypeModal(CHANGE_BRANCH_SAVE)
                                         },
                                     });
 
-                                    editor.ui.registry.addMenuItem('chooseRepo', {
+                                    editor.ui.registry.addMenuItem('getFrom', {
+                                        text: `Get from...`,
+                                        onAction: function () {
+                                            setTypeModal(CHANGE_BRANCH_GET)
+                                        },
+                                    });
+
+                                    editor.ui.registry.addMenuItem('changeRepo', {
                                         text: 'Change repo...',
                                         onAction: function () {
                                             history.push(`/userrepos/`)
                                         }
                                     });
 
-                                    editor.ui.registry.addMenuItem('saveCommit', {
-                                        text: 'Save in git...',
+                                    editor.ui.registry.addMenuItem('quickSave', {
+                                         text: 'Quick save',
+                                         onAction: function () {
+                                             if (editorStatus.currentValueBranch) {
+                                                 saveContentInGit(owner, repo, editorStatus.currentValueBranch,
+                                                     editorStatus.currentValueBranch, editorStatus.currentValuePath, "Quick save in current branch")
+                                                     .then(() => console.log("ok"))
+                                                     .catch(error => {
+                                                         setTypeModal(error)
+                                                         console.log(error);
+                                                     });
+                                             }
+                                             else {setTypeModal(CHANGE_BRANCH_SAVE)}
+                                         }
+                                     });
+
+                                    editor.ui.registry.addMenuItem('quickRestore', {
+                                        text: 'Quick restore',
                                         onAction: function () {
-                                            saveContentInGit(editor.getContent())
-                                                .then(() => console.log("ok"))
-                                                .catch(error => {
-                                                    console.log(error);
-                                                });
+                                            if (editorStatus.currentValueBranch) {
+                                                reviveFromGit(owner, repo, editorStatus.currentValuePath, editorStatus.currentValueBranch)
+                                                    .then(() => console.log("ok"))
+                                                    .catch(error => {
+                                                        setTypeModal(error)
+                                                        console.log(error);
+                                                    });
+                                            }
+                                            else {setTypeModal(CHANGE_BRANCH_GET)}
                                         }
                                     });
 
-                                    editor.ui.registry.addMenuItem('branches', {
+                                    editor.ui.registry.addMenuItem('compareBranches', {
                                         text: 'Compare commits...',
                                         onAction: function () {
                                             history.push('../branches/')

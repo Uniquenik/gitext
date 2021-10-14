@@ -120,7 +120,7 @@ export const ChangeRepoContainer = () => {
                 {(typeModal !== "" &&
                     <ErrorModal errorMsg={typeModal} onBack={onBack}/>) ||
                 (isFetching &&
-                    <LoadingOverlay show={isFetching}/>)}
+                    <LoadingOverlay/>)}
             </ModalPortal>
             <ChangeRepo owner={mainStatus.username}
                         repos={repos}

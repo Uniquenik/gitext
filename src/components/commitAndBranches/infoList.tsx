@@ -1,10 +1,10 @@
 import React from "react";
 import {Link} from "react-router-dom"
-import {branchInfo} from "../../types/data-types";
+import {branchSimpleInfo} from "../../types/data-types";
 
 export const InfoList = (
     props: {
-        listBranches: Array<branchInfo>,
+        listBranches: Array<branchSimpleInfo>,
         checkTrees: boolean[],
         commitMessage: string,
         sha: string,

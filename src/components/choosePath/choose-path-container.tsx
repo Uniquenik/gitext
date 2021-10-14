@@ -90,6 +90,7 @@ export const ChoosePathContainer = () => {
                 setTypeModal(error)
                 throw new Error(error)
             })
+
         for (let i = 0; i < branchesList.length; i++) {
             await getCommitSha(branchesList[i].lastCommitSha, owner, repo)
                 .then((resp) => {
@@ -118,12 +119,8 @@ export const ChoosePathContainer = () => {
     }
 
     const compareLocalTree = (a: filePath, b: filePath) => {
-        if (a.type < b.type) {
-            return 1;
-        }
-        if (a.type > b.type) {
-            return -1;
-        }
+        if (a.type < b.type) return 1;
+        if (a.type > b.type) return -1;
         return 0;
     }
 
@@ -201,7 +198,7 @@ export const ChoosePathContainer = () => {
                 {(typeModal !== "" &&
                     <ErrorModal errorMsg={typeModal} onBack={onReturnToList}/>) ||
                 (isFetching &&
-                    <LoadingOverlay show={isFetching}/>)}
+                    <LoadingOverlay/>)}
             </ModalPortal>
             <ChoosePath branchesList={branches}
                         indexBranch={indexBranch} setIndexBranch={setBranch}

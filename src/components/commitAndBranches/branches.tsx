@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react'
 import {InfoList} from "./infoList";
 import { useDispatch, useSelector } from "react-redux";
-import {branchInfo, commitInfo, mergeInfo} from "../../types/data-types";
+import {branchSimpleInfo, commitInfo, mergeInfo} from "../../types/data-types";
 import {Gitgraph, templateExtend, TemplateName} from "@gitgraph/react";
 import {RootReducer} from "../../redux";
 import {setCommitsTree} from "../../redux/branches-state";
@@ -11,7 +11,7 @@ import {ReactComponent as TreeDot} from "./../other/dot.svg";
 export const Branches = (
     props: {
         isMounted: boolean,
-        listBranches:branchInfo[],
+        listBranches:branchSimpleInfo[],
         listCommits:Array<commitInfo>,
         listMerge:Array<mergeInfo>,
         mainBranch: number,
@@ -19,7 +19,7 @@ export const Branches = (
     ) => {
 
     const [displayTreeInfo, setDisplayTreeInfo] =
-        useState<branchInfo[]>(() => [])
+        useState<branchSimpleInfo[]>(() => [])
     const [isDisplay, setIsDisplay] = useState(true)
 
     const branchesStatus: any = useSelector<RootReducer>(state => state.branches);
@@ -172,7 +172,7 @@ export const Branches = (
         let containerGraph = 100
         //if (document.documentElement.clientWidth < 640) containerGraph = 80
         gitgraph._graph.template.branch.spacing = (containerGraph/(displayTree.length))
-        let displayTreeGraph:branchInfo[] = []
+        let displayTreeGraph:branchSimpleInfo[] = []
         for(let i = 0; i< displayTree.length; i++){
             displayTreeGraph.push({
                 name: displayTree[i],

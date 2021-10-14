@@ -23,6 +23,9 @@ module.exports = {
       '6xl': '4rem',
       '7xl': '5rem',
     },
+    maxHeight: {
+      "70vh": "70vh",
+    },
     height: {
       "20px":"20px",
       "28px":"28px",

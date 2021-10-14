@@ -62,7 +62,7 @@ export const AuthContainer = () => {
                     {(error!=="" &&
                     <ErrorModal errorMsg={error} onBack={onBack}/> ) ||
                     (isFetching &&
-                    <LoadingOverlay show={isFetching}/>)}
+                    <LoadingOverlay/>)}
                 </div>
             </ModalPortal>
                 <Auth token={value}

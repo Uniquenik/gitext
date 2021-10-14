@@ -21,7 +21,7 @@ export const defaultBranchesCompareCommitInfo:branchesCompareCommitInfo = {
     commitAuthorDate: ""
 }
 
-export interface branchInfo {
+export interface branchSimpleInfo {
     name: string,
     color: string,
 }
@@ -31,13 +31,7 @@ export interface mergeInfo {
     to: string
 }
 
-export interface MatchParams {
-    owner: string;
-    repo: string;
-    path: string;
-    commitSha: string;
-}
-
 export const OVERRIDE_VALUE = "OVERRIDE_VALUE"
 export const CHANGE_REPO_MSG = "CHANGE_REPO_MSG"
-export const CHANGE_BRANCH = "CHANGE_BRANCH"
+export const CHANGE_BRANCH_SAVE = "CHANGE_BRANCH_SAVE"
+export const CHANGE_BRANCH_GET = "CHANGE_BRANCH_GET"
