@@ -6,9 +6,7 @@ export const ChangeBranchCard = (props: {
     onClick: (name:string) => void
 }) => {
 
-    const onCardClick = () => {
-        props.onClick(props.branch.name)
-    }
+    const onCardClick = () => props.onClick(props.branch.name)
 
     return (
         <button onClick={onCardClick}>

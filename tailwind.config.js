@@ -66,6 +66,7 @@ module.exports = {
       "1/4": '25%',
       min: "min-content",
       max: "max-content",
+      screen: "100vw",
       full: "100%",
     },
     colors: {

@@ -133,7 +133,9 @@ export const ChangeBranch = (props: {
                     {(error!=="" &&
                         <ErrorModal errorMsg={error} onBack={props.onBack}/> ) ||
                     (isFetching &&
-                        <LoadingOverlay/>)}
+                        <div className={"h-screen w-screen bg-black bg-opacity-75"}>
+                            <LoadingOverlay/>
+                        </div>)}
             </ModalPortal>
             <h2 className={"m-0 w-max"}>{(props.isSave && "Save in branch...") || "Restore from branch..."
             }</h2>

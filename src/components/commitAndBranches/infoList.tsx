@@ -1,11 +1,8 @@
 import React from "react";
 import {Link} from "react-router-dom"
-import {branchSimpleInfo} from "../../types/data-types";
 
 export const InfoList = (
     props: {
-        listBranches: Array<branchSimpleInfo>,
-        checkTrees: boolean[],
         commitMessage: string,
         sha: string,
         committerAuthorLogin: string,
@@ -39,7 +36,6 @@ export const InfoList = (
                     </div>
                 </div>
             </Link>
-            {/*</div>*/}
         </div>
 
     )

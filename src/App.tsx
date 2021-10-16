@@ -2,7 +2,7 @@ import React, {useEffect} from 'react';
 import './App.css';
 
 import {BranchesContainer} from "./components/commitAndBranches/branches-container";
-import TinyMCEEditor from "./components/tinyMCEeditor/tinymce-editor"
+import EditorContainer from "./components/tinyMCEeditor/editor-container"
 import {
     BrowserRouter as Router,
     Switch,
@@ -53,8 +53,8 @@ const App = () => {
                 <Switch>
                     <PrivateRoute path="/:owner/:repo/:path/branches/:commitSha" children={<BranchesContainer/>}/>
                     <PrivateRoute path="/:owner/:repo/:path/branches/" children={<BranchesContainer/>}/>
-                    <PrivateRoute path="/:owner/:repo/:path/editor/:commitSha" children={<TinyMCEEditor/>}/>
-                    <PrivateRoute path="/:owner/:repo/:path/editor/" children={<TinyMCEEditor/>}/>
+                    <PrivateRoute path="/:owner/:repo/:path/editor/:commitSha" children={<EditorContainer/>}/>
+                    <PrivateRoute path="/:owner/:repo/:path/editor/" children={<EditorContainer/>}/>
                     <PrivateRoute path= "/:owner/:repo/:option/" children={<ChoosePathContainer/>}/>
                     <PrivateRoute path= "/:owner/:repo/" children={<ChoosePathContainer/>}/>
                     <PrivateRoute path= "/userrepos" children={<ChangeRepoContainer/>}/>
