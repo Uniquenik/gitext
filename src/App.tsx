@@ -2,7 +2,7 @@ import React, {useEffect} from 'react';
 import './App.css';
 
 import {BranchesContainer} from "./components/commitAndBranches/branches-container";
-import EditorContainer from "./components/tinyMCEeditor/editor-container"
+import EditorContainer from "./components/editor/editor-container"
 import {
     BrowserRouter as Router,
     Switch,
@@ -14,9 +14,6 @@ import {ChoosePathContainer} from "./components/choosePath/choose-path-container
 import {useSelector} from "react-redux";
 import {RootReducer} from "./redux";
 import {AuthContainer} from "./components/auth/auth-container";
-
-//const { Octokit } = require("@octokit/core");
-//const octokit = new Octokit({ auth: `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` });
 
 
 const App = () => {
@@ -43,8 +40,7 @@ const App = () => {
                         />
                     )}
             />
-        );
-    }
+        );}
 
 
     return (

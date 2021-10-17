@@ -1,6 +1,7 @@
-import {filePath} from "./choose-path-container";
+
 import folder from "./image/folder.svg"
 import file from "./image/file.svg"
+import {filePath} from "./data-types";
 
 export const FileInfo = (props: {
     info:filePath,

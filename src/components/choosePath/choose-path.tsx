@@ -1,12 +1,13 @@
-import {branch, filePath} from "./choose-path-container";
+
 import {FileInfo} from "./file-info";
 import up from './image/up.svg'
 import React from "react";
+import {branchChoosePath, filePath} from "./data-types";
 
 export const ChoosePath = (props:{
     owner:string,
     repo:string,
-    branchesList:branch[],
+    branchesList:branchChoosePath[],
     currTree: filePath[],
     currDir: string,
     setCurrDir: (str:string) => void,
@@ -20,8 +21,6 @@ export const ChoosePath = (props:{
     const setIndex = (name:string) => {
         props.setIndexBranch((props.branchesList.map(arr => arr.name)).indexOf(name))
     }
-
-    console.log(props.branchesList)
 
     return (
         <div className={"bg-accent text-white p-2 px-3 w-full h-full"}>
@@ -51,17 +50,17 @@ export const ChoosePath = (props:{
                 )}
             </div>
             <div className={""}>
-                {(props.currDir !== "" &&
-                    <div className={"px-2 hover:bg-accent-second border border-gray m-0.5"}>
-                        <button className={"w-full h-full"} onClick={props.backDir}>
-                            <img className={"pt-2"} width={"20"} alt="..." src={up}/>
-                        </button>
-                    </div>) ||
-                    <div className={"px-2 py-1.5"}>
-                        <div className={"pt-2 h-28px"}/>
-                    </div>
-                }
                 <div className={"flex flex-wrap"}>
+                    {(props.currDir !== "" &&
+                        <div className={"px-2 hover:bg-accent-second border border-gray m-0.5 w-full h-full"}>
+                            <button className={"w-full h-full"} onClick={props.backDir}>
+                                <img className={"pt-2"} width={"20"} alt="..." src={up}/>
+                            </button>
+                        </div>) ||
+                    <div className={"px-2 border border-gray m-0.5 w-full h-full"}>
+                        <div className={"pt-2 h-35px"}/>
+                    </div>
+                    }
                 {props.currTree.map((item, index) =>
                     <div key={index} className={"flex-grow border border-gray px-2 m-0.5 hover:bg-accent-second"}>
                         <FileInfo setDir={props.setCurrDir} setFile={props.setFile}

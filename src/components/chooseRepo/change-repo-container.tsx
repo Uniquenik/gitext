@@ -8,30 +8,8 @@ import {useSelector} from "react-redux";
 import {RootReducer} from "../../redux";
 import {useAuth} from "../../hooks/auth-hook";
 import {LoadingOverlay} from "../../loading/loading-overlay";
-
-export interface repoInfo {
-    created_at: string,
-    pushed_at: string,
-    id_project: number,
-    language: string,
-    name: string,
-    description: string,
-    owner_login: string,
-    owner_avatar: string,
-    visibility: string,
-    permissions: boolean[],
-    //admin/pull/push
-}
-
-export interface ownerRepoValue {
-    owner: string,
-    repo: string
-}
-
-export const defaultOwnerRepoValue = {
-    owner: "",
-    repo: "",
-}
+import {changeRepoInfo, defaultOwnerRepoValueForm, ownerRepoValueForm} from "./data-types";
+import {compareByPushedAt} from "../../types/comparators";
 
 export const ChangeRepoContainer = () => {
     const mainStatus: any = useSelector<RootReducer>(state => state.main);
@@ -40,17 +18,17 @@ export const ChangeRepoContainer = () => {
 
     let history = useHistory()
 
-    const [repos, setRepos] = useState<repoInfo[]>([])
+    const [repos, setRepos] = useState<changeRepoInfo[]>([])
     const [isFetching, setIsFetching] = useState(true)
     const [typeModal, setTypeModal] = useState("")
-    const [ownerRepo, setOwnerRepo] = useState<ownerRepoValue>(defaultOwnerRepoValue)
+    const [ownerRepo, setOwnerRepo] = useState<ownerRepoValueForm>(defaultOwnerRepoValueForm)
 
     const onChange = ({target: {name, value}}: ChangeEvent<HTMLInputElement>) => {
         setOwnerRepo({...ownerRepo, [name]: value})
     }
 
     const onViewBranches = () => {
-        history.push(`/${ownerRepo.owner}/${ownerRepo.repo}/branches/`)
+        if (ownerRepo.owner && ownerRepo.repo) history.push(`/${ownerRepo.owner}/${ownerRepo.repo}/branches/`)
     }
 
     useEffect(() => {
@@ -67,7 +45,7 @@ export const ChangeRepoContainer = () => {
     }, [])
 
     async function getRepos() {
-        let repoArr: repoInfo[] = []
+        let repoArr: changeRepoInfo[] = []
         await getUserRepo()
             .then((response) => {
                 console.log(response)
@@ -86,11 +64,7 @@ export const ChangeRepoContainer = () => {
                         })
                     }
                 )
-                repoArr.sort(function (a, b) {
-                    if (a.pushed_at! > b.pushed_at!) return -1
-                    if (a.pushed_at! < b.pushed_at!) return 1
-                    else return 0
-                })
+                repoArr.sort(compareByPushedAt)
             })
             .catch((error) => {
                 console.log(error)

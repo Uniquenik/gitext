@@ -11,6 +11,7 @@ module.exports = {
     },
     fontSize: {
       'xs': '.75rem',
+      'xss': '.8rem',
       'sm': '.875rem',
       'tiny': '.875rem',
       'base': '1rem',
@@ -30,6 +31,7 @@ module.exports = {
       "20px":"20px",
       "28px":"28px",
       "30px":"30px",
+      "35px":"35px",
       "38px":"38px",
       "40px":"40px",
       "48px":"48px",

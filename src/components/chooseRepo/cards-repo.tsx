@@ -1,7 +1,8 @@
-import {repoInfo} from "./change-repo-container";
+import {changeRepoInfo} from "./data-types";
+
 
 export const CardsRepo = (props: {
-    rep:repoInfo
+    rep:changeRepoInfo
 }) => {
     return (
         <div className={"hover:bg-accent-second text-white border border-gray-dark p-1 rounded-sm"}>

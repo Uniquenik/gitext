@@ -9,9 +9,9 @@ export const ChangeOverrideMsg = (
         from: fileInfo,
         to: fileInfo,
         saveGit: boolean,
-        onBack: (event:any) => void,
-        onReturn: (event:any) => void,
-        onEdit: (event:any) => void,
+        onBack: (event: any) => void,
+        onReturn: (event: any) => void,
+        onEdit: (event: any) => void,
         currentContent: string
     }) => {
 
@@ -22,8 +22,8 @@ export const ChangeOverrideMsg = (
                     {(props.isChange && headerChangeRepo) || headerOverride}</h2>
                 <div className={"text-center text-error"}>
                     {(((props.from.currentValueOwner !== props.to.currentValueOwner) ||
-                    (props.from.currentValueRepo !== props.to.currentValueRepo)) &&
-                    <h3 className={"m-0"}>(Different repository)</h3>)
+                        (props.from.currentValueRepo !== props.to.currentValueRepo)) &&
+                        <h3 className={"m-0"}>(Different repository)</h3>)
                     }
                     {(props.to.currentValueBranch && props.from.currentValueBranch !== props.to.currentValueBranch) &&
                     <h3 className={"m-0"}>(Another branch)</h3>
@@ -37,8 +37,8 @@ export const ChangeOverrideMsg = (
                 {!props.saveGit && <h3 className={"m-0 text-error text-center"}>(Current content not save in Git!)</h3>}
                 {props.to.currentValueParentCommit &&
                 <div className={"font-sans h-40vh bg-white w-full overflow-auto"}>
-                    {parse(props.currentContent)}
-                </div> }
+                    {props.currentContent && parse(props.currentContent)}
+                </div>}
                 <div className={"text-base text-white"}>
                     From: {props.from.currentValueOwner} / {props.from.currentValueRepo}
                     <div>:{props.from.currentValuePath}
@@ -50,11 +50,15 @@ export const ChangeOverrideMsg = (
                     </div>
                 </div>
                 <div className={"flex"}>
-                    <button className={"m-2 px-4 py-2 rounded-sm text-sm font-medium border-0 transition text-white bg-gray-dark hover:bg-gray"}
-                            onClick={(props.isChange && props.onReturn) || props.onBack} >No, back</button>
+                    <button
+                        className={"m-2 px-4 py-2 rounded-sm text-sm font-medium border-0 transition text-white bg-gray-dark hover:bg-gray"}
+                        onClick={(props.isChange && props.onReturn) || props.onBack}>No, back
+                    </button>
                     <div className={"flex-grow"}/>
-                    <button className={"m-2 px-4 py-2 rounded-sm text-sm font-medium border-0 transition text-white bg-black-second hover:bg-gray"}
-                            onClick={props.onEdit} >Yes, override</button>
+                    <button
+                        className={"m-2 px-4 py-2 rounded-sm text-sm font-medium border-0 transition text-white bg-black-second hover:bg-gray"}
+                        onClick={props.onEdit}>Yes, override
+                    </button>
                 </div>
 
             </div>

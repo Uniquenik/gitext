@@ -1,4 +1,3 @@
-import {Editor} from '@tinymce/tinymce-react';
 import React, {useEffect, useState} from "react";
 import {useCommits} from "../../hooks/commits-hook";
 import {useDispatch, useSelector} from "react-redux";
@@ -10,11 +9,9 @@ import {
     setValueText
 } from "../../redux/editor-state/editor-action-creators";
 import {
-    branchesCompareCommitInfo,
     CHANGE_BRANCH_GET,
     CHANGE_BRANCH_SAVE,
     CHANGE_REPO_MSG,
-    defaultBranchesCompareCommitInfo,
     OVERRIDE_VALUE
 } from "../../types/data-types";
 import {useBranches} from "../../hooks/branches-hook";
@@ -27,6 +24,9 @@ import {LoadingOverlay} from "../../loading/loading-overlay";
 import {ChangeBranch} from "../../modalPortal/modalContent/change-branch";
 import {b64DecodeUnicode} from "../other/decode";
 import {TinymceEditor} from "./tinymce-editor";
+import {ReactComponent as Local } from "./image/localsave.svg"
+import {ReactComponent as Cloud } from "./image/cloudsave.svg"
+
 
 const EditorContainer = () => {
     const per_page = 100;
@@ -48,10 +48,12 @@ const EditorContainer = () => {
 
     useEffect(() => {
         onStart()
+            .catch(() => console.log('Global error'))
     }, [])
 
     useEffect(() => {
         onStart()
+            .catch(() => console.log('Global error'))
     }, [owner, repo, path, commitSha])
 
     async function onStart() {
@@ -63,7 +65,7 @@ const EditorContainer = () => {
         ) {
             setIsFetching(false)
         } else {
-            checkCorrectData(owner, repo)
+            checkCorrectData(owner, repo, commitSha)
                 .then(() => {
                     if (!editorStatus.currentValueOwner && !editorStatus.currentValueRepo && !editorStatus.currentValuePath)
                         //if editor is empty
@@ -92,7 +94,6 @@ const EditorContainer = () => {
                     }
                 })
                 .catch((error) => {
-
                     setIsFetching(false)
                     console.log(error)
                 })
@@ -100,7 +101,7 @@ const EditorContainer = () => {
     }
 
     //check exists and permissions
-    async function checkCorrectData(owner: string, repo: string) {
+    async function checkCorrectData(owner: string, repo: string, commitSha: string) {
         let repInfo = await getRep(owner, repo)
             .catch((error) => {
                 setTypeModal(error)
@@ -111,6 +112,13 @@ const EditorContainer = () => {
             setTypeModal(getRepPermission)
             console.log(getRepPermission)
             throw new Error(getRepPermission)
+        }
+        if (commitSha !== "") {
+            await getCommitSha(commitSha, owner, repo)
+                .catch((error)=> {
+                    setTypeModal(error)
+                    throw new Error(error)
+                })
         }
     }
 
@@ -261,8 +269,8 @@ const EditorContainer = () => {
 
     const onReturn = () => {
         setTypeModal("")
-        history.push(`/${editorStatus.currentValueOwner}/${editorStatus.currentValueRepo}/
-        ${editorStatus.currentValuePath.replaceAll("/", "$")}/editor/`)
+        history.push(`/${editorStatus.currentValueOwner}/${editorStatus.currentValueRepo}/`+
+            `${editorStatus.currentValuePathreplaceAll("/", "$")}/editor/`)
     }
 
     const onOverride = () => {
@@ -297,14 +305,17 @@ const EditorContainer = () => {
                     console.log(editorStatus.currentValueBranch)
                 })
                 .catch((error) => {
-                    setTypeModal(error)
+                    if (typeModal === "") setTypeModal(error)
                     setIsFetching(false)
                     console.log(error)
                 })
         }
     }
 
-    const onBackError = () => history.goBack()
+    const onBackError = () => {
+        history.goBack()
+        setTypeModal("")
+    }
 
     const onFocusOutSave = () => {
         dispatch(setValueText(value))
@@ -332,13 +343,17 @@ const EditorContainer = () => {
     const reviveGit = () => {
         if (editorStatus.currentValueBranch) {
             reviveFromGit(owner, repo, editorStatus.currentValuePath, editorStatus.currentValueBranch)
-                .then(() => console.log("ok"))
+                //.then(() => console.log("ok"))
                 .catch(error => {
                     setTypeModal(error)
                     console.log(error);
                 });
         }
         else setTypeModal(CHANGE_BRANCH_GET)
+    }
+
+    const onNewBranch = () => {
+
     }
 
     return (
@@ -375,6 +390,7 @@ const EditorContainer = () => {
                         />) || (
                         (typeModal === CHANGE_BRANCH_SAVE || typeModal === CHANGE_BRANCH_GET) &&
                        <ChangeBranch
+                           onNewBranch={onNewBranch}
                            isSave={(typeModal === CHANGE_BRANCH_SAVE && true) || false}
                            onGet={reviveFromGit}
                            onBack={()=> {setTypeModal("")}}
@@ -405,16 +421,19 @@ const EditorContainer = () => {
                                        history={(name)=>history.push(name)}
                         />
                     </div>
-                    <div className={"flex flex-wrap flex-row bg-accent text-white text-sm px-2 "}>
+                    <div className={"flex flex-wrap flex-row bg-accent text-white text-sm px-2.5"}>
                         <div className={"flex"}>{editorStatus.currentValueOwner}/{editorStatus.currentValueRepo}</div>
                         <div
                             className={"flex"}>:{editorStatus.currentValuePath} in {editorStatus.currentValueBranch}</div>
                         <div className={"flex-grow"}/>
-                        <div className={"flex"}>{
-                            ((editorStatus.isSaveCurrentValue && "local save") ||
-                            "not saved local")}/
-                            {((editorStatus.isSaveCurrentValueGit && "git save") ||
-                        "not save in git")}</div>
+                        <div className={"flex gap-x-1"}>{
+                            ((editorStatus.isSaveCurrentValue &&
+                                <Local fill={"#FFFFFF"} className={"p-0.5"} height={"20"} width={"20"} />) ||
+                                <Local fill={"#575757"} className={"p-0.5"} height={"20"} width={"20"} />)}
+                            {((editorStatus.isSaveCurrentValueGit &&
+                                <Cloud fill={"#FFFFFF"} height={"20"} width={"20"}/>) ||
+                                <Cloud fill={"#575757"} height={"20"} width={"20"}/>
+                            )}</div>
                     </div>
                 </div>
             </div>

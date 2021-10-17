@@ -4,30 +4,16 @@ import {useBranches} from "../../hooks/branches-hook";
 import {ErrorModal} from "../../modalPortal/error-modal";
 import {ModalPortal} from "../../modalPortal/modal-portal";
 import {useHistory, useParams} from 'react-router-dom';
-import {nameNotResolve} from "../../types/errors-const";
 import {LoadingOverlay} from "../../loading/loading-overlay";
+import {branchChoosePath, filePath} from "./data-types";
+import {compareLocalTreeByType} from "../../types/comparators";
 
-export interface filePath {
-    type: string,
-    path: string
-}
-
-export interface branch {
-    name: string,
-    lastCommitSha: string,
-    lastCommitShaTree: string,
-    protected: boolean,
-    resp: filePath[]
-}
 
 export const ChoosePathContainer = () => {
-    let {
-        owner,
-        repo, option
-    } = useParams()
+    let {owner, repo, option} = useParams()
     const {getTreeFromSha, getAllBranches, getCommitSha} = useBranches()
 
-    const [branches, setBranches] = useState<branch[]>([])
+    const [branches, setBranches] = useState<branchChoosePath[]>([])
     const [indexBranch, setIndexBranch] = useState(0)
     const [isFetching, setIsFetching] = useState(true)
     const [typeModal, setTypeModal] = useState("")
@@ -35,6 +21,7 @@ export const ChoosePathContainer = () => {
     const [currentDir, setCurrentDir] = useState<string>("")
     const [currentTree, setCurrentTree] = useState<filePath[]>([])
 
+    //open on editor or commits compare
     const [isEdit, setIsEdit] = useState(true)
 
     const history = useHistory()
@@ -48,66 +35,58 @@ export const ChoosePathContainer = () => {
             })
     }, [])
 
+    const getFilePath = (index: number) => {
+        let localTree: filePath[] = []
+        branches[index].resp.forEach((item) => {
+            if (item.path.indexOf("/") === -1) localTree.push(item)
+        })
+        localTree.sort(compareLocalTreeByType)
+        return localTree
+    }
+
     async function getStartInfo() {
         setIsFetching(true)
         setIndexBranch(0)
         await getBranches(owner, repo)
             .then((response) => {
-                setBranches(response)
                 //do not work from function here
                 let localTree: filePath[] = []
+                //get files path for all branches
+                console.log(response)
                 response[indexBranch].resp.forEach((item) => {
                     if (item.path.indexOf("/") === -1) localTree.push(item)
                 })
-                localTree.sort(compareLocalTree)
+                localTree.sort(compareLocalTreeByType)
+                setBranches(response)
+                console.log(localTree)
                 setCurrentTree(localTree)
-                //
                 setCurrentDir("")
                 setIsFetching(false)
             })
             .catch((error) => {
-                setTypeModal(nameNotResolve)
                 setIsFetching(false)
                 throw new Error(error)
             })
     }
 
     async function getBranches(owner: string, repo: string) {
-        let branchesList: branch[] = []
-        await getAllBranches(owner, repo)
-            .then((resp) => {
-                resp.forEach((item) =>
-                    branchesList.push({
-                        name: item.name,
-                        lastCommitSha: item.commit.sha,
-                        lastCommitShaTree: "",
-                        protected: item.protected,
-                        resp: []
-                    })
-                )
-            })
+        let branchesList: branchChoosePath[] = []
+        let allBranches = await getAllBranches(owner, repo)
             .catch((error) => {
                 setTypeModal(error)
                 throw new Error(error)
             })
-
-        for (let i = 0; i < branchesList.length; i++) {
-            await getCommitSha(branchesList[i].lastCommitSha, owner, repo)
-                .then((resp) => {
-                    branchesList[i].lastCommitShaTree = resp.tree.sha
-                    getTreeFromSha(resp.tree.sha, owner, repo)
-                        .then((resp) => {
-                            branchesList[i].resp = resp.tree.map(arr => ({path: arr.path!, type: arr.type!}))
-                        })
-                        .catch((error) => {
-                            setTypeModal(error)
-                            console.log(error)
-                        })
-                })
-                .catch((error) => {
-                    setTypeModal(error)
-                    console.log(error)
-                })
+        for (let i = 0; i<allBranches.length; i+=1) {
+            let lastCommit = await getCommitSha(allBranches[i].commit.sha, owner, repo)
+            let trees = await getTreeFromSha(lastCommit.tree.sha, owner, repo)
+            let paths = trees.tree.map(arr => ({path: arr.path!, type: arr.type!}))
+            branchesList.push({
+                name: allBranches[i].name,
+                lastCommitSha: allBranches[i].commit.sha,
+                lastCommitShaTree: lastCommit.tree.sha,
+                protected: allBranches[i].protected,
+                resp: paths
+            })
         }
         return branchesList
     }
@@ -116,21 +95,6 @@ export const ChoosePathContainer = () => {
         setCurrentDir("")
         setCurrentTree(getFilePath(num))
         setIndexBranch(num)
-    }
-
-    const compareLocalTree = (a: filePath, b: filePath) => {
-        if (a.type < b.type) return 1;
-        if (a.type > b.type) return -1;
-        return 0;
-    }
-
-    const getFilePath = (index: number) => {
-        let localTree: filePath[] = []
-        branches[index].resp.forEach((item) => {
-            if (item.path.indexOf("/") === -1) localTree.push(item)
-        })
-        localTree.sort(compareLocalTree)
-        return localTree
     }
 
     const setDir = (str: string) => {
@@ -148,7 +112,7 @@ export const ChoosePathContainer = () => {
         } else {
             localTree = getFilePath(indexBranch)
         }
-        localTree.sort(compareLocalTree)
+        localTree.sort(compareLocalTreeByType)
         setCurrentTree(localTree)
     }
 
@@ -178,13 +142,11 @@ export const ChoosePathContainer = () => {
         } else {
             localTree = getFilePath(indexBranch)
         }
-        localTree.sort(compareLocalTree)
+        localTree.sort(compareLocalTreeByType)
         setCurrentTree(localTree)
     }
 
-    const onReturnToList = () => {
-        history.push('/userrepos')
-    }
+    const onReturnToList = () => history.push('/userrepos')
 
     return (
         <>

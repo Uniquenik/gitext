@@ -4,8 +4,6 @@ export interface Action {
 }
 
 export interface branchesState {
-    getTrees: boolean,
-    getCommits: boolean,
     isOpenListCommits: boolean
     isOpenCurrentValue: boolean
 }

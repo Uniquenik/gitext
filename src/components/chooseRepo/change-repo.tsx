@@ -1,11 +1,11 @@
-import {repoInfo} from "./change-repo-container";
 import React from "react";
 import {CardsRepo} from "./cards-repo";
 import {Link} from "react-router-dom"
+import {changeRepoInfo} from "./data-types";
 
 export const ChangeRepo = (props: {
     owner: string,
-    repos: repoInfo[],
+    repos: changeRepoInfo[],
     onLogout: (event:any)=> void
     ownerValue: string,
     repoValue:string,
@@ -15,14 +15,14 @@ export const ChangeRepo = (props: {
 
     return(
         <div className={"bg-accent p-2"}>
-            <div className={"flex flex-wrap"}>
+            <div className={"flex flex-wrap px-1"}>
                 <h2 className={"m-0 text-white text-center"}>Hello, {props.owner}!</h2>
                 <div className={"flex-grow"}/>
                 <button onClick={props.onLogout} className={"px-3 py-1 rounded-sm text-sm font-medium border-0 transition text-white bg-gray-dark hover:bg-gray"}
-                        type={'button'}>Logout</button>
+                        type={'button'}>Sign out</button>
             </div>
             <div className={"flex flex-wrap"}>
-                <h3 className={"m-0 py-2 text-gray pr-4"}>Choose your repository or view commits on any public repo </h3>
+                <h3 className={"m-0 py-2 pl-1 text-gray pr-4"}>Choose your repository or view commits on any public repo </h3>
                 <div className={"my-2 text-white"}>
                     <input type={"text"}
                            className={"rounded-sm border border-gray-middle m-1 p-0.5 bg-dark"}

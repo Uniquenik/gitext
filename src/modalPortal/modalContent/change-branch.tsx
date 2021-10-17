@@ -1,53 +1,29 @@
 import {fileInfo} from "../../redux/editor-state/data-types";
 import {ModalPortal} from "../modal-portal";
-import {ChangeEvent, useEffect, useState} from "react";
+import React, {ChangeEvent, useEffect, useState} from "react";
 import {LoadingOverlay} from "../../loading/loading-overlay";
 import {useBranches} from "../../hooks/branches-hook";
 import {ErrorModal} from "../error-modal";
 import {ChangeBranchCard} from "./change-branch-card";
-
-export interface branchInf {
-    name: string,
-    date: string,
-    lastCommit: string,
-    lastCommitMsg: string,
-    lastCommitAuthor: string,
-    lastCommitAuthorImg: string,
-    lastCommitTree:string,
-    protected: boolean
-}
-
-export const defaultStateBranchInf = {
-    name: "",
-    date: "",
-    lastCommit: "",
-    lastCommitMsg: "",
-    lastCommitAuthor: "",
-    lastCommitAuthorImg: "",
-    lastCommitTree: "",
-    protected: false
-}
-
-export interface inputBranch {
-    path: string,
-    msg: string,
-}
+import {compareLocalBranchesByDate} from "../../types/comparators";
+import {branchInfoInModal, defaultStateBranchInfoInModal, inputBranchModal} from "./data-types";
 
 export const ChangeBranch = (props: {
     repo: fileInfo,
     isSave: boolean,
+    onNewBranch: (event:any)=> void,
     onBack: (event:any) => void,
     onSave: (owner:string, repo:string, currentTreeName:string, treeName:string, path:string, msg:string) => void,
     onGet: (owner: string, repo: string, path: string, ref: string) => void
 }) => {
 
     const [isFetching, setIsFetching] = useState(true)
-    const [branches, setBranches] = useState<branchInf[]>([])
+    const [branches, setBranches] = useState<branchInfoInModal[]>([])
     const [error, setError] = useState("")
     const {getAllBranches, getBranch} = useBranches();
     const [currentBranch, setCurrentBranch] = useState("")
-    const [currentInfo, setCurrentInfo] = useState<branchInf>(defaultStateBranchInf)
-    const [inputs, setInputs] = useState<inputBranch>({path:"", msg: ""})
+    const [currentInfo, setCurrentInfo] = useState<branchInfoInModal>(defaultStateBranchInfoInModal)
+    const [inputs, setInputs] = useState<inputBranchModal>({path:"", msg: ""})
 
     const onChangeInput = ({ target: { name, value } }: ChangeEvent<HTMLInputElement>) => {
         setInputs({...inputs, [name]:value})
@@ -64,7 +40,7 @@ export const ChangeBranch = (props: {
     }, [])
 
     async function getBranches ()  {
-        let localBranches:branchInf[] = []
+        let localBranches:branchInfoInModal[] = []
         let list = await getAllBranches(props.repo.currentValueOwner, props.repo.currentValueRepo)
             .catch((error)=> {
                 console.log(error)
@@ -90,20 +66,12 @@ export const ChangeBranch = (props: {
                     setError(error)
                 })
         }
-        localBranches.sort(compareLocalBranches)
+        localBranches.sort(compareLocalBranchesByDate)
         if (currentBranch) {
             setCurrentInfo(localBranches[0])
             setCurrentBranch(localBranches[0].name)
         }
         setBranches(localBranches)
-    }
-
-    const compareLocalBranches = (a: branchInf, b: branchInf) => {
-        let a1 = Date.parse(a.date)
-        let b1 = Date.parse(b.date)
-        if (a1 < b1) return 1;
-        if (a1 > b1) return -1;
-        return 0;
     }
 
     const setCurrBranch = (name:string) => {
@@ -133,7 +101,7 @@ export const ChangeBranch = (props: {
                     {(error!=="" &&
                         <ErrorModal errorMsg={error} onBack={props.onBack}/> ) ||
                     (isFetching &&
-                        <div className={"h-screen w-screen bg-black bg-opacity-75"}>
+                        <div className={"bg-opacity-80 bg-black"}>
                             <LoadingOverlay/>
                         </div>)}
             </ModalPortal>
@@ -146,16 +114,24 @@ export const ChangeBranch = (props: {
             }
             <div className={"max-h-70vh overflow-y-auto"}>
                 <div className={"flex flex-row flex-wrap text-center"}>
-                {
-                    branches.map((item, key)=>
-                        <div key={key} className={(currentBranch === item.name && "text-white text-xl") || "text-gray text-base"}>
+     {/*           {
+                    (props.isSave &&
+                        <div>
+                            <button onClick={props.onNewBranch}>
+                                <div className={"px-2 py-1 text-gray hover:text-white flex-grow"}>
+                                    <div className={"m-0"}>+</div>
+                                    <div className={"text-xs"}>New branch</div>
+                                </div>
+                            </button>
+                        </div>)}*/}
+                    {branches.map((item, key)=>
+                        <div key={key} className={(currentBranch === item.name && "text-white flex-grow text-xl") || "text-gray flex-grow text-base"}>
                             <ChangeBranchCard
                                 branch={item}
                                 onClick={setCurrBranch}
                             />
                         </div>
-                    )
-                }
+                    )}
                 </div>
                 <div>
                     <div className={"text-sm py-2"}>{currentInfo.lastCommitMsg}</div>

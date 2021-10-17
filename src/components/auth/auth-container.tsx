@@ -5,7 +5,6 @@ import {useAuth} from "../../hooks/auth-hook";
 import {useHistory} from 'react-router-dom'
 import {useDispatch} from "react-redux";
 import {setUsername} from "../../redux/main-state/main-action-creators";
-import {LoadingContainer} from "../../loading/loading-container";
 import {ModalPortal} from "../../modalPortal/modal-portal";
 import {ErrorModal} from "../../modalPortal/error-modal";
 import {badCredentials} from "../../types/errors-const";
@@ -20,7 +19,7 @@ export const AuthContainer = () => {
     const [error, setError] = useState("")
 
     const [value, setValue] = useState("")
-    const {isOcto, setToken} = useAuth()
+    const {setToken} = useAuth()
 
     const onChangeTokenInput = ({ target: { name, value } }: ChangeEvent<HTMLInputElement>) => {
         setValue(value)

@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react"
+import React, {useEffect, useState} from "react"
 import {useDispatch, useSelector} from "react-redux";
 import parse from 'html-react-parser';
 import {BranchesContainerDraws} from "./branches-container-draws";
@@ -11,14 +11,13 @@ import './../../prism/prism.css'
 import {useHistory, useParams} from 'react-router-dom';
 import {useBranches} from "../../hooks/branches-hook";
 import {getRandomColor} from "../other/randomColor";
-import React from "react";
 import {RootReducer} from "../../redux";
 import {setOpenCommits, setVisibleCurrentValue} from "../../redux/branches-state/branches-action-creators";
 import {BranchesListButton} from "../../buttons/brancheslist-button";
 import {useCommits} from "../../hooks/commits-hook";
 import {
-    emptyFileError,
-    openFileMsg, wrongExtension
+    emptyFileError, getCommit404,
+    openFileMsg, unhandledError, wrongExtension
 } from "../../types/errors-const";
 import {CompareButton} from "../../buttons/compare-button";
 import {ErrorModal} from "../../modalPortal/error-modal";
@@ -34,6 +33,7 @@ import {
 } from "./data-types";
 import {branchesCompareCommitInfo, defaultBranchesCompareCommitInfo} from "../../types/data-types";
 import {b64DecodeUnicode} from "../other/decode";
+import {compareCommitsByDate} from "../../types/comparators";
 
 
 export const BranchesContainer = () => {
@@ -47,16 +47,18 @@ export const BranchesContainer = () => {
         getTreeFromSha, getTreesCommits, getAllPullRequests
     } = useBranches();
 
-    const {getBlobFromFileSha} = useCommits();
+    const {getBlobFromFileSha, getRep} = useCommits();
     const history = useHistory()
 
     const [globalError, setGlobalError] = useState("");
     const [isMounted, setIsMounted] = useState(false)
 
     const [isNotLoadCommits, setLoadCommit] = useState(false)
-    const [infoCompareCommit, setInfoCompareCommit] = useState<branchesCompareCommitInfo>(defaultBranchesCompareCommitInfo)
+    const [infoCompareCommit, setInfoCompareCommit] =
+        useState<branchesCompareCommitInfo>(defaultBranchesCompareCommitInfo)
     const [compareContent, setCompareContent] = useState("")
     const [isSetCommits, setCommits] = useState(false)
+    const [isEdit, setIsEdit] = useState(false)
 
     //on change global params
     useEffect(() => {
@@ -67,8 +69,9 @@ export const BranchesContainer = () => {
                 setLoadCommit(true)
                 Prism.highlightAll();
             })
-            .catch(() => {
-                setLoadCommit(true)
+            .catch((error) => {
+                if (globalError === "") setGlobalError(unhandledError)
+                console.log(error)
                 console.log("Global error")
             })
     }, [owner, repo, path])
@@ -149,6 +152,16 @@ export const BranchesContainer = () => {
                 setGlobalError(error)
                 throw new Error(error)
             })
+        getRep(owner, repo)
+            .then(reps => {
+                //check permissions
+                if (reps.permissions && reps.permissions.pull && reps.permissions.push) setIsEdit(true)
+                else if (reps.permissions && (!reps.permissions.pull || !reps.permissions.push)) setIsEdit(false)
+                else {
+                    setGlobalError(getCommit404)
+                    throw new Error(getCommit404)
+                }
+            })
         //get some data and create new array for commits on every branch
         let commitsInfo = new Array<commitInfo>()
         let mainBranch = 0
@@ -171,16 +184,24 @@ export const BranchesContainer = () => {
             for (let k = 0; k < getBranches.length; ++k) checkTrees.push(false);
             checkTrees[0] = true
             if (branchCommits) branchCommits.forEach(function (item) {
-                commitsInfo.push({
-                    checkTrees: checkTrees,
-                    sha: item.sha,
-                    commitAuthorDate: item.commit.committer!.date!,
-                    commitMessage: item.commit.message,
-                    committerAuthorLogin: item.committer!.login,
-                    committerAuthorAvatarURL: item.committer!.avatar_url
-                })
+                getTreeFromSha(item.sha, owner, repo)
+                    .then((resp) => {
+                        if (resp.tree.findIndex((i) => i.path === path.replaceAll("$", "/")) !== -1) {
+                            commitsInfo.push({
+                                checkTrees: checkTrees,
+                                sha: item.sha,
+                                commitAuthorDate: item.commit.committer!.date!,
+                                commitMessage: item.commit.message,
+                                committerAuthorLogin: item.committer!.login,
+                                committerAuthorAvatarURL: item.committer!.avatar_url
+                            })
+                        }
+                    })
+                    .catch((error)=> {
+                        setGlobalError(error)
+                    })
             })
-
+            console.log(commitsInfo)
             for (let i = 1; i < getBranches.length; i++) {
                 if (getBranches[i].name === 'main' || getBranches[i].name === 'master') {
                     //if main - set main branch
@@ -198,6 +219,7 @@ export const BranchesContainer = () => {
                         setGlobalError(error);
                         throw new Error(error);
                     })
+                console.log("Get data...", i,"/",getBranches.length)
                 console.log(getBranches[i].name, branchCommits)
                 if (branchCommits) {
                     //new list commits checks
@@ -209,29 +231,35 @@ export const BranchesContainer = () => {
                             let checkTrees: boolean[] = commitsInfo[ind].checkTrees.slice();
                             commitsInfo[ind].checkTrees = []
                             checkTrees[i] = true
-                            console.log(i)
                             commitsInfo[ind].checkTrees = checkTrees
                         } else if (getBranches) {
                             let checkTrees: boolean[] = []
                             for (let w = 0; w < getBranches.length; ++w) checkTrees.push(false)
                             checkTrees[i] = true
-                            let k = 0
-                            while (Date.parse(commitsInfo[k].commitAuthorDate) > Date.parse(branchCommits[j].commit.committer!.date!) &&
-                            k < commitsInfo.length - 1) {
-                                k += 1
-                            }
-                            commitsInfo.splice(k, 0, {
-                                checkTrees: checkTrees,
-                                sha: branchCommits[j].sha,
-                                commitAuthorDate: branchCommits[j].commit.committer!.date!,
-                                commitMessage: branchCommits[j].commit.message,
-                                committerAuthorLogin: branchCommits[j].committer!.login!,
-                                committerAuthorAvatarURL: branchCommits[j].committer!.avatar_url!
-                            })
+                            getTreeFromSha(branchCommits[j].sha, owner, repo)
+                                .then((resp) => {
+                                    if (resp.tree.findIndex((i) => i.path === path.replaceAll("$", "/")) !== -1) {
+                                        commitsInfo.push({
+                                            checkTrees: checkTrees,
+                                            sha: branchCommits[j].sha,
+                                            commitAuthorDate: branchCommits[j].commit.committer!.date!,
+                                            commitMessage: branchCommits[j].commit.message,
+                                            committerAuthorLogin:
+                                                (branchCommits[j].committer && branchCommits[j].committer!.login
+                                                    && branchCommits[j].committer!.login) || "",
+                                            committerAuthorAvatarURL:
+                                                (branchCommits[j].committer && branchCommits[j].committer!.avatar_url!) || ""
+                                        })
+                                    }
+                                })
+                                .catch((error)=> {
+                                    setGlobalError(error)
+                                })
                         }
                     }
                 }
             }
+            commitsInfo.sort(compareCommitsByDate)
             console.log("Final", commitsInfo)
             console.log(branchesInfo)
             setListBranches(branchesInfo.slice(0, per_page))
@@ -287,15 +315,25 @@ export const BranchesContainer = () => {
         if (commitSha) history.push(`../editor/${commitSha}`)
     }
 
-    const backEditor = () => {
-        history.push(`../editor/`)
-    }
+    const backEditor = () => history.push(`../editor/`)
+
+    const mainPage = () => history.push('/userrepos')
 
     const nodeRef = React.useRef(null);
 
     const onBackError = () => {
         history.push('/')
     }
+
+    const parser = (input: string) =>
+        parse(input /*, {
+            replace: domNode => {
+                console.log(domNode)
+                if (domNode instanceof Element && domNode.tagName === 'html') {
+                    return domNode.lastChild;
+                }
+            }
+        }*/ )
 
     return (
         <>
@@ -314,43 +352,47 @@ export const BranchesContainer = () => {
             <div className={"h-screen relative overflow-hidden bg-accent"}>
                 <div className={`flex flex-col px-1 h-full`}>
                     <div className={"w-full h-min"}>
-                        <div className={"flex"}>
+                        <div className={"flex p-0.5"}>
                             <div
                                 className={"py-1 flex-grow text-base text-white overflow-ellipsis overflow-hidden max-h-48px"}>
                                 {infoCompareCommit.commitMessage}
                             </div>
                         </div>
-                        <div className={"flex text-xs text-gray"}>
+                        <div className={"flex flex-wrap text-xs text-gray p-0.5"}>
+                            {isEdit &&
                             <button onClick={backEditor}
-                                    className={"mr-2 px-4 py-2 rounded-sm text-sm font-medium border-0 transition text-white bg-gray-dark hover:bg-gray"}
-                                    placeholder={'sas'} type={'button'}>Back
+                                    className={"mr-2 px-4 py-2 rounded-sm text-sm font-medium border-0 transition text-white bg-gray-middle hover:bg-gray"}
+                                    placeholder={'sas'} type={'button'}>Back to editor
+                            </button>}
+                            <button onClick={mainPage}
+                                    className={"px-4 py-2 rounded-sm text-sm font-medium border-0 transition text-white bg-gray-dark hover:bg-gray"}
+                                    placeholder={'sas'} type={'button'}>Go to main page
                             </button>
-                            <div className={"flex-grow"}/>
-                            {infoCompareCommit.commitAuthorDate &&
-                            <div className={"text-right"}>
-                                <div className={"hidden sm:block"}> {infoCompareCommit.sha} </div>
-                                <div> {infoCompareCommit.commitAuthorDate}/{infoCompareCommit.committerAuthorLogin}  </div>
+                            <div className={"flex-grow mx-2"}>
+                                {infoCompareCommit.commitAuthorDate &&
+                                <div className={"text-right"}>
+                                    <div className={"hidden sm:block"}> {infoCompareCommit.sha} </div>
+                                    <div> {infoCompareCommit.commitAuthorDate}/{infoCompareCommit.committerAuthorLogin}  </div>
+                                </div>}
                             </div>
-                            }
-                            <div>
-                                <button onClick={editCommit} disabled={commitSha === ""}
-                                        className={"ml-2 px-4 py-2 disabled:opacity-70 rounded-sm text-sm font-medium border-0 transition text-white bg-black-second hover:bg-gray"}
+                            {isEdit &&
+                            <button onClick={editCommit} disabled={commitSha === ""}
+                                        className={"px-4 py-2 disabled:opacity-70 rounded-sm text-sm font-medium border-0 transition text-white bg-black-second hover:bg-gray"}
                                         placeholder={'sas'} type={'button'}>Edit
-                                </button>
-                            </div>
+                            </button>}
                         </div>
                     </div>
                     <div className={"flex flex-wrap h-full"}>
                         {branchesStatus.isOpenCurrentValue &&
                         <div
                             className={"font-sans bg-white h-1/2 sm:h-full w-full sm:w-1/2 overflow-y-auto border-2 border-accent"}>
-                            {parse(editorStatus.currentValue)}
+                            {parse(editorStatus.currentValue, { trim: true }) }
                             <div className={"h-72px"}/>
                         </div>
                         }
                         <div
                             className={`${(!branchesStatus.isOpenCurrentValue && "w-full h-full ") || "w-full sm:w-1/2 h-1/2 sm:h-full "} font-sans overflow-y-auto bg-white border-2 border-accent`}>
-                            {parse(compareContent)}
+                            {parser(compareContent)}
                             <div className={"h-72px"}/>
                         </div>
                     </div>

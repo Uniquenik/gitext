@@ -27,8 +27,7 @@ export const useBranches = () => {
                 owner: owner,
                 repo: repo
             })
-                .then((response: any) => {
-                    console.log("Resp:",response)
+                .then((response) => {
                     resolve(response.data)
                 })
                 .catch((error:any) => {
@@ -48,7 +47,7 @@ export const useBranches = () => {
                 ref: ref,
                 per_page: per_page
             })
-                .then((response: any) => {
+                .then((response) => {
                     resolve(response.data)
                 })
                 .catch((error:any) => {
