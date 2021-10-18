@@ -50,7 +50,7 @@ export const BranchesContainer = () => {
     const {getBlobFromFileSha, getRep} = useCommits();
     const history = useHistory()
 
-    const [globalError, setGlobalError] = useState("");
+    const [typeModal, setTypeError] = useState("");
     const [isMounted, setIsMounted] = useState(false)
 
     const [isNotLoadCommits, setLoadCommit] = useState(false)
@@ -70,7 +70,7 @@ export const BranchesContainer = () => {
                 Prism.highlightAll();
             })
             .catch((error) => {
-                if (globalError === "") setGlobalError(unhandledError)
+                if (typeModal === "") setTypeError(unhandledError)
                 console.log(error)
                 console.log("Global error")
             })
@@ -149,7 +149,7 @@ export const BranchesContainer = () => {
         let getBranches = await getAllBranches(owner, repo)
             .catch((error) => {
                 console.log(error)
-                setGlobalError(error)
+                setTypeError(error)
                 throw new Error(error)
             })
         getRep(owner, repo)
@@ -158,7 +158,7 @@ export const BranchesContainer = () => {
                 if (reps.permissions && reps.permissions.pull && reps.permissions.push) setIsEdit(true)
                 else if (reps.permissions && (!reps.permissions.pull || !reps.permissions.push)) setIsEdit(false)
                 else {
-                    setGlobalError(getCommit404)
+                    setTypeError(getCommit404)
                     throw new Error(getCommit404)
                 }
             })
@@ -176,7 +176,7 @@ export const BranchesContainer = () => {
             //get commits for first branch
             let branchCommits = await getTreesCommits(owner, repo, getBranches[0].name, per_page)
                 .catch((error) => {
-                    setGlobalError(error)
+                    setTypeError(error)
                     throw new Error(error)
                 })
             console.log(branchCommits)
@@ -198,7 +198,7 @@ export const BranchesContainer = () => {
                         }
                     })
                     .catch((error)=> {
-                        setGlobalError(error)
+                        setTypeError(error)
                     })
             })
             console.log(commitsInfo)
@@ -216,7 +216,7 @@ export const BranchesContainer = () => {
                 //get commits...
                 let branchCommits = await getTreesCommits(owner, repo, getBranches[i].name, per_page)
                     .catch((error) => {
-                        setGlobalError(error);
+                        setTypeError(error);
                         throw new Error(error);
                     })
                 console.log("Get data...", i,"/",getBranches.length)
@@ -253,7 +253,7 @@ export const BranchesContainer = () => {
                                     }
                                 })
                                 .catch((error)=> {
-                                    setGlobalError(error)
+                                    setTypeError(error)
                                 })
                         }
                     }
@@ -268,7 +268,7 @@ export const BranchesContainer = () => {
             //get pull requests(not work)
             let result = await getAllPullRequests(owner, repo)
                 .catch((error) => {
-                    setGlobalError(error);
+                    setTypeError(error);
                     throw new Error(error);
                 })
             let newListMerge: mergeInfo[] = []
@@ -338,14 +338,14 @@ export const BranchesContainer = () => {
     return (
         <>
             <ModalPortal
-                show={globalError !== "" || !isSetCommits || !isNotLoadCommits}
+                show={typeModal !== "" || !isSetCommits || !isNotLoadCommits}
                 closable={false}
                 onClose={() => {
                 }}
                 selector={"#modal"}
             >
-                {(globalError !== "" &&
-                    <ErrorModal errorMsg={globalError} onBack={onBackError}/>) ||
+                {(typeModal !== "" &&
+                    <ErrorModal errorMsg={typeModal} onBack={onBackError}/>) ||
                 ((!isSetCommits || !isNotLoadCommits) &&
                     <LoadingOverlay/>)}
             </ModalPortal>

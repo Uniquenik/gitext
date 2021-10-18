@@ -37,11 +37,11 @@ export const ChoosePath = (props:{
                     {(props.branchesList[props.indexBranch] && props.branchesList[props.indexBranch].lastCommitSha) || ""}</p>
                 /{props.currDir}
             </div>
-            <div className={"flex flex-wrap py-2 text-gray"}>
-                <div className={"py-0.5"}>Branches:</div>
+            <div className={"pt-1 text-gray"}>Branches:</div>
+            <div className={"flex pb-2 text-gray overflow-x-auto"}>
                 {props.branchesList.map((item, index) =>
-                    <button key={index} onClick={()=> setIndex(item.name)}>
-                        <div className={`flex-grow hover:bg-accent-second 
+                    <button key={index} onClick={()=> setIndex(item.name)} className={"flex-grow"}>
+                        <div className={`flex-grow hover:bg-accent-second
                         ${item.name === props.branchesList[props.indexBranch].name && 'text-xl text-white'} text-center px-4`} >
                             <div>{item.name}</div>
                             <div className={"text-xs"}>{(item.protected && "true") || "false"}</div>
@@ -49,6 +49,7 @@ export const ChoosePath = (props:{
                     </button>
                 )}
             </div>
+            {props.branchesList.length === 30 && <div> (Show only first 30 branches) </div>}
             <div className={""}>
                 <div className={"flex flex-wrap"}>
                     {(props.currDir !== "" &&

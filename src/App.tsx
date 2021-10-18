@@ -14,15 +14,12 @@ import {ChoosePathContainer} from "./components/choosePath/choose-path-container
 import {useSelector} from "react-redux";
 import {RootReducer} from "./redux";
 import {AuthContainer} from "./components/auth/auth-container";
+import MainPage from "./components/mainPage/mainPage";
 
 
 const App = () => {
 
     const mainStatus: any = useSelector<RootReducer>(state => state.main);
-
-    useEffect(() => {
-
-    }, [])
 
     function PrivateRoute({ children, ...rest }) {
         return (
@@ -55,6 +52,7 @@ const App = () => {
                     <PrivateRoute path= "/:owner/:repo/" children={<ChoosePathContainer/>}/>
                     <PrivateRoute path= "/userrepos" children={<ChangeRepoContainer/>}/>
                     <Route path="/auth" children={<AuthContainer/>}/>
+                    <Route path="/" children={<MainPage/>}/>
                 </Switch>
             </div>
         </Router>

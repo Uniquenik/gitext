@@ -302,7 +302,6 @@ const EditorContainer = () => {
                     }))
                     setIsFetching(false)
                     history.push('./')
-                    console.log(editorStatus.currentValueBranch)
                 })
                 .catch((error) => {
                     if (typeModal === "") setTypeModal(error)

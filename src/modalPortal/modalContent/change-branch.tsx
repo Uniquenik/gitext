@@ -91,7 +91,7 @@ export const ChangeBranch = (props: {
     }
 
     return (
-        <div className={"rounded-sm bg-accent-second w-full text-white p-1"}>
+        <div className={"rounded-md bg-accent-second w-full text-white"}>
             <ModalPortal
                 show={error !== "" || isFetching}
                 closable={false}
@@ -101,15 +101,15 @@ export const ChangeBranch = (props: {
                     {(error!=="" &&
                         <ErrorModal errorMsg={error} onBack={props.onBack}/> ) ||
                     (isFetching &&
-                        <div className={"bg-opacity-80 bg-black"}>
+                        <div className={"bg-opacity-50 bg-black"}>
                             <LoadingOverlay/>
                         </div>)}
             </ModalPortal>
-            <h2 className={"m-0 w-max"}>{(props.isSave && "Save in branch...") || "Restore from branch..."
+            <h2 className={"m-0 w-max px-2 border-b border-black"}>{(props.isSave && "Save in branch...") || "Restore from branch..."
             }</h2>
-            <div className={"text-sm text-center"}>{props.repo.currentValueOwner}/{props.repo.currentValueRepo}</div>
+            <div className={"text-sm text-center px-2 pt-1"}>{props.repo.currentValueOwner}/{props.repo.currentValueRepo}</div>
             {(props.repo.currentValueBranch &&
-            <div className={"text-center"}>Last commit in {props.repo.currentValueBranch}</div>)
+            <div className={"text-center px-2"}>Last commit in {props.repo.currentValueBranch}</div>)
             || <div>Quick save is not available, parent commit doesn't exist</div>
             }
             <div className={"max-h-70vh overflow-y-auto"}>
@@ -134,34 +134,36 @@ export const ChangeBranch = (props: {
                     )}
                 </div>
                 <div>
-                    <div className={"text-sm py-2"}>{currentInfo.lastCommitMsg}</div>
-                    <div className={"text-gray text-xs"}>{currentInfo.lastCommit}</div>
-                    <div className={"flex py-1 flex-wrap gap-x-2"}>
+                    <div className={"text-sm p-2"}>{currentInfo.lastCommitMsg}</div>
+                    <div className={"text-gray px-2 text-xs"}>{currentInfo.lastCommit}</div>
+                    <div className={"flex py-1 px-2 flex-wrap gap-x-2"}>
                         <img src={currentInfo.lastCommitAuthorImg} alt={"avatar"} width={"20"}/>
                         <div className={"text-sm"}>{currentInfo.lastCommitAuthor}</div>
                         <div className={"flex-grow"}/>
                         <div className={"text-sm"}>{currentInfo.date}</div>
                     </div>
                     {(props.isSave &&
-                    <div className={"py-1"}>
-                        <input type={"text"}
-                               name={"path"}
-                               className={"w-full rounded-sm border border-gray-middle p-1 bg-dark"}
-                               onChange={onChangeInput}
-                               value={inputs.path}
-                               placeholder={"Path"}
-                        />
-                        <input type={"text"}
-                               name={"msg"}
-                               className={"w-full rounded-sm border border-gray-middle p-1 bg-dark"}
-                               onChange={onChangeInput}
-                               value={inputs.msg}
-                               placeholder={"Message commit"}
-                        />
-                        <button className={"w-full mt-2 px-4 py-2 rounded-sm text-sm font-medium border-0 transition text-white bg-black-second hover:bg-gray"}
+                    <div className={""}>
+                        <div className={"px-2"}>
+                            <input type={"text"}
+                                   name={"path"}
+                                   className={"w-full rounded-sm border border-gray-middle p-1 my-1 px-2 bg-dark"}
+                                   onChange={onChangeInput}
+                                   value={inputs.path}
+                                   placeholder={"Path"}
+                            />
+                            <input type={"text"}
+                                   name={"msg"}
+                                   className={"w-full rounded-sm border border-gray-middle px-2 my-1 p-1 bg-dark"}
+                                   onChange={onChangeInput}
+                                   value={inputs.msg}
+                                   placeholder={"Message commit"}
+                            />
+                        </div>
+                        <button className={"w-full mt-1 px-4 py-3 border-0 transition text-white bg-black-second hover:bg-gray"}
                                 onClick={onSaveContent} >Commit</button>
                     </div>) ||
-                    <button className={"w-full mt-2 px-4 py-2 rounded-sm text-sm font-medium border-0 transition text-white bg-black-second hover:bg-gray"}
+                    <button className={"w-full mt-1 px-4 py-3 border-0 transition text-white bg-black-second hover:bg-gray"}
                             onClick={onGetContent} >Restore</button>
                     }
                 </div>
