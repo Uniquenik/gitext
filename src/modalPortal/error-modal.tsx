@@ -7,7 +7,7 @@ export const ErrorModal = (props: {
     onBack:(event:any)=>void
 }) => {
     return (
-        <div>
+        <div className={"bg-accent rounded-t-lg"}>
         <img alt={"error"}
              className={"mx-auto py-2"}
              width={"50"}

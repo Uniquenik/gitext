@@ -138,8 +138,6 @@ const EditorContainer = () => {
                     if (tree.tree[i].path === path && tree.tree[i].sha !== undefined)
                         fileSha = tree.tree[i].sha!
                 }
-                console.log(tree)
-                console.log(path)
                 return getBlobFromFileSha(owner, repo, fileSha)
             })
             .then((fileContent) => {
@@ -181,7 +179,6 @@ const EditorContainer = () => {
         if (currentTreeName === "") currentTreeName = treeName
         let pathNew = path.replace("$", "/")
         let lastCommitSha
-        console.log(owner, repo, currentTreeName)
         await getSingleTree(owner, repo, currentTreeName)
             .then(response => {
                 return getSingleCommit(owner, repo, response.sha)

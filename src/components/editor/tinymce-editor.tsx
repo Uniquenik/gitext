@@ -29,14 +29,14 @@ export const TinymceEditor = (props: {
                     menubar: "gitext file edit insert view format table help branches custom",
                     menu: {
                         gitext: {title: 'Gitext', items: 'changeRepo changeFile | compareBranches | logout'},
-                        file: {title: 'File', items: 'print | quickSave saveIn | quickRestore getFrom '},
+                        file: {title: 'File', items: 'print | quickSave saveIn | quickRestore getFrom'},
                         edit: {
                             title: 'Edit',
                             items: 'undo redo | cut copy paste | selectall | searchreplace'
                         },
                         view: {
                             title: 'View',
-                            items: 'code | visualaid visualchars visualblocks'
+                            items: 'code | visualaid visualchars visualblocks | wordcount'
                         },
                         insert: {
                             title: 'Insert',
@@ -44,7 +44,7 @@ export const TinymceEditor = (props: {
                         },
                         format: {
                             title: 'Format',
-                            items: 'strikethrough superscript subscript codeformat code | formats blockformats fontformats fontsizes align lineheight | forecolor backcolor | removeformat'
+                            items: 'strikethrough superscript subscript codesample code | formats blockformats fontformats fontsizes align lineheight | forecolor backcolor | removeformat'
                         },
                         table: {
                             title: 'Table',
@@ -111,9 +111,11 @@ export const TinymceEditor = (props: {
                     plugins: ['codesample code',
                         'advlist autolink lists link image',
                         'charmap print preview anchor help',
-                        'searchreplace visualblocks',
-                        'insertdatetime media table paste wordcoun'
+                        'searchreplace visualblocks visualchars',
+                        'insertdatetime media table paste wordcount quickbars'
                     ],
+                    quickbars_insert_toolbar: false,
+                    quickbars_selection_toolbar: 'bold italic | formatselect | quicklink',
                     codesample_languages: [
                         {text: 'HTML/XML', value: 'markup'},
                         {text: 'JavaScript', value: 'javascript'},

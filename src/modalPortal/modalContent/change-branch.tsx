@@ -101,7 +101,7 @@ export const ChangeBranch = (props: {
                     {(error!=="" &&
                         <ErrorModal errorMsg={error} onBack={props.onBack}/> ) ||
                     (isFetching &&
-                        <div className={"bg-opacity-50 bg-black"}>
+                        <div className={"bg-opacity-50 w-screen h-screen z-40 bg-black"}>
                             <LoadingOverlay/>
                         </div>)}
             </ModalPortal>

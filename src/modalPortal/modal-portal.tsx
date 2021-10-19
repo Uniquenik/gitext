@@ -35,7 +35,7 @@ export const ModalPortal = ({ show, closable, children, selector, onClose }) => 
     const styleContent = {
         meta: "modal-content ",
         layout: "relative z-30 w-full h-full rounded-md ",
-        color: "bg-dark",
+        color: "",
         get() {
             return this.meta + this.layout + this.color;
         }

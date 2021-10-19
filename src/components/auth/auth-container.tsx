@@ -3,17 +3,20 @@ import {ChangeEvent, useState} from "react";
 import {Octokit} from "@octokit/core";
 import {useAuth} from "../../hooks/auth-hook";
 import {useHistory} from 'react-router-dom'
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {setUsername} from "../../redux/main-state/main-action-creators";
 import {ModalPortal} from "../../modalPortal/modal-portal";
 import {ErrorModal} from "../../modalPortal/error-modal";
 import {badCredentials} from "../../types/errors-const";
 import {LoadingOverlay} from "../../loading/loading-overlay";
+import {RootReducer} from "../../redux";
 
 
 export const AuthContainer = () => {
     let history = useHistory()
-    const dispatch = useDispatch();
+    const dispatch = useDispatch()
+    const {deleteOcto} = useAuth()
+    const mainStatus: any = useSelector<RootReducer>(state => state.main);
 
     const [isFetching, setIsFetching] = useState(false)
     const [error, setError] = useState("")
@@ -49,6 +52,10 @@ export const AuthContainer = () => {
         setError("")
     }
 
+    const onLogout = () => {
+        deleteOcto()
+    }
+
     return(
         <>
             <ModalPortal
@@ -67,6 +74,8 @@ export const AuthContainer = () => {
                 <Auth token={value}
                       onChangeTokenInput={onChangeTokenInput}
                       checkToken={checkToken}
+                      onLogOut={onLogout}
+                      isAuth={mainStatus.isAuth}
                 />
         </>
     )
