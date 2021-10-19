@@ -181,24 +181,27 @@ export const BranchesContainer = () => {
             let checkTrees: boolean[] = [];
             for (let k = 0; k < getBranches.length; ++k) checkTrees.push(false);
             checkTrees[0] = true
-            if (branchCommits) branchCommits.forEach(function (item) {
-                getTreeFromSha(item.sha, owner, repo)
-                    .then((resp) => {
-                        if (resp.tree.findIndex((i) => i.path === path.replaceAll("$", "/")) !== -1) {
-                            commitsInfo.push({
-                                checkTrees: checkTrees,
-                                sha: item.sha,
-                                commitAuthorDate: item.commit.committer!.date!,
-                                commitMessage: item.commit.message,
-                                committerAuthorLogin: item.committer!.login,
-                                committerAuthorAvatarURL: item.committer!.avatar_url
-                            })
-                        }
-                    })
-                    .catch((error)=> {
-                        setTypeError(error)
-                    })
-            })
+            console.log(branchCommits)
+            if (branchCommits)
+                for (let i = 0; i<branchCommits.length; i+=1){
+                    await getTreeFromSha(branchCommits[i].sha, owner, repo)
+                        .then((resp) => {
+                            console.log(resp)
+                            if (resp.tree.findIndex((i) => i.path === path.replaceAll("$", "/")) !== -1) {
+                                commitsInfo.push({
+                                    checkTrees: checkTrees,
+                                    sha: branchCommits[i].sha,
+                                    commitAuthorDate: branchCommits[i].commit.committer!.date!,
+                                    commitMessage: branchCommits[i].commit.message,
+                                    committerAuthorLogin: branchCommits[i].committer!.login,
+                                    committerAuthorAvatarURL: branchCommits[i].committer!.avatar_url
+                                })
+                            }
+                        })
+                        .catch((error)=> {
+                            setTypeError(error)
+                        })
+                }
             console.log("Get data...")
             for (let i = 1; i < getBranches.length; i++) {
                 if (getBranches[i].name === 'main' || getBranches[i].name === 'master') {

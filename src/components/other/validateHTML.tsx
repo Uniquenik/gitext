@@ -1,4 +1,4 @@
-import parse, {domToReact} from "html-react-parser";
+import parse, {attributesToProps, domToReact} from "html-react-parser";
 import {Element} from "domhandler/lib/node";
 import React from "react";
 
@@ -17,10 +17,11 @@ const options = {
         }
         if (domNode instanceof Element && domNode.tagName === "body") {
             console.log("Remove body tag")
+            let props = attributesToProps(domNode.attribs);
             return (
-                <>
+                <div {...props}>
                     {domToReact(domNode.children, options)}
-                </>
+                </div>
             );
         }
         if (domNode instanceof Element && domNode.tagName === "head") {
