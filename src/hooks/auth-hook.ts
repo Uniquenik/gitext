@@ -1,6 +1,5 @@
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import {Octokit} from "@octokit/core";
-import {auth} from "@octokit/auth-app/dist-types/auth";
 import {useDispatch, useSelector} from "react-redux";
 import {RootReducer} from "../redux";
 import {deleteAuthToken, setAuthToken} from "../redux/main-state/main-action-creators";
@@ -13,7 +12,7 @@ export const useAuth = () => {
 
     const isOcto = () => {
         console.log(octo)
-        return octo && true || false
+        return (octo && true) || false
     }
 
     const setToken = (token:string) => {

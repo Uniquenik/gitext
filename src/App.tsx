@@ -1,6 +1,5 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import './App.css';
-
 import {BranchesContainer} from "./components/commitAndBranches/branches-container";
 import EditorContainer from "./components/editor/editor-container"
 import {

@@ -13,11 +13,11 @@ export const Header = () => {
                 </div>
                 <div className={"flex-grow"}/>
                 <div className={"text-white"}>
-                    {mainStatus.isAuth &&
+                    {(mainStatus.isAuth &&
                     <Link to={`/userrepos`} className={"no-underline"}>
                         <div>{mainStatus.username}</div>
                     </Link>
-                    ||
+                    )||
                     <Link to={`/auth`} className={"no-underline"}>
                         <div>Log in</div>
                     </Link>

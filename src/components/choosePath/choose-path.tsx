@@ -16,6 +16,8 @@ export const ChoosePath = (props:{
     indexBranch:number,
     setIndexBranch: (num:number) => void,
     onReturnToList: (event:any) => void,
+    onChangeRadio: (event:any) => void,
+    isEditGlobal: boolean
 }) => {
 
     const setIndex = (name:string) => {
@@ -25,9 +27,27 @@ export const ChoosePath = (props:{
     return (
         <div className={"bg-accent text-white p-2 px-3 w-full h-full"}>
             <div className={""}>
+                <div className={"flex flex-wrap"}>
                 <button onClick={props.onReturnToList}
-                        className={"mr-2 px-4 py-2 rounded-sm text-sm font-medium border-0 transition text-white bg-gray-dark hover:bg-gray"}
+                        className={"mr-1 px-4 py-2 my-1 rounded-sm text-sm font-medium border-0 transition text-white bg-gray-dark hover:bg-gray"}
                         type={'button'}>Back</button>
+                <div className={"flex-grow"}/>
+                    {props.isEditGlobal &&
+                    <div className="flex border border-gray rounded-sm overflow-hidden select-none" onChange={props.onChangeRadio}>
+                        <div className="title py-3 pt-4 px-3 bg-accent-second text-white text-sm font-semibold mr-1">Open for...
+                        </div>
+                        <label className="flex radio p-1 cursor-pointer">
+                            <input defaultChecked className="my-auto" value="edit" type="radio" name="sfg"/>
+                            <div className="title px-2 py-2 pt-3">Edit</div>
+                        </label>
+
+                        <label className="flex radio p-1 cursor-pointer">
+                            <input className="my-auto" value={"compare"} type="radio" name="sfg"/>
+                            <div className="title px-2 py-2 pt-3">Compare</div>
+                        </label>
+                    </div>
+                    }
+                </div>
                 <h3 className={"m-0 text-gray"}>Choose file from repo:</h3>
                 <div className={"flex flex-wrap"}>
                     <h3 className={"m-0"}>{props.owner}/ </h3>
@@ -38,7 +58,7 @@ export const ChoosePath = (props:{
                 /{props.currDir}
             </div>
             <div className={"pt-1 text-gray"}>Branches:</div>
-            <div className={"flex pb-2 text-gray overflow-x-auto"}>
+            <div className={"flex pb-2 text-gray overflow-x-auto mx-0.5"}>
                 {props.branchesList.map((item, index) =>
                     <button key={index} onClick={()=> setIndex(item.name)} className={"flex-grow"}>
                         <div className={`flex-grow hover:bg-accent-second

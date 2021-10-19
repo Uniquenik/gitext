@@ -1,8 +1,5 @@
 import {Endpoints} from "@octokit/types";
 import {
-    getBlob403,
-    getBlob404,
-    getBlob422,
     getUserRep304,
     getUserRep401,
     getUserRep403,

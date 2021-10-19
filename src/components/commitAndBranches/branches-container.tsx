@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from "react"
 import {useDispatch, useSelector} from "react-redux";
-import parse from 'html-react-parser';
 import {BranchesContainerDraws} from "./branches-container-draws";
 import {CSSTransition} from 'react-transition-group'
 import styles from './loading-styles.module.css'
@@ -34,6 +33,7 @@ import {
 import {branchesCompareCommitInfo, defaultBranchesCompareCommitInfo} from "../../types/data-types";
 import {b64DecodeUnicode} from "../other/decode";
 import {compareCommitsByDate} from "../../types/comparators";
+import parser from "../other/validateHTML";
 
 
 export const BranchesContainer = () => {
@@ -44,7 +44,7 @@ export const BranchesContainer = () => {
 
     const {
         getAllBranches, getCommitSha,
-        getTreeFromSha, getTreesCommits, getAllPullRequests
+        getTreeFromSha, getTreesCommits
     } = useBranches();
 
     const {getBlobFromFileSha, getRep} = useCommits();
@@ -166,7 +166,6 @@ export const BranchesContainer = () => {
         let commitsInfo = new Array<commitInfo>()
         let mainBranch = 0
         if (getBranches) {
-            console.log(getBranches)
             let branchesInfo = new Array<branchSimpleInfo>()
             //create first branch
             branchesInfo.push({
@@ -179,7 +178,6 @@ export const BranchesContainer = () => {
                     setTypeError(error)
                     throw new Error(error)
                 })
-            console.log(branchCommits)
             let checkTrees: boolean[] = [];
             for (let k = 0; k < getBranches.length; ++k) checkTrees.push(false);
             checkTrees[0] = true
@@ -201,11 +199,10 @@ export const BranchesContainer = () => {
                         setTypeError(error)
                     })
             })
-            console.log(commitsInfo)
+            console.log("Get data...")
             for (let i = 1; i < getBranches.length; i++) {
                 if (getBranches[i].name === 'main' || getBranches[i].name === 'master') {
                     //if main - set main branch
-                    console.log(getBranches[i].name)
                     mainBranch = i
                 }
                 //create array with name and color every branch
@@ -219,8 +216,7 @@ export const BranchesContainer = () => {
                         setTypeError(error);
                         throw new Error(error);
                     })
-                console.log("Get data...", i,"/",getBranches.length)
-                console.log(getBranches[i].name, branchCommits)
+                console.log(i+1,"/",getBranches.length)
                 if (branchCommits) {
                     //new list commits checks
                     for (let j = 0; j < branchCommits.length; j++) {
@@ -260,28 +256,27 @@ export const BranchesContainer = () => {
                 }
             }
             commitsInfo.sort(compareCommitsByDate)
-            console.log("Final", commitsInfo)
-            console.log(branchesInfo)
-            setListBranches(branchesInfo.slice(0, per_page))
-            setListCommits(commitsInfo.slice(0, per_page))
+            console.log("Final", commitsInfo.length, "commits...")
+            setListBranches(branchesInfo.slice(0,70))
+            setListCommits(commitsInfo.slice(0,70))
             setMainBranch(mainBranch)
             //get pull requests(not work)
-            let result = await getAllPullRequests(owner, repo)
-                .catch((error) => {
-                    setTypeError(error);
-                    throw new Error(error);
-                })
-            let newListMerge: mergeInfo[] = []
-            result.forEach(function (item) {
-                if (item.state === 'closed') {
-                    newListMerge.push({
-                        from: item.head.sha,
-                        to: item.merge_commit_sha!
-                    })
-                }
-            })
-            if (!isMounted)
-                setListMerge(newListMerge)
+            // let result = await getAllPullRequests(owner, repo)
+            //     .catch((error) => {
+            //         setTypeError(error);
+            //         throw new Error(error);
+            //     })
+            // let newListMerge: mergeInfo[] = []
+            // result.forEach(function (item) {
+            //     if (item.state === 'closed') {
+            //         newListMerge.push({
+            //             from: item.head.sha,
+            //             to: item.merge_commit_sha!
+            //         })
+            //     }
+            // })
+            // if (!isMounted)
+            //     setListMerge(newListMerge)
             setCommits(true)
             setIsMounted(true)
         }
@@ -324,16 +319,6 @@ export const BranchesContainer = () => {
     const onBackError = () => {
         history.push('/')
     }
-
-    const parser = (input: string) =>
-        parse(input /*, {
-            replace: domNode => {
-                console.log(domNode)
-                if (domNode instanceof Element && domNode.tagName === 'html') {
-                    return domNode.lastChild;
-                }
-            }
-        }*/ )
 
     return (
         <>
@@ -386,7 +371,7 @@ export const BranchesContainer = () => {
                         {branchesStatus.isOpenCurrentValue &&
                         <div
                             className={"font-sans bg-white h-1/2 sm:h-full w-full sm:w-1/2 overflow-y-auto border-2 border-accent"}>
-                            {parse(editorStatus.currentValue, { trim: true }) }
+                            {parser(editorStatus.currentValue) }
                             <div className={"h-72px"}/>
                         </div>
                         }

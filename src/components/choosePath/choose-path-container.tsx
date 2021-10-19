@@ -22,13 +22,16 @@ export const ChoosePathContainer = () => {
     const [currentTree, setCurrentTree] = useState<filePath[]>([])
 
     //open on editor or commits compare
+    const [isEditGlobal, setIsEditGlobal] = useState(true)
     const [isEdit, setIsEdit] = useState(true)
+
+    const onChangeRadio = (e) => setIsEdit(e.target.value !== "compare")
 
     const history = useHistory()
 
     useEffect(() => {
-        if (option === 'branches') setIsEdit(false)
-        else setIsEdit(true)
+        if (option === 'branches') setIsEditGlobal(false)
+        else setIsEditGlobal(true)
         getStartInfo()
             .catch((error) => {
                 console.log(error)
@@ -52,13 +55,11 @@ export const ChoosePathContainer = () => {
                 //do not work from function here
                 let localTree: filePath[] = []
                 //get files path for all branches
-                console.log(response)
                 response[indexBranch].resp.forEach((item) => {
                     if (item.path.indexOf("/") === -1) localTree.push(item)
                 })
                 localTree.sort(compareLocalTreeByType)
                 setBranches(response)
-                console.log(localTree)
                 setCurrentTree(localTree)
                 setCurrentDir("")
                 setIsFetching(false)
@@ -76,7 +77,9 @@ export const ChoosePathContainer = () => {
                 setTypeModal(error)
                 throw new Error(error)
             })
+        console.log("Get last commits from branches...")
         for (let i = 0; i<allBranches.length; i+=1) {
+            console.log(i+1, "/", allBranches.length)
             let lastCommit = await getCommitSha(allBranches[i].commit.sha, owner, repo)
             let trees = await getTreeFromSha(lastCommit.tree.sha, owner, repo)
             let paths = trees.tree.map(arr => ({path: arr.path!, type: arr.type!}))
@@ -109,7 +112,8 @@ export const ChoosePathContainer = () => {
                         type: item.type
                     })
             })
-        } else {
+        }
+        else {
             localTree = getFilePath(indexBranch)
         }
         localTree.sort(compareLocalTreeByType)
@@ -119,8 +123,9 @@ export const ChoosePathContainer = () => {
     const setFile = (str: string) => {
         let str1 = str.replace("/", "$")
         let currDir = currentDir.replaceAll("/", "$")
-        if (isEdit) history.push(`./${currDir + str1}/editor/${branches[indexBranch].lastCommitSha}`)
-        else history.push(`../${currDir + str1}/branches/${branches[indexBranch].lastCommitSha}`)
+        if (!isEditGlobal) history.push(`../${currDir + str1}/branches/${branches[indexBranch].lastCommitSha}`)
+        else if (!isEdit) history.push(`./${currDir + str1}/branches/${branches[indexBranch].lastCommitSha}`)
+        else history.push(`./${currDir + str1}/editor/${branches[indexBranch].lastCommitSha}`)
     }
 
     const backDir = () => {
@@ -171,7 +176,9 @@ export const ChoosePathContainer = () => {
                         backDir={backDir}
                         owner={owner}
                         repo={repo}
+                        onChangeRadio={onChangeRadio}
                         onReturnToList={onReturnToList}
+                        isEditGlobal={isEditGlobal}
             />
         </>
     )

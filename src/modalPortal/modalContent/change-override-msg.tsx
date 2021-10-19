@@ -1,5 +1,5 @@
 import {fileInfo} from "../../redux/editor-state/data-types";
-import parse from "html-react-parser";
+import parser from "../../components/other/validateHTML";
 
 const headerChangeRepo = "Change file in editor?"
 const headerOverride = "Override current content?"
@@ -32,13 +32,12 @@ export const ChangeOverrideMsg = (
                     <h3 className={"m-0"}>(Different file)</h3>
                     }
                     {!props.to.currentValueParentCommit &&
-                    <h3 className={"m-0"}>(no content)</h3>}
+                    <h3 className={"m-0"}>(No content from new file)</h3>}
                 </div>
                 {!props.saveGit && <h3 className={"m-0 text-error text-center"}>(Current content not save in Git!)</h3>}
-                {props.to.currentValueParentCommit &&
                 <div className={"font-sans h-40vh bg-white w-full overflow-auto"}>
-                    {props.currentContent && parse(props.currentContent)}
-                </div>}
+                    {props.currentContent && parser(props.currentContent)}
+                </div>
                 <div className={"text-base text-white"}>
                     From: {props.from.currentValueOwner} / {props.from.currentValueRepo}
                     <div>:{props.from.currentValuePath}

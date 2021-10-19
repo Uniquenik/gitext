@@ -107,13 +107,12 @@ const EditorContainer = () => {
                 setTypeModal(error)
                 throw new Error(error)
             })
-        console.log(repInfo)
         if (!repInfo.permissions || !repInfo.permissions.pull || !repInfo.permissions.push) {
             setTypeModal(getRepPermission)
             console.log(getRepPermission)
             throw new Error(getRepPermission)
         }
-        if (commitSha !== "") {
+        if (commitSha) {
             await getCommitSha(commitSha, owner, repo)
                 .catch((error)=> {
                     setTypeModal(error)
@@ -270,7 +269,7 @@ const EditorContainer = () => {
     const onReturn = () => {
         setTypeModal("")
         history.push(`/${editorStatus.currentValueOwner}/${editorStatus.currentValueRepo}/`+
-            `${editorStatus.currentValuePathreplaceAll("/", "$")}/editor/`)
+            `${editorStatus.currentValuePath.replaceAll("/", "$")}/editor/`)
     }
 
     const onOverride = () => {

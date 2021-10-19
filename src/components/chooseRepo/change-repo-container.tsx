@@ -28,7 +28,8 @@ export const ChangeRepoContainer = () => {
     }
 
     const onViewBranches = () => {
-        if (ownerRepo.owner && ownerRepo.repo) history.push(`/${ownerRepo.owner}/${ownerRepo.repo}/branches/`)
+        if (ownerRepo.owner && ownerRepo.repo)
+        history.push(`/${ownerRepo.owner}/${ownerRepo.repo}/branches/`)
     }
 
     useEffect(() => {
@@ -48,7 +49,6 @@ export const ChangeRepoContainer = () => {
         let repoArr: changeRepoInfo[] = []
         await getUserRepo()
             .then((response) => {
-                console.log(response)
                 response.forEach((item) => {
                         repoArr.push({
                             created_at: item.created_at!,

@@ -1,6 +1,5 @@
 import { combineReducers } from "redux";
-import { createStore, applyMiddleware } from "redux";
-import { createLogger } from "redux-logger";
+import { createStore } from "redux";
 import {branchesReducer} from "./branches-state";
 import {branchesState} from "./branches-state/data-types";
 import {editorState} from "./editor-state/data-types";
@@ -8,18 +7,15 @@ import {editorReducer} from "./editor-state/editor-reducer";
 
 import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
-import {composeWithDevTools} from "redux-devtools-extension";
 import {mainState} from "./main-state/data-types";
 import {mainReducer} from "./main-state/main-reducer";
 import {encryptTransform} from "redux-persist-transform-encrypt";
-
-const loggerMiddleware = createLogger();
 
 function makeKey(length) {
     let result = '';
     let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let charactersLength = characters.length;
-    for ( var i = 0; i < length; i++ ) {
+    for (let i = 0; i < length; i++ ) {
         result += characters.charAt(Math.floor(Math.random() *
             charactersLength));
     }
@@ -61,17 +57,16 @@ const rootReducer = combineReducers({
 
 const persistedReducer = persistReducer(persistConfig, rootReducer)
 
-export const store = createStore(persistedReducer,
-    composeWithDevTools(
-        applyMiddleware(loggerMiddleware))
-);
+export const store = createStore(persistedReducer);
 
-export default () => {
+const st = () => {
     let store = createStore(persistedReducer)
     //@ts-ignore
     let persistor = persistStore(store)
     return { store, persistor }
 }
+
+export default st;
 
 //@ts-ignore
 export const persistor = persistStore(store);

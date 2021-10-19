@@ -6,7 +6,6 @@ export const ErrorModal = (props: {
     errorMsg:string,
     onBack:(event:any)=>void
 }) => {
-    console.log(props.errorMsg)
     return (
         <div>
         <img alt={"error"}

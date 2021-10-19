@@ -25,9 +25,10 @@ export const TinymceEditor = (props: {
                 onEditorChange={(newValue) => props.onEditorChange(newValue)}
                 init={{
                     height: '100%',
+                    invalid_elements: 'form, input, textarea, button, select, script',
                     menubar: "gitext file edit insert view format table help branches custom",
                     menu: {
-                        gitext: {title: 'Gitext', items: 'changeRepo | compareBranches | logout'},
+                        gitext: {title: 'Gitext', items: 'changeRepo changeFile | compareBranches | logout'},
                         file: {title: 'File', items: 'print | quickSave saveIn | quickRestore getFrom '},
                         edit: {
                             title: 'Edit',
@@ -76,6 +77,13 @@ export const TinymceEditor = (props: {
                             text: 'Change repo...',
                             onAction: function () {
                                 props.history(`/userrepos/`)
+                            }
+                        });
+
+                        editor.ui.registry.addMenuItem('changeFile', {
+                            text: 'Change file in repo...',
+                            onAction: function () {
+                                props.history(`./../../`)
                             }
                         });
 
