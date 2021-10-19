@@ -2,6 +2,7 @@ import step1 from "./images/step1.png"
 import step2 from "./images/step2.png"
 import step3 from "./images/step3.png"
 import step4 from "./images/step4.png"
+import step5 from "./images/step5.png"
 import gh from "./images/github.svg"
 
 
@@ -10,14 +11,16 @@ export const Auth = (props: {
     onChangeTokenInput: (event:any) => void,
     checkToken: (event:any) => void
 }) => {
-    let texts = [{index:1, text: "In the upper-right corner of any page in Github, click your profile photo, then click Settings.",
+    let texts = [{index:1, text: "In the upper-right corner of any page in Github, click your profile photo and then click Settings",
         photo: step1, width:"25%"},
-        {index:2,text: "In the left sidebar, click Developer settings and in new sidebar click Personal Access token",
-            photo: step2, width:"45%"},
-        {index:3,text: "Click Generate new token and give token some name",
-            photo: step3, width:"95%"},
-        {index:4,text: "Select scope repo (that's enough for work) and click Generate token below",
-            photo: step4, width:"95%"}
+        {index:2,text: "In the left sidebar scroll down and click Developer settings",
+            photo: step2, width:"35%"},
+        {index:3,text: "In new sidebar click Personal Access token",
+            photo: step3, width:"35%"},
+        {index:4,text: "Click Generate new token and give token some name",
+            photo: step4, width:"90%"},
+        {index:5,text: "Select scope repo (that's enough for work) and click Generate token below",
+            photo: step5, width:"90%"}
     ]
     let warning1 = "Your safety is in your hands. We save token only on your browser in encrypted form, because this is serverless application."
     let warning2 = "You can always delete or regenerate your token, if there is a risk of compromising."
