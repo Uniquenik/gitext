@@ -181,12 +181,10 @@ export const BranchesContainer = () => {
             let checkTrees: boolean[] = [];
             for (let k = 0; k < getBranches.length; ++k) checkTrees.push(false);
             checkTrees[0] = true
-            console.log(branchCommits)
             if (branchCommits)
                 for (let i = 0; i<branchCommits.length; i+=1){
                     await getTreeFromSha(branchCommits[i].sha, owner, repo)
                         .then((resp) => {
-                            console.log(resp)
                             if (resp.tree.findIndex((i) => i.path === path.replaceAll("$", "/")) !== -1) {
                                 commitsInfo.push({
                                     checkTrees: checkTrees,
@@ -385,7 +383,7 @@ export const BranchesContainer = () => {
                         </div>
                     </div>
                 </div>
-                <CSSTransition in={branchesStatus.isOpenListCommits && branchesStatus.getCommits}
+                <CSSTransition in={branchesStatus.isOpenListCommits}
                                nodeRef={nodeRef}
                                classNames={{
                                    enter: styles.enter,
