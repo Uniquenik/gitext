@@ -4,7 +4,6 @@ import {BranchesContainer} from "./components/commitAndBranches/branches-contain
 import EditorContainer from "./components/editor/editor-container"
 import {
     BrowserRouter as Router,
-    Switch,
     Route,
     Redirect
 } from "react-router-dom";
@@ -42,17 +41,15 @@ const App = () => {
     return (
         <Router>
             <div>
-                <Switch>
-                    <PrivateRoute path="/:owner/:repo/:path/branches/:commitSha" children={<BranchesContainer/>}/>
-                    <PrivateRoute path="/:owner/:repo/:path/branches/" children={<BranchesContainer/>}/>
-                    <PrivateRoute path="/:owner/:repo/:path/editor/:commitSha" children={<EditorContainer/>}/>
-                    <PrivateRoute path="/:owner/:repo/:path/editor/" children={<EditorContainer/>}/>
-                    <PrivateRoute path= "/:owner/:repo/:option/" children={<ChoosePathContainer/>}/>
-                    <PrivateRoute path= "/:owner/:repo/" children={<ChoosePathContainer/>}/>
-                    <PrivateRoute path= "/userrepos" children={<ChangeRepoContainer/>}/>
-                    <Route path="/auth" children={<AuthContainer/>}/>
-                    <Route path="/" children={<MainPage/>}/>
-                </Switch>
+                <PrivateRoute exact path="/:owner/:repo/:path/branches/:commitSha" children={<BranchesContainer/>}/>
+                <PrivateRoute exact path="/:owner/:repo/:path/branches/" children={<BranchesContainer/>}/>
+                <PrivateRoute exact path="/:owner/:repo/:path/editor/:commitSha" children={<EditorContainer/>}/>
+                <PrivateRoute exact path="/:owner/:repo/:path/editor/" children={<EditorContainer/>}/>
+                <PrivateRoute exact path= "/:owner/:repo/:option/" children={<ChoosePathContainer/>}/>
+                <PrivateRoute exact path= "/:owner/:repo/" children={<ChoosePathContainer/>}/>
+                <PrivateRoute exact path= "/userrepos" children={<ChangeRepoContainer/>}/>
+                <Route exact path="/auth" children={<AuthContainer/>}/>
+                <Route exact path="/" children={<MainPage/>}/>
             </div>
         </Router>
     )
