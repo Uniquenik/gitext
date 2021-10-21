@@ -91,7 +91,7 @@ export const ChangeBranch = (props: {
     }
 
     return (
-        <div className={"rounded-md bg-accent-second w-full text-white"}>
+        <div className={"max-w-80vw rounded-md bg-accent-second w-full text-white"}>
             <ModalPortal
                 show={error !== "" || isFetching}
                 closable={false}

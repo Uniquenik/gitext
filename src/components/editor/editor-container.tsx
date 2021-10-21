@@ -262,7 +262,7 @@ const EditorContainer = () => {
 
     const onBack = () => {
         setTypeModal("")
-        history.push('./')
+        history.goBack()
     }
 
     const onReturn = () => {

@@ -28,6 +28,9 @@ module.exports = {
     maxHeight: {
       "70vh": "70vh",
     },
+    maxWidth: {
+      "80vw": "80vw",
+    },
     height: {
       "20px":"20px",
       "28px":"28px",

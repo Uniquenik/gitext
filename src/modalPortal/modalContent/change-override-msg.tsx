@@ -12,13 +12,13 @@ export const ChangeOverrideMsg = (
         onBack: (event: any) => void,
         onReturn: (event: any) => void,
         onEdit: (event: any) => void,
-        currentContent: string
+        currentContent: string,
     }) => {
 
     return (
         <>
-            <div className={"rounded-sm bg-accent-second w-full"}>
-                <h2 className={"px-2 text-error border-b-2 border-gray m-0 w-max"}>
+            <div className={"rounded-sm bg-accent-second w-full max-w-80vw"}>
+                <h2 className={"px-2 text-error border-b-2 border-gray m-0"}>
                     {(props.isChange && headerChangeRepo) || headerOverride}</h2>
                 <div className={"text-center text-error"}>
                     {(((props.from.currentValueOwner !== props.to.currentValueOwner) ||
@@ -48,10 +48,14 @@ export const ChangeOverrideMsg = (
                     <div>:{props.to.currentValuePath}
                     </div>
                 </div>
-                <div className={"flex"}>
+                <div className={"flex flex-wrap"}>
                     <button
                         className={"m-2 px-4 py-2 rounded-sm text-sm font-medium border-0 transition text-white bg-gray-dark hover:bg-gray"}
-                        onClick={(props.isChange && props.onReturn) || props.onBack}>No, back
+                        onClick={props.onBack}>No, back
+                    </button>
+                    <button
+                        className={"m-2 px-4 py-2 rounded-sm text-sm font-medium border-0 transition text-white bg-gray-dark hover:bg-gray"}
+                        onClick={props.onReturn}>Edit current content
                     </button>
                     <div className={"flex-grow"}/>
                     <button

@@ -34,7 +34,7 @@ export const Branches = (props:{
             </div>
             {props.isGetCommits && props.isMounted &&
             <div className={"flex"}>
-                <div className={"w-80px sm:w-150px pt-8"}>
+                <div className={"w-150px pt-8"}>
                     <Gitgraph options={props.options}>
                         {(gitgraph) => {
                             props.gitGraphCreate(gitgraph)
