@@ -49,6 +49,7 @@ export const ChangeRepoContainer = () => {
         let repoArr: changeRepoInfo[] = []
         await getUserRepo()
             .then((response) => {
+                console.log("Repos get...")
                 response.forEach((item) => {
                         repoArr.push({
                             created_at: item.created_at!,

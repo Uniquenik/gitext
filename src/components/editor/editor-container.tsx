@@ -78,7 +78,7 @@ const EditorContainer = () => {
                                     currentValueParentCommit: commitSha,
                                     currentValueBranch: branch!
                                 }))
-                                setIsFetching(false)
+                                //setIsFetching(false)
                             })
                             .catch((error) => {
                                 console.log(error)
@@ -90,7 +90,7 @@ const EditorContainer = () => {
                             pathNew.toUpperCase() !== editorStatus.currentValuePath.toUpperCase())
                             setTypeModal(CHANGE_REPO_MSG)
                         else setTypeModal(OVERRIDE_VALUE)
-                        setIsFetching(false)
+                        //setIsFetching(false)
                     }
                 })
                 .catch((error) => {
@@ -414,6 +414,7 @@ const EditorContainer = () => {
                                        quickSave={saveOnGit}
                                        quickRestore={reviveGit}
                                        history={(name)=>history.push(name)}
+                                       setIsFetching={setIsFetching}
                         />
                     </div>
                     <div className={"flex flex-wrap flex-row bg-accent text-white text-sm px-2.5"}>

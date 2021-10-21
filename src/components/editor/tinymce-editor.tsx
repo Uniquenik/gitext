@@ -10,7 +10,8 @@ export const TinymceEditor = (props: {
     setTypeModal: (name: string) => void,
     quickSave: (event: any) => void,
     quickRestore: (event: any) => void,
-    history: (address: string) => void
+    history: (address: string) => void,
+    setIsFetching:(bool:boolean)=> void,
 }) => {
 
     const {deleteOcto} = useAuth()
@@ -54,6 +55,7 @@ export const TinymceEditor = (props: {
                         custom: {title: 'Custom menu', items: 'nesteditem toggleitem'}
                     },
                     setup: function (editor) {
+                        props.setIsFetching(false)
                         editor.ui.registry.addMenuItem('saveIn', {
                             text: `Save in...`,
                             onAction: function () {

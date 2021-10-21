@@ -17,16 +17,16 @@ export const Auth = (props: {
         photo: step1, width:"25%"},
         {index:2,text: "In the left sidebar scroll down and click Developer settings",
             photo: step2, width:"35%"},
-        {index:3,text: "In new sidebar click Personal Access token",
+        {index:3,text: "In the new sidebar click Personal Access token",
             photo: step3, width:"35%"},
         {index:4,text: "Click Generate new token and give token some name",
             photo: step4, width:"90%"},
         {index:5,text: "Select scope repo (that's enough for work) and click Generate token below",
             photo: step5, width:"90%"}
     ]
-    let warning1 = "Your safety is in your hands. We save token only on your browser in encrypted form, because this is serverless application."
+    let warning1 = "Your safety is in your hands. We save token only in the your browser in encrypted form, because this is serverless application."
     let warning2 = "You can always delete or regenerate your token, if there is a risk of compromising."
-    let finish = "Paste token and enjoy! We save token in browser and you don't need sign in again every time."
+    let finish = "Paste token and enjoy! We save token in the browser so you don't need sign in again every time."
 
     const onKeyPress = (event:any) => {
         //@ts-ignore
