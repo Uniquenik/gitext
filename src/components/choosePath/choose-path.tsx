@@ -1,5 +1,5 @@
-
 import {FileInfo} from "./file-info";
+import {Link} from "react-router-dom";
 import up from './image/up.svg'
 import React from "react";
 import {branchChoosePath, filePath} from "./data-types";
@@ -40,7 +40,6 @@ export const ChoosePath = (props:{
                             <input defaultChecked className="my-auto" value="edit" type="radio" name="sfg"/>
                             <div className="title px-2 py-2 pt-3">Edit</div>
                         </label>
-
                         <label className="flex radio p-1 cursor-pointer">
                             <input className="my-auto" value={"compare"} type="radio" name="sfg"/>
                             <div className="title px-2 py-2 pt-3">Compare</div>
@@ -53,6 +52,16 @@ export const ChoosePath = (props:{
                     <h3 className={"m-0"}>{props.owner}/ </h3>
                     <h3 className={"m-0"}>{props.repo}/</h3>
                 </div>
+                {(props.owner.toLowerCase()+'.github.io' === props.repo &&
+                    <div className={"text-sm py-2"}>
+                        <div className={"text-error"}>Yay!</div>
+                        You see the MAGIC repository and you can share content from /index.html in main branch with people around the world in one step! Just use
+                        this <a href={"https://" +props.owner.toLowerCase()+'.github.io'} target="_blank" >link</a>.
+                        <div className={"text-xs text-gray"}>
+                            Not work? Read <a href={"https://pages.github.com"} target="_blank" >documentation</a> on Github.
+                        </div>
+                    </div>
+                    )}
                 <p className={"text-xs text-gray pb-2"}>Commit:
                     {(props.branchesList[props.indexBranch] && props.branchesList[props.indexBranch].lastCommitSha) || ""}</p>
                 /{props.currDir}

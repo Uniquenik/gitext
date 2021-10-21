@@ -53,6 +53,7 @@ export const BranchesContainer = () => {
     const [typeModal, setTypeError] = useState("");
     const [isMounted, setIsMounted] = useState(false)
 
+    const [statusLoading, setStatusLoading] = useState("")
     const [isNotLoadCommits, setLoadCommit] = useState(false)
     const [infoCompareCommit, setInfoCompareCommit] =
         useState<branchesCompareCommitInfo>(defaultBranchesCompareCommitInfo)
@@ -117,7 +118,7 @@ export const BranchesContainer = () => {
                 return getTreeFromSha(treeSha.tree.sha, owner, repo)
             })
             .then((tree) => {
-                console.log(path)
+                //console.log(path)
                 let fileSha = ""
                 for (let i = 0; i < tree.tree.length; i++) {
                     if (tree.tree[i].path === path && tree.tree[i].sha !== undefined)
@@ -200,7 +201,8 @@ export const BranchesContainer = () => {
                             setTypeError(error)
                         })
                 }
-            console.log("Get data...")
+            setStatusLoading("Get data...")
+            //console.log("Get data...")
             for (let i = 1; i < getBranches.length; i++) {
                 if (getBranches[i].name === 'main' || getBranches[i].name === 'master') {
                     //if main - set main branch
@@ -217,7 +219,8 @@ export const BranchesContainer = () => {
                         setTypeError(error);
                         throw new Error(error);
                     })
-                console.log(i+1,"/",getBranches.length)
+                setStatusLoading(i+1+"/"+getBranches.length)
+                //console.log(i+1,"/",getBranches.length)
                 if (branchCommits) {
                     //new list commits checks
                     for (let j = 0; j < branchCommits.length; j++) {
@@ -256,6 +259,7 @@ export const BranchesContainer = () => {
                     }
                 }
             }
+            setStatusLoading("")
             commitsInfo.sort(compareCommitsByDate)
             console.log("Final", commitsInfo.length, "commits...")
             setListBranches(branchesInfo.slice(0,70))
@@ -333,7 +337,7 @@ export const BranchesContainer = () => {
                 {(typeModal !== "" &&
                     <ErrorModal errorMsg={typeModal} onBack={onBackError}/>) ||
                 ((!isSetCommits || !isNotLoadCommits) &&
-                    <LoadingOverlay/>)}
+                    <LoadingOverlay msg={(statusLoading && "Load branches commits... "+statusLoading) || "Load file..."}/>)}
             </ModalPortal>
             <div className={"h-screen relative overflow-hidden bg-accent"}>
                 <div className={`flex flex-col px-1 h-full`}>
@@ -369,21 +373,23 @@ export const BranchesContainer = () => {
                         </div>
                     </div>
                     <div className={"flex flex-wrap h-full"}>
-                        {branchesStatus.isOpenCurrentValue &&
+                        {isSetCommits && branchesStatus.isOpenCurrentValue &&
                         <div
                             className={"font-sans bg-white h-1/2 sm:h-full w-full sm:w-1/2 overflow-y-auto border-2 border-accent"}>
                             {parser(editorStatus.currentValue) }
                             <div className={"h-72px"}/>
                         </div>
                         }
-                        <div
-                            className={`${(!branchesStatus.isOpenCurrentValue && "w-full h-full ") || "w-full sm:w-1/2 h-1/2 sm:h-full "} font-sans overflow-y-auto bg-white border-2 border-accent`}>
-                            {parser(compareContent)}
-                            <div className={"h-72px"}/>
-                        </div>
+                        {isSetCommits && isNotLoadCommits &&
+                            <div
+                                className={`${(!branchesStatus.isOpenCurrentValue && "w-full h-full ") || "w-full sm:w-1/2 h-1/2 sm:h-full "} font-sans overflow-y-auto bg-white border-2 border-accent`}>
+                                {parser(compareContent)}
+                                <div className={"h-72px"}/>
+                            </div>
+                        }
                     </div>
                 </div>
-                <CSSTransition in={branchesStatus.isOpenListCommits}
+                <CSSTransition in={isSetCommits && branchesStatus.isOpenListCommits}
                                nodeRef={nodeRef}
                                classNames={{
                                    enter: styles.enter,

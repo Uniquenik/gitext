@@ -7,7 +7,7 @@ import {
     Route,
     Redirect
 } from "react-router-dom";
-import {ChangeRepoContainer} from "./components/chooseRepo/change-repo-container";
+import {ChangeRepoContainer} from "./components/changeRepo/change-repo-container";
 import {ChoosePathContainer} from "./components/choosePath/choose-path-container";
 import {useSelector} from "react-redux";
 import {RootReducer} from "./redux";

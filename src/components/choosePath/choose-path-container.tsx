@@ -20,6 +20,7 @@ export const ChoosePathContainer = () => {
 
     const [currentDir, setCurrentDir] = useState<string>("")
     const [currentTree, setCurrentTree] = useState<filePath[]>([])
+    const [statusLoading, setStatusLoading] = useState("")
 
     //open on editor or commits compare
     const [isEditGlobal, setIsEditGlobal] = useState(true)
@@ -77,9 +78,10 @@ export const ChoosePathContainer = () => {
                 setTypeModal(error)
                 throw new Error(error)
             })
-        console.log("Get last commits from branches...")
+        //console.log("Get last commits from branches...")
         for (let i = 0; i<allBranches.length; i+=1) {
-            console.log(i+1, "/", allBranches.length)
+            setStatusLoading(i+1+ "/"+ allBranches.length)
+            //console.log(i+1, "/", allBranches.length)
             let lastCommit = await getCommitSha(allBranches[i].commit.sha, owner, repo)
             let trees = await getTreeFromSha(lastCommit.tree.sha, owner, repo)
             let paths = trees.tree.map(arr => ({path: arr.path!, type: arr.type!}))
@@ -91,6 +93,7 @@ export const ChoosePathContainer = () => {
                 resp: paths
             })
         }
+        setStatusLoading("")
         return branchesList
     }
 
@@ -165,7 +168,7 @@ export const ChoosePathContainer = () => {
                 {(typeModal !== "" &&
                     <ErrorModal errorMsg={typeModal} onBack={onReturnToList}/>) ||
                 (isFetching &&
-                    <LoadingOverlay/>)}
+                    <LoadingOverlay msg={statusLoading && "Get branches... "+statusLoading || "Analyze..."}/>)}
             </ModalPortal>
             <ChoosePath branchesList={branches}
                         indexBranch={indexBranch} setIndexBranch={setBranch}

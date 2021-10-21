@@ -404,7 +404,7 @@ const EditorContainer = () => {
                     (typeModal &&
                         <ErrorModal errorMsg={typeModal} onBack={onBackError}/>) ||
                     ((isFetching || isFetchingEditor) &&
-                        <LoadingOverlay/>)
+                        <LoadingOverlay msg={(isFetchingEditor && "Load editors components...") || "Loading data..."}/>)
                     }
                 </ModalPortal>
                 <div className={"h-full flex flex-col"}>

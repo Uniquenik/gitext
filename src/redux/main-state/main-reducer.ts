@@ -27,7 +27,6 @@ export function mainReducer(state:mainState = defaultState, action:Action){
                 authToken: ""
             }
 
-
         default: return state
     }
 }

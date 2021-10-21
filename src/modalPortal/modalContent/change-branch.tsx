@@ -105,13 +105,17 @@ export const ChangeBranch = (props: {
                             <LoadingOverlay/>
                         </div>)}
             </ModalPortal>
-            <h2 className={"m-0 w-max px-2 border-b border-black"}>{(props.isSave && "Save in branch...") || "Restore from branch..."
-            }</h2>
-            <div className={"text-sm text-center px-2 pt-1"}>{props.repo.currentValueOwner}/{props.repo.currentValueRepo}</div>
-            {(props.repo.currentValueBranch &&
-            <div className={"text-center px-2"}>Last commit in {props.repo.currentValueBranch}</div>)
-            || <div>Quick save is not available, parent commit doesn't exist</div>
+            <div className={"w-full border-b border-black"}>
+                <h2 className={"m-0 w-max px-2"}>{(props.isSave && "Save in branch...") || "Restore from branch..."
+                }</h2>
+            </div>
+            <div className={"text-sm text-center px-2 pt-1 text-gray"}>{props.repo.currentValueOwner}/{props.repo.currentValueRepo}</div>
+            {(!props.repo.currentValueBranch &&
+                <div>Quick save is not available, parent commit doesn't exist</div>)
             }
+            <div className={"text-center text-sm px-2"}>
+                Select branch:
+            </div>
             <div className={"max-h-70vh overflow-y-auto"}>
                 <div className={"flex flex-row flex-wrap text-center"}>
      {/*           {
@@ -134,14 +138,14 @@ export const ChangeBranch = (props: {
                     )}
                 </div>
                 <div>
-                    <div className={"text-sm p-2"}>{currentInfo.lastCommitMsg}</div>
-                    <div className={"text-gray px-2 text-xs"}>{currentInfo.lastCommit}</div>
-                    <div className={"flex py-1 px-2 flex-wrap gap-x-2"}>
+                    <div className={"text-sm pt-2 px-2"}>{currentInfo.lastCommitMsg}</div>
+                    <div className={"flex pt-2 px-2 flex-wrap gap-x-2"}>
                         <img src={currentInfo.lastCommitAuthorImg} alt={"avatar"} width={"20"}/>
                         <div className={"text-sm"}>{currentInfo.lastCommitAuthor}</div>
                         <div className={"flex-grow"}/>
                         <div className={"text-sm"}>{currentInfo.date}</div>
                     </div>
+                    <div className={"text-gray px-2 text-xs"}>{currentInfo.lastCommit}</div>
                     {(props.isSave &&
                     <div className={""}>
                         <div className={"px-2"}>
