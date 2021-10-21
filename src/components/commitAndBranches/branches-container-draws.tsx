@@ -31,7 +31,7 @@ export const BranchesContainerDraws = (
             dot: {
                 size: 10
             },
-            spacing: 90,
+            spacing: 89.6,
             message: {
                 display: false
             },

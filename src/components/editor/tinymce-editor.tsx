@@ -28,6 +28,9 @@ export const TinymceEditor = (props: {
                     height: '100%',
                     invalid_elements: 'form, input, textarea, button, select, script',
                     menubar: "gitext file edit insert view format table help branches custom",
+                    mobile: {
+                        menubar: true
+                    },
                     menu: {
                         gitext: {title: 'Gitext', items: 'changeRepo changeFile | compareBranches | logout'},
                         file: {title: 'File', items: 'print | quickSave saveIn | quickRestore getFrom'},
@@ -118,8 +121,10 @@ export const TinymceEditor = (props: {
                         'searchreplace visualblocks visualchars',
                         'insertdatetime media table paste wordcount quickbars'
                     ],
+                    contextmenu: 'copy paste cut | link',
+                    contextmenu_never_use_native: true,
                     quickbars_insert_toolbar: false,
-                    quickbars_selection_toolbar: 'bold italic | formatselect | quicklink',
+                    quickbars_selection_toolbar: 'copy paste cut | bold italic | formatselect | quicklink',
                     codesample_languages: [
                         {text: 'HTML/XML', value: 'markup'},
                         {text: 'JavaScript', value: 'javascript'},
@@ -132,7 +137,9 @@ export const TinymceEditor = (props: {
                         {text: 'C#', value: 'csharp'},
                         {text: 'C++', value: 'cpp'}
                     ],
-                    toolbar: 'undo redo | formatselect fontselect | bold italic underline | alignleft aligncenter alignright | bullist numlist | outdent indent | image | codesample'
+                    toolbar: 'undo redo | formatselect fontselect | bold italic underline strikethrough ' +
+                    'forecolor backcolor | align | bullist numlist | image | table | codesample',
+                    toolbar_mode: 'sliding',
                 }}
             />
         </>

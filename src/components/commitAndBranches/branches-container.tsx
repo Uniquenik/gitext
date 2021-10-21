@@ -86,8 +86,8 @@ export const BranchesContainer = () => {
                 .then((compareCommit) => {
                     if (compareCommit !== "") setCompareContent(compareCommit)
                     else setCompareContent(emptyFileError)
-                    Prism.highlightAll();
                     setLoadCommit(true)
+                    Prism.highlightAll();
                 })
                 .catch(() => {
                     console.log("Global error")

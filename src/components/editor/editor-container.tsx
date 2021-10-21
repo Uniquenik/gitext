@@ -221,7 +221,7 @@ const EditorContainer = () => {
         setIsFetching(true)
         await getRep(owner, repo)
             .then(reps => {
-                console.log(reps)
+                //console.log(reps)
                 //check permissions
                 if (reps.permissions && reps.permissions.pull && reps.permissions.push) {
                     return reps.owner.login
