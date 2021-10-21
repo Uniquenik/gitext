@@ -37,6 +37,7 @@ const EditorContainer = () => {
 
     const [value, setValue] = useState(() => editorStatus.currentValue)
     const [isFetching, setIsFetching] = useState(true)
+    const [isFetchingEditor, setIsFetchingEditor] = useState(true)
     const [typeModal, setTypeModal] = useState("")
 
     const {
@@ -58,12 +59,13 @@ const EditorContainer = () => {
 
     async function onStart() {
         setIsFetching(true)
+        setIsFetchingEditor(true)
         let pathNew = path.replaceAll("$", "/")
         if (!commitSha && editorStatus.currentValueOwner.toUpperCase() === owner.toUpperCase() &&
             editorStatus.currentValuePath.toUpperCase() === pathNew.toUpperCase() &&
             editorStatus.currentValueRepo.toUpperCase() === repo.toUpperCase()
         ) {
-            //setIsFetching(false)
+            setIsFetching(false)
         } else {
             checkCorrectData(owner, repo, commitSha)
                 .then(() => {
@@ -78,7 +80,7 @@ const EditorContainer = () => {
                                     currentValueParentCommit: commitSha,
                                     currentValueBranch: branch!
                                 }))
-                                //setIsFetching(false)
+                                setIsFetching(false)
                             })
                             .catch((error) => {
                                 console.log(error)
@@ -90,7 +92,7 @@ const EditorContainer = () => {
                             pathNew.toUpperCase() !== editorStatus.currentValuePath.toUpperCase())
                             setTypeModal(CHANGE_REPO_MSG)
                         else setTypeModal(OVERRIDE_VALUE)
-                        //setIsFetching(false)
+                        setIsFetching(false)
                     }
                 })
                 .catch((error) => {
@@ -355,7 +357,7 @@ const EditorContainer = () => {
         <>
             <div className={"h-screen"}>
                 <ModalPortal
-                    show={typeModal !== "" || isFetching}
+                    show={typeModal !== "" || isFetching || isFetchingEditor}
                     onClose={() => {if (typeModal === CHANGE_BRANCH_SAVE || typeModal === CHANGE_BRANCH_GET) setTypeModal("")}}
                     selector={'#modal'}
                     closable={((typeModal === CHANGE_BRANCH_SAVE || typeModal === CHANGE_BRANCH_GET) && true) || false}
@@ -401,7 +403,7 @@ const EditorContainer = () => {
                     ) ||
                     (typeModal &&
                         <ErrorModal errorMsg={typeModal} onBack={onBackError}/>) ||
-                    (isFetching &&
+                    ((isFetching || isFetchingEditor) &&
                         <LoadingOverlay/>)
                     }
                 </ModalPortal>
@@ -414,7 +416,7 @@ const EditorContainer = () => {
                                        quickSave={saveOnGit}
                                        quickRestore={reviveGit}
                                        history={(name)=>history.push(name)}
-                                       setIsFetching={setIsFetching}
+                                       setIsFetchingEditor={setIsFetchingEditor}
                         />
                     </div>
                     <div className={"flex flex-wrap flex-row bg-accent text-white text-sm px-2.5"}>
