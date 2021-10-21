@@ -63,7 +63,7 @@ const EditorContainer = () => {
             editorStatus.currentValuePath.toUpperCase() === pathNew.toUpperCase() &&
             editorStatus.currentValueRepo.toUpperCase() === repo.toUpperCase()
         ) {
-            setIsFetching(false)
+            //setIsFetching(false)
         } else {
             checkCorrectData(owner, repo, commitSha)
                 .then(() => {

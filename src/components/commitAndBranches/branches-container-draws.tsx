@@ -45,7 +45,6 @@ export const BranchesContainerDraws = (
     const gitGraphCreate = (gitgraph) => {
         //draw lines, strange algorithm
         setCommitsTree(false)
-        //console.log(props.listCommits)
         //array with different branches for create them in future
         let branches: any[] = []
         let displayTree: string[] = []
