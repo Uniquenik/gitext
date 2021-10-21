@@ -57,8 +57,10 @@ export const TinymceEditor = (props: {
                     invalid_elements: 'form, input, textarea, button, select, script',
                     menubar: "gitext file edit insert view format table help branches custom",
                     mobile: {
-                        menubar: true,
-                        menu: menu
+                        menubar: "gitext file edit insert view format table help branches custom",
+                        menu: menu,
+                        toolbar_mode: 'sliding',
+                        contextmenu_never_use_native: true,
                     },
                     menu: menu,
                     setup: function (editor) {
