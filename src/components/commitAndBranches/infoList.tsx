@@ -25,7 +25,7 @@ export const InfoList = (
                             <img alt={"icon"} className={"h-20px pl-2"} src={props.committerAuthorAvatarURL}/>
                         </div>
                         <div className={"flex flex-wrap text-xs text-gray"}>
-                            <span>
+                            <span className={"hidden sm:block"}>
                             {props.sha}
                             </span>
                             <span className={"flex-grow"}> </span>

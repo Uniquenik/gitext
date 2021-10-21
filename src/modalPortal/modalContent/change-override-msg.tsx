@@ -17,7 +17,7 @@ export const ChangeOverrideMsg = (
 
     return (
         <>
-            <div className={"rounded-sm bg-accent-second w-full max-w-80vw"}>
+            <div className={"rounded-sm bg-accent-second w-full max-w-80vw max-h-70vh"}>
                 <h2 className={"px-2 text-error border-b-2 border-gray m-0"}>
                     {(props.isChange && headerChangeRepo) || headerOverride}</h2>
                 <div className={"text-center text-error"}>
