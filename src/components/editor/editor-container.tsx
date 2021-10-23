@@ -198,6 +198,7 @@ const EditorContainer = () => {
             .then(newCommit => {
                 updateRef(owner, repo, treeName, newCommit.sha)
                 setIsFetching(false)
+                alert("Content successfully saved in Git")
                 dispatch(setIsSaveCurrentValueGit(true))
                 dispatch(setIsSaveCurrentValue(true))
                 dispatch(setCurrentValueInfo({
@@ -404,7 +405,7 @@ const EditorContainer = () => {
                     (typeModal &&
                         <ErrorModal errorMsg={typeModal} onBack={onBackError}/>) ||
                     ((isFetching || isFetchingEditor) &&
-                        <LoadingOverlay msg={(isFetchingEditor && "Load editors components...") || "Loading data..."}/>)
+                        <LoadingOverlay msg={(isFetchingEditor && "Load editors components...") || "Loading..."}/>)
                     }
                 </ModalPortal>
                 <div className={"h-full flex flex-col"}>
