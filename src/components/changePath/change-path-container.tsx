@@ -6,7 +6,7 @@ import {useHistory, useParams} from 'react-router-dom';
 import {LoadingOverlay} from "../../loading/loading-overlay";
 import {branchChoosePath, filePath} from "./data-types";
 import {compareLocalTreeByType} from "../../types/comparators";
-import {useChangePath} from "./gh-change-path";
+import {useChangePath} from "./git-change-path";
 
 
 export const ChangePathContainer = () => {

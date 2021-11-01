@@ -10,6 +10,7 @@ import {ErrorModal} from "../../modalPortal/error-modal";
 import {badCredentials} from "../../types/errors-const";
 import {LoadingOverlay} from "../../loading/loading-overlay";
 import {RootReducer} from "../../redux";
+import {useAuthLogin} from "./git-auth";
 
 
 export const AuthContainer = () => {
@@ -17,6 +18,7 @@ export const AuthContainer = () => {
     const dispatch = useDispatch()
     const {deleteOcto} = useAuth()
     const mainStatus: any = useSelector<RootReducer>(state => state.main);
+    const {checkTokenGH} = useAuthLogin()
 
     const [isFetching, setIsFetching] = useState(false)
     const [error, setError] = useState("")
@@ -28,23 +30,19 @@ export const AuthContainer = () => {
         setValue(value)
     }
 
-    async function checkToken () {
+    const checkToken = () => {
         setIsFetching(true)
-        let octokit = new Octokit({auth: value
-        });
-        console.log(octokit)
-        await octokit.request("/user")
-             .then((resp)=>{
-                 setToken(value)
-                 dispatch(setUsername(resp.data.login))
-                 setIsFetching(false)
-                 history.push('/userrepos')
-             })
-             .catch((error) => {
-                 setIsFetching(false)
-                 setError(badCredentials)
-                 console.log(error)
-             })
+        checkTokenGH(value)
+            .then((resp) => {
+                setToken(value)
+                dispatch(setUsername(resp.data.login))
+                setIsFetching(false)
+                history.push('/userrepos')
+            })
+            .catch(()=> {
+                setIsFetching(false)
+                setError(badCredentials)
+            })
     }
 
     const onBack = () => {

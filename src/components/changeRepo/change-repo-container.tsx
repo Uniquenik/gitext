@@ -10,11 +10,12 @@ import {useAuth} from "../../hooks/auth-hook";
 import {LoadingOverlay} from "../../loading/loading-overlay";
 import {changeRepoInfo, defaultOwnerRepoValueForm, ownerRepoValueForm} from "./data-types";
 import {compareByPushedAt} from "../../types/comparators";
+import {useChangeRepo} from "./git-change-repo";
 
 export const ChangeRepoContainer = () => {
     const mainStatus: any = useSelector<RootReducer>(state => state.main);
-    const {getUserRepo} = useRepo()
     const {deleteOcto} = useAuth()
+    const {getReposGH} = useChangeRepo()
 
     let history = useHistory()
 
@@ -34,46 +35,19 @@ export const ChangeRepoContainer = () => {
 
     useEffect(() => {
         setIsFetching(true)
-        getRepos()
+        getReposGH()
             .then((resp) => {
                 setRepos(resp)
                 setIsFetching(false)
             })
-            .catch(() => {
+            .catch((error) => {
+                setTypeModal(error)
                 setIsFetching(false)
                 console.log("Global error")
             })
     }, [])
 
-    async function getRepos() {
-        let repoArr: changeRepoInfo[] = []
-        await getUserRepo()
-            .then((response) => {
-                //console.log("Repos get...")
-                response.forEach((item) => {
-                        repoArr.push({
-                            created_at: item.created_at!,
-                            pushed_at: item.pushed_at!,
-                            id_project: item.id!,
-                            language: item.language!,
-                            name: item.name!,
-                            description: item.description!,
-                            owner_login: item.owner.login!,
-                            owner_avatar: item.owner.avatar_url,
-                            visibility: item.visibility!,
-                            permissions: [item.permissions!.admin, item.permissions!.pull, item.permissions!.push]
-                        })
-                    }
-                )
-                repoArr.sort(compareByPushedAt)
-            })
-            .catch((error) => {
-                console.log(error)
-                setTypeModal(error)
-                throw new Error(error)
-            })
-        return repoArr
-    }
+
 
     const onLogout = () => {
         deleteOcto()

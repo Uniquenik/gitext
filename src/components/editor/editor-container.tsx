@@ -174,7 +174,6 @@ const EditorContainer = () => {
         return branch
     }
 
-
     async function saveContentInGit(owner:string, repo:string, currentTreeName:string, treeName:string, path:string, msg:string) {
         setTypeModal("")
         setIsFetching(true)
