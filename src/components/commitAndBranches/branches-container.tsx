@@ -29,7 +29,7 @@ import {
 } from "./data-types";
 import {branchesCompareCommitInfo, defaultBranchesCompareCommitInfo} from "../../types/data-types";
 import parser from "../other/validateHTML";
-import {useCommitBranches} from "./git-branches";
+import {useCommitBranchesData} from "./git-branches";
 
 
 export const BranchesContainer = () => {
@@ -39,7 +39,7 @@ export const BranchesContainer = () => {
     const dispatch = useDispatch();
 
     const history = useHistory()
-    const {getCommitFromTreeShaGH, getCommitAndBranchesGH} = useCommitBranches()
+    const {getCommitFromTreeShaGH, getCommitAndBranchesGH} = useCommitBranchesData()
 
     const [typeModal, setTypeError] = useState("");
     const [isMounted, setIsMounted] = useState(false)

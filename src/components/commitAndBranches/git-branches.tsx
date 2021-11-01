@@ -7,7 +7,7 @@ import {branchSimpleInfo, commitInfo} from "./data-types";
 import {getRandomColor} from "../other/randomColor";
 import {compareCommitsByDate} from "../../types/comparators";
 
-export const useCommitBranches = () => {
+export const useCommitBranchesData = () => {
     const {getBlobFromFileSha, getRep} = useCommits();
     const {
         getAllBranches, getCommitSha,
@@ -45,10 +45,8 @@ export const useCommitBranches = () => {
             })
             .catch((error) => {
                 file = error
-                //setCompareContent(error)
                 throw error
             })
-        //console.log(file)
         setInfoCompareCommit(currentCommitInfo)
         return file
     }
@@ -67,7 +65,6 @@ export const useCommitBranches = () => {
                 if (reps.permissions && reps.permissions.pull && reps.permissions.push) setIsEdit(true)
                 else if (reps.permissions && (!reps.permissions.pull || !reps.permissions.push)) setIsEdit(false)
                 else {
-                    //setTypeError(getCommit404)
                     throw getCommit404
                 }
             })

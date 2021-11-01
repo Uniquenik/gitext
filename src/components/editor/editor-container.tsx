@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from "react";
-import {useCommits} from "../../hooks/commits-hook";
 import {useDispatch, useSelector} from "react-redux";
 import {RootReducer} from "../../redux";
 import {
@@ -14,18 +13,17 @@ import {
     CHANGE_REPO_MSG,
     OVERRIDE_VALUE
 } from "../../types/data-types";
-import {useBranches} from "../../hooks/branches-hook";
-import {getCommit404, getRepPermission, wrongExtensionLine} from "../../types/errors-const";
 import {ModalPortal} from "../../modalPortal/modal-portal";
 import {useHistory, useParams} from 'react-router-dom'
 import {ErrorModal} from "../../modalPortal/error-modal";
 import {ChangeOverrideMsg} from "../../modalPortal/modalContent/change-override-msg";
 import {LoadingOverlay} from "../../loading/loading-overlay";
 import {ChangeBranch} from "../../modalPortal/modalContent/change-branch";
-import {b64DecodeUnicode} from "../other/decode";
 import {TinymceEditor} from "./tinymce-editor";
 import {ReactComponent as Local } from "./image/localsave.svg"
 import {ReactComponent as Cloud } from "./image/cloudsave.svg"
+import {useEditorData} from "./git-editor";
+import {defaultFileInfoState} from "./data-types";
 
 
 const EditorContainer = () => {
@@ -40,224 +38,82 @@ const EditorContainer = () => {
     const [isFetchingEditor, setIsFetchingEditor] = useState(true)
     const [typeModal, setTypeModal] = useState("")
 
-    const {
-        getSingleTree, getSingleCommit, createBlob, createTree, createCommit, updateRef, getBlob, getRep, getBlobFromFileSha
-    } = useCommits()
-    const {getCommitSha, getTreeFromSha, getAllBranches, getTreesCommits} = useBranches()
+    const {onStartGH, getCommitFileAndBranchGH, saveContentInGitGH, reviveFromGitGH} = useEditorData()
 
     let history = useHistory()
 
     useEffect(() => {
+        console.log("here1")
         onStart()
-            .catch(() => console.log('Global error'))
+            //.catch(() => console.log('Global error'))
     }, [])
 
     useEffect(() => {
+        console.log("here2", commitSha)
         onStart()
-            .catch(() => console.log('Global error'))
+            //.catch(() => console.log('Global error'))
     }, [owner, repo, path, commitSha])
 
-    async function onStart() {
+    const onStart = () => {
         setIsFetching(true)
         setIsFetchingEditor(true)
-        let pathNew = path.replaceAll("$", "/")
-        if (!commitSha && editorStatus.currentValueOwner.toUpperCase() === owner.toUpperCase() &&
-            editorStatus.currentValuePath.toUpperCase() === pathNew.toUpperCase() &&
-            editorStatus.currentValueRepo.toUpperCase() === repo.toUpperCase()
-        ) {
-            setIsFetching(false)
-        } else {
-            checkCorrectData(owner, repo, commitSha)
-                .then(() => {
-                    if (!editorStatus.currentValueOwner && !editorStatus.currentValueRepo && !editorStatus.currentValuePath)
-                        //if editor is empty
-                        getCommitFileAndBranch(owner, repo, pathNew, commitSha)
-                            .then((branch) => {
-                                dispatch(setCurrentValueInfo({
-                                    currentValueOwner: owner,
-                                    currentValuePath: pathNew,
-                                    currentValueRepo: repo,
-                                    currentValueParentCommit: commitSha,
-                                    currentValueBranch: branch!
-                                }))
-                                setIsFetching(false)
-                            })
-                            .catch((error) => {
-                                console.log(error)
-                                setIsFetching(false)
-                            })
-                    else {
-                        if (owner.toUpperCase() !== editorStatus.currentValueOwner.toUpperCase() ||
-                            repo.toUpperCase() !== editorStatus.currentValueRepo.toUpperCase() ||
-                            pathNew.toUpperCase() !== editorStatus.currentValuePath.toUpperCase())
-                            setTypeModal(CHANGE_REPO_MSG)
-                        else setTypeModal(OVERRIDE_VALUE)
-                        setIsFetching(false)
-                    }
-                })
-                .catch((error) => {
-                    setIsFetching(false)
-                    console.log(error)
-                })
-        }
-    }
-
-    //check exists and permissions
-    async function checkCorrectData(owner: string, repo: string, commitSha: string) {
-        let repInfo = await getRep(owner, repo)
-            .catch((error) => {
-                setTypeModal(error)
-                throw new Error(error)
-            })
-        if (!repInfo.permissions || !repInfo.permissions.pull || !repInfo.permissions.push) {
-            setTypeModal(getRepPermission)
-            console.log(getRepPermission)
-            throw new Error(getRepPermission)
-        }
-        if (commitSha) {
-            await getCommitSha(commitSha, owner, repo)
-                .catch((error)=> {
-                    setTypeModal(error)
-                    throw new Error(error)
-                })
-        }
-    }
-
-    async function getCommitFileAndBranch(owner: string, repo: string, path: string, commitSha: string) {
-        //return branch for redux
-        let branch = ""
-        if (path.split('.').pop() !== 'html') {
-            setTypeModal(wrongExtensionLine)
-            throw new Error(wrongExtensionLine)
-        }
-        await getCommitSha(commitSha, owner, repo)
-            .then((treeSha) => {
-                return getTreeFromSha(treeSha.tree.sha, owner, repo)
-            })
-            .then((tree) => {
-                let fileSha = ""
-                for (let i = 0; i < tree.tree.length; i++) {
-                    if (tree.tree[i].path === path && tree.tree[i].sha !== undefined)
-                        fileSha = tree.tree[i].sha!
+        onStartGH(owner, repo, commitSha, path, 30, {
+            currentValueOwner: editorStatus.currentValueOwner,
+            currentValuePath: editorStatus.currentValuePath,
+            currentValueRepo: editorStatus.currentValueRepo,
+            currentValueParentCommit: editorStatus.currentValueParentCommit,
+            currentValueBranch: editorStatus.currentValueBranch
+        })
+            .then((resp) => {
+                if (resp.typeModal) setTypeModal(resp.typeModal)
+                else if (!resp.isCheck && resp.currentValueInfo && resp.value) {
+                    if (resp.currentValueInfo !== defaultFileInfoState) dispatch(setCurrentValueInfo(resp.currentValueInfo))
+                    setValue(resp.value)
+                    dispatch(setValueText(resp.value))
+                    dispatch(setIsSaveCurrentValueGit(true))
                 }
-                return getBlobFromFileSha(owner, repo, fileSha)
-            })
-            .then((fileContent) => {
-                let file = b64DecodeUnicode(fileContent.content)
-                setValue(file)
-                dispatch(setValueText(file))
-                dispatch(setIsSaveCurrentValueGit(true))
-            })
+                setIsFetching(false)
+                setIsFetchingEditor(false)
+                })
             .catch((error) => {
-                console.log(error)
+                setIsFetching(false)
+                setIsFetchingEditor(false)
                 setTypeModal(error)
-                throw new Error(error)
             })
-        //search branch for this commit
-        let getBranches = await getAllBranches(owner, repo)
-            .catch((error) => {
-                setTypeModal(error)
-                throw new Error(error)
-            })
-            let i = 0;
-            while (branch === "" && getBranches.length > i) {
-                let treeCommits = await getTreesCommits(owner, repo, getBranches[i].name, per_page)
-                    .catch((error) => {
-                        setTypeModal(error)
-                        throw new Error(error);
-                    })
-                for (let j = 0; j < treeCommits.length && branch === ""; j++) {
-                    if (treeCommits[j].sha === commitSha) branch = getBranches[i].name;
-                }
-                i += 1
-            }
-        return branch
     }
 
-    async function saveContentInGit(owner:string, repo:string, currentTreeName:string, treeName:string, path:string, msg:string) {
+    const saveContentInGit = (owner:string, repo:string, currentTreeName:string, treeName:string, path:string, msg:string) => {
         setTypeModal("")
         setIsFetching(true)
-        if (currentTreeName === "") currentTreeName = treeName
-        let pathNew = path.replace("$", "/")
-        let lastCommitSha
-        await getSingleTree(owner, repo, currentTreeName)
-            .then(response => {
-                return getSingleCommit(owner, repo, response.sha)
-            })
-            .then(getCommitFromTree => {
-                lastCommitSha = getCommitFromTree.sha
-                return createBlob(owner, repo, value)
-            })
-            .then(newBlob => {
-                return createTree(lastCommitSha, owner, repo, newBlob.sha, pathNew)
-            })
-            .then(newTree => {
-                return createCommit(owner, repo, msg, lastCommitSha, newTree.sha)
-            })
-            .then(newCommit => {
-                updateRef(owner, repo, treeName, newCommit.sha)
+        saveContentInGitGH(owner, repo, currentTreeName, treeName, path, msg, value)
+            .then((resp)=> {
                 setIsFetching(false)
-                alert("Content successfully saved in Git")
                 dispatch(setIsSaveCurrentValueGit(true))
                 dispatch(setIsSaveCurrentValue(true))
-                dispatch(setCurrentValueInfo({
-                    currentValueOwner: owner,
-                    currentValuePath: pathNew,
-                    currentValueRepo: repo,
-                    currentValueParentCommit: newCommit.sha,
-                    currentValueBranch: treeName
-                }))
+                dispatch(setCurrentValueInfo(resp))
             })
-            .catch(error => {
-                setTypeModal(error)
-                console.log(error);
+            .catch((error)=> {
                 setIsFetching(false)
-            });
+                setTypeModal(error)
+            })
     }
 
-
-    async function reviveFromGit(owner: string, repo: string, path: string, ref: string) {
+    const reviveFromGit = (owner: string, repo: string, path: string, ref: string) => {
         setTypeModal("")
         setIsFetching(true)
-        await getRep(owner, repo)
-            .then(reps => {
-                //console.log(reps)
-                //check permissions
-                if (reps.permissions && reps.permissions.pull && reps.permissions.push) {
-                    return reps.owner.login
-                } else if (reps.permissions && (!reps.permissions.pull || !reps.permissions.push)) {
-                    setTypeModal(getRepPermission)
-                    throw new Error("Permission Error")
-                }
-                setTypeModal(getCommit404)
-                throw new Error("Not found")
-            })
-            .then(owner => {
-                return getBlob(owner, repo, path, ref)
-            })
-            .then(infoFile => {
-                // (??) only this place need ts-ignore
-                //@ts-ignore
-                let file = b64DecodeUnicode(infoFile.content)
-                dispatch(setValueText(file))
-                setValue(file)
+        reviveFromGitGH(owner, repo, path, ref)
+            .then((resp)=> {
+                dispatch(setValueText(resp.value))
+                setValue(resp.value)
+                dispatch(setCurrentValueInfo(resp.currentValueInfo))
                 dispatch(setIsSaveCurrentValueGit(true))
                 dispatch(setIsSaveCurrentValue(true))
-                dispatch(setCurrentValueInfo({
-                    currentValueOwner: owner,
-                    currentValuePath: path,
-                    currentValueRepo: repo,
-                    //@ts-ignore
-                    currentValueParentCommit: infoFile.sha,
-                    currentValueBranch: ref
-                }))
                 setIsFetching(false)
             })
-            .catch(error => {
+            .catch((error)=>{
                 setTypeModal(error)
-                console.log(error);
                 setIsFetching(false)
-            });
+            })
     }
 
     const onBack = () => {
@@ -289,15 +145,18 @@ const EditorContainer = () => {
             }))
             setIsFetching(false)
         } else {
-            getCommitFileAndBranch(owner, repo, pathNew, commitSha)
-                .then((branch) => {
+            getCommitFileAndBranchGH(owner, repo, pathNew, commitSha, 30)
+                .then((resp) => {
                     dispatch(setCurrentValueInfo({
                         currentValueOwner: owner,
                         currentValuePath: pathNew,
                         currentValueRepo: repo,
                         currentValueParentCommit: commitSha,
-                        currentValueBranch: branch!
+                        currentValueBranch: resp.branch
                     }))
+                    setValue(resp.value)
+                    dispatch(setValueText(resp.value))
+                    dispatch(setIsSaveCurrentValueGit(true))
                     setIsFetching(false)
                     history.push('./')
                 })
@@ -326,25 +185,15 @@ const EditorContainer = () => {
     }
 
     const saveOnGit = () => {
-        if (editorStatus.currentValueBranch) {
+        if (editorStatus.currentValueBranch)
             saveContentInGit(owner, repo, editorStatus.currentValueBranch,
                 editorStatus.currentValueBranch, editorStatus.currentValuePath, "Quick save in current branch")
-                .catch(error => {
-                    setTypeModal(error)
-                    console.log(error);
-                });
-        }
         else {setTypeModal(CHANGE_BRANCH_SAVE)}
     }
 
     const reviveGit = () => {
         if (editorStatus.currentValueBranch) {
             reviveFromGit(owner, repo, editorStatus.currentValuePath, editorStatus.currentValueBranch)
-                //.then(() => console.log("ok"))
-                .catch(error => {
-                    setTypeModal(error)
-                    console.log(error);
-                });
         }
         else setTypeModal(CHANGE_BRANCH_GET)
     }
