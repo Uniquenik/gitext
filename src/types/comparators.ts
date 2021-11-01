@@ -1,5 +1,5 @@
 import {branchInfoInModal} from "../modalPortal/modalContent/data-types";
-import {filePath} from "../components/choosePath/data-types";
+import {filePath} from "../components/changePath/data-types";
 import {commitInfo} from "../components/commitAndBranches/data-types";
 
 export const compareCommitsByDate = (a: commitInfo, b: commitInfo) => {

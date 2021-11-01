@@ -4,7 +4,7 @@ import up from './image/up.svg'
 import React from "react";
 import {branchChoosePath, filePath} from "./data-types";
 
-export const ChoosePath = (props:{
+export const ChangePath = (props:{
     owner:string,
     repo:string,
     branchesList:branchChoosePath[],

@@ -118,7 +118,7 @@ export const useBranches = () => {
     }
 
     const getCommitSha = (sha:string, owner:string, repo:string) => {
-        return new Promise<Endpoints['GET /repos/{owner}/{repo}/git/commits/{commit_sha}']["response"]["data"]>((resolve, reject) => {
+            return new Promise<Endpoints['GET /repos/{owner}/{repo}/git/commits/{commit_sha}']["response"]["data"]>((resolve, reject) => {
             octokit.request('GET /repos/{owner}/{repo}/git/commits/{commit_sha}', {
                 owner: owner,
                 repo: repo,

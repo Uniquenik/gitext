@@ -8,7 +8,7 @@ import {
     Redirect
 } from "react-router-dom";
 import {ChangeRepoContainer} from "./components/changeRepo/change-repo-container";
-import {ChoosePathContainer} from "./components/choosePath/choose-path-container";
+import {ChangePathContainer} from "./components/changePath/change-path-container";
 import {useSelector} from "react-redux";
 import {RootReducer} from "./redux";
 import {AuthContainer} from "./components/auth/auth-container";
@@ -45,8 +45,8 @@ const App = () => {
                 <PrivateRoute exact path="/:owner/:repo/:path/branches/" children={<BranchesContainer/>}/>
                 <PrivateRoute exact path="/:owner/:repo/:path/editor/:commitSha" children={<EditorContainer/>}/>
                 <PrivateRoute exact path="/:owner/:repo/:path/editor/" children={<EditorContainer/>}/>
-                <PrivateRoute exact path= "/:owner/:repo/:option/" children={<ChoosePathContainer/>}/>
-                <PrivateRoute exact path= "/:owner/:repo/" children={<ChoosePathContainer/>}/>
+                <PrivateRoute exact path= "/:owner/:repo/:option/" children={<ChangePathContainer/>}/>
+                <PrivateRoute exact path= "/:owner/:repo/" children={<ChangePathContainer/>}/>
                 <PrivateRoute exact path= "/userrepos" children={<ChangeRepoContainer/>}/>
                 <Route exact path="/auth" children={<AuthContainer/>}/>
                 <Route exact path="/" children={<MainPage/>}/>

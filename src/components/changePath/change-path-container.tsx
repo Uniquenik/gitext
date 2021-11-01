@@ -1,22 +1,22 @@
-import {ChoosePath} from "./choose-path";
+import {ChangePath} from "./change-path";
 import React, {useEffect, useState} from "react";
-import {useBranches} from "../../hooks/branches-hook";
 import {ErrorModal} from "../../modalPortal/error-modal";
 import {ModalPortal} from "../../modalPortal/modal-portal";
 import {useHistory, useParams} from 'react-router-dom';
 import {LoadingOverlay} from "../../loading/loading-overlay";
 import {branchChoosePath, filePath} from "./data-types";
 import {compareLocalTreeByType} from "../../types/comparators";
+import {useChangePath} from "./gh-change-path";
 
 
-export const ChoosePathContainer = () => {
+export const ChangePathContainer = () => {
     let {owner, repo, option} = useParams()
-    const {getTreeFromSha, getAllBranches, getCommitSha} = useBranches()
 
     const [branches, setBranches] = useState<branchChoosePath[]>([])
     const [indexBranch, setIndexBranch] = useState(0)
     const [isFetching, setIsFetching] = useState(true)
     const [typeModal, setTypeModal] = useState("")
+    const {getBranchesGH} = useChangePath()
 
     const [currentDir, setCurrentDir] = useState<string>("")
     const [currentTree, setCurrentTree] = useState<filePath[]>([])
@@ -26,14 +26,14 @@ export const ChoosePathContainer = () => {
     const [isEditGlobal, setIsEditGlobal] = useState(true)
     const [isEdit, setIsEdit] = useState(true)
 
-    const onChangeRadio = (e) => setIsEdit(e.target.value !== "compare")
+    const onChangeRadio = (e:any) => setIsEdit(e.target.value !== "compare")
 
     const history = useHistory()
 
     useEffect(() => {
         if (option === 'branches') setIsEditGlobal(false)
         else setIsEditGlobal(true)
-        getStartInfo()
+        getStartInfo(owner, repo)
             .catch((error) => {
                 console.log(error)
             })
@@ -48,10 +48,10 @@ export const ChoosePathContainer = () => {
         return localTree
     }
 
-    async function getStartInfo() {
+    async function getStartInfo(owner: string, repo: string) {
         setIsFetching(true)
         setIndexBranch(0)
-        await getBranches(owner, repo)
+        await getBranchesGH(owner, repo, setStatusLoading)
             .then((response) => {
                 //do not work from function here
                 let localTree: filePath[] = []
@@ -67,34 +67,10 @@ export const ChoosePathContainer = () => {
             })
             .catch((error) => {
                 setIsFetching(false)
-                throw new Error(error)
-            })
-    }
-
-    async function getBranches(owner: string, repo: string) {
-        let branchesList: branchChoosePath[] = []
-        let allBranches = await getAllBranches(owner, repo)
-            .catch((error) => {
+                console.log(error)
                 setTypeModal(error)
                 throw new Error(error)
             })
-        //console.log("Get last commits from branches...")
-        for (let i = 0; i<allBranches.length; i+=1) {
-            setStatusLoading(i+1+ "/"+ allBranches.length)
-            //console.log(i+1, "/", allBranches.length)
-            let lastCommit = await getCommitSha(allBranches[i].commit.sha, owner, repo)
-            let trees = await getTreeFromSha(lastCommit.tree.sha, owner, repo)
-            let paths = trees.tree.map(arr => ({path: arr.path!, type: arr.type!}))
-            branchesList.push({
-                name: allBranches[i].name,
-                lastCommitSha: allBranches[i].commit.sha,
-                lastCommitShaTree: lastCommit.tree.sha,
-                protected: allBranches[i].protected,
-                resp: paths
-            })
-        }
-        setStatusLoading("")
-        return branchesList
     }
 
     const setBranch = (num: number) => {
@@ -170,7 +146,7 @@ export const ChoosePathContainer = () => {
                 (isFetching &&
                     <LoadingOverlay msg={statusLoading && "Get branches... "+statusLoading || "Analyze..."}/>)}
             </ModalPortal>
-            <ChoosePath branchesList={branches}
+            <ChangePath branchesList={branches}
                         indexBranch={indexBranch} setIndexBranch={setBranch}
                         setCurrDir={setDir}
                         setFile={setFile}
