@@ -29,14 +29,11 @@ export const useCommits = () => {
                 .catch((error:any) => {
                     if(error.response) {
                         switch (error.response.status) {
-                            case 404:
-                                reject(getTree404)
+                            case 404: reject(getTree404)
                                 break;
-                            case 422:
-                                reject(getTree422)
+                            case 422: reject(getTree422)
                                 break;
-                        }
-                    }
+                        }}
                     reject("Unhandled:\n" + error)
                 })
         })

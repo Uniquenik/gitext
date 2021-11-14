@@ -43,20 +43,20 @@ const EditorContainer = () => {
     let history = useHistory()
 
     useEffect(() => {
-        console.log("here1")
+        setIsFetching(true)
+        setIsFetchingEditor(true)
         onStart()
             //.catch(() => console.log('Global error'))
     }, [])
 
     useEffect(() => {
-        console.log("here2", commitSha)
+        setIsFetching(true)
+        setIsFetchingEditor(true)
         onStart()
             //.catch(() => console.log('Global error'))
     }, [owner, repo, path, commitSha])
 
     const onStart = () => {
-        setIsFetching(true)
-        setIsFetchingEditor(true)
         onStartGH(owner, repo, commitSha, path, 30, {
             currentValueOwner: editorStatus.currentValueOwner,
             currentValuePath: editorStatus.currentValuePath,

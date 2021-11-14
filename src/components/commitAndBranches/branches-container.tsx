@@ -13,7 +13,7 @@ import {setOpenCommits, setVisibleCurrentValue} from "../../redux/branches-state
 import {BranchesListButton} from "../../buttons/brancheslist-button";
 import {
     emptyFileError,
-    openFileMsg, unhandledError
+    openFileMsg, unhandledError, universal401
 } from "../../types/errors-const";
 import {CompareButton} from "../../buttons/compare-button";
 import {ErrorModal} from "../../modalPortal/error-modal";
@@ -69,7 +69,8 @@ export const BranchesContainer = () => {
                 Prism.highlightAll();
             })
             .catch((error) => {
-                if (typeModal === "") setTypeError(unhandledError)
+                if (typeModal === "" && universal401) setTypeError(universal401)
+                else setTypeError(unhandledError)
                 console.log(error)
                 console.log("Global error")
             })

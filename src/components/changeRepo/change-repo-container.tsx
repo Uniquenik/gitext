@@ -9,7 +9,6 @@ import {RootReducer} from "../../redux";
 import {useAuth} from "../../hooks/auth-hook";
 import {LoadingOverlay} from "../../loading/loading-overlay";
 import {changeRepoInfo, defaultOwnerRepoValueForm, ownerRepoValueForm} from "./data-types";
-import {compareByPushedAt} from "../../types/comparators";
 import {useChangeRepo} from "./git-change-repo";
 
 export const ChangeRepoContainer = () => {

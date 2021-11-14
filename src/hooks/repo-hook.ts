@@ -11,8 +11,8 @@ export const useRepo = () => {
     const {getOcto} = useAuth()
     const octokit = getOcto()!
 
-    const getUserRepo = () => {
-        return new Promise<Endpoints['GET /user/repos']["response"]["data"]>((resolve, reject) => {
+    const getUserRepos = () => {
+            return new Promise<Endpoints['GET /user/repos']["response"]["data"]>((resolve, reject) => {
             octokit.request('GET /user/repos')
                 .then((response:any) => {
                     resolve(response.data)
@@ -39,7 +39,7 @@ export const useRepo = () => {
         })
     }
     return {
-        getUserRepo: getUserRepo
+        getUserRepo: getUserRepos
 
     }
 }
