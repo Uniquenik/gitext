@@ -52,29 +52,38 @@ export const BranchesContainer = () => {
     const [isSetCommits, setCommits] = useState(false)
     const [isEdit, setIsEdit] = useState(false)
 
-    //on change global params
+    const [listBranches, setListBranches] =
+        useState<branchSimpleInfo[]>(() => new Array(branchSimpleInfoInitState))
+    const [listCommits, setListCommits] =
+        useState<Array<commitInfo>>(() => new Array(commitInfoInitState))
+    const [mainBranch, setMainBranch] = useState<number>(0)
+    const [listMerge, setListMerge] = useState<Array<mergeInfo>>(() => new Array(mergeInfoInitState))
+
+    //on load
     useEffect(() => {
         setLoadCommit(false)
         setCommits(false)
-        getCommitAndBranchesGH(owner, repo, 30, path, setIsEdit, setStatusLoading)
-            .then((resp) => {
-                if (resp) {
-                    setListBranches(resp.listBranches)
-                    setListCommits(resp.listCommits)
-                    setMainBranch(resp.mainBranch)
-                }
-                setCommits(true)
-                setIsMounted(true)
-                setLoadCommit(true)
-                Prism.highlightAll();
-            })
-            .catch((error) => {
-                if (typeModal === "" && universal401) setTypeError(universal401)
-                else setTypeError(unhandledError)
-                console.log(error)
-                console.log("Global error")
-            })
-    }, [owner, repo, path])
+        if (listCommits !== Array(commitInfoInitState)) {
+            getCommitAndBranchesGH(owner, repo, 30, path, setIsEdit, setStatusLoading)
+                .then((resp) => {
+                    if (resp) {
+                        setListBranches(resp.listBranches)
+                        setListCommits(resp.listCommits)
+                        setMainBranch(resp.mainBranch)
+                    }
+                    setCommits(true)
+                    setIsMounted(true)
+                    setLoadCommit(true)
+                    Prism.highlightAll();
+                })
+                .catch((error) => {
+                    if (typeModal === "" && universal401) setTypeError(universal401)
+                    else setTypeError(unhandledError)
+                    console.log(error)
+                    console.log("Global error")
+                })
+        }
+    }, [])
 
     //on change content
     useEffect(() => {
@@ -97,15 +106,7 @@ export const BranchesContainer = () => {
             setCompareContent(openFileMsg)
             setLoadCommit(true)
         }
-    }, [owner, repo, path, commitSha])
-
-
-    const [listBranches, setListBranches] =
-        useState<branchSimpleInfo[]>(() => new Array(branchSimpleInfoInitState))
-    const [listCommits, setListCommits] =
-        useState<Array<commitInfo>>(() => new Array(commitInfoInitState))
-    const [mainBranch, setMainBranch] = useState<number>(0)
-    const [listMerge, setListMerge] = useState<Array<mergeInfo>>(() => new Array(mergeInfoInitState))
+    }, [commitSha])
 
 
     /*async function createBranch(owner:string, repo:string, branchFrom:string, branchTo:string){

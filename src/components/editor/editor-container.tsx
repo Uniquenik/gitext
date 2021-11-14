@@ -49,12 +49,12 @@ const EditorContainer = () => {
             //.catch(() => console.log('Global error'))
     }, [])
 
-    useEffect(() => {
-        setIsFetching(true)
-        setIsFetchingEditor(true)
-        onStart()
-            //.catch(() => console.log('Global error'))
-    }, [owner, repo, path, commitSha])
+    // useEffect(() => {
+    //     setIsFetching(true)
+    //     setIsFetchingEditor(true)
+    //     onStart()
+    //         //.catch(() => console.log('Global error'))
+    // }, [owner, repo, path, commitSha])
 
     const onStart = () => {
         onStartGH(owner, repo, commitSha, path, 30, {
@@ -72,12 +72,12 @@ const EditorContainer = () => {
                     dispatch(setValueText(resp.value))
                     dispatch(setIsSaveCurrentValueGit(true))
                 }
+                console.log(isFetching, isFetchingEditor)
                 setIsFetching(false)
-                setIsFetchingEditor(false)
                 })
             .catch((error) => {
+                console.log(error)
                 setIsFetching(false)
-                setIsFetchingEditor(false)
                 setTypeModal(error)
             })
     }
