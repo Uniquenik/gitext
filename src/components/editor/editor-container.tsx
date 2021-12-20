@@ -27,7 +27,7 @@ import {defaultFileInfoState} from "./data-types";
 
 
 const EditorContainer = () => {
-    const per_page = 100;
+    //const per_page = 100;
     let { owner, repo, path, commitSha } = useParams()
 
     const editorStatus: any = useSelector<RootReducer>(state => state.editor);
@@ -46,15 +46,15 @@ const EditorContainer = () => {
         setIsFetching(true)
         setIsFetchingEditor(true)
         onStart()
-            //.catch(() => console.log('Global error'))
+        //.catch(() => console.log('Global error'))
     }, [])
 
-    // useEffect(() => {
-    //     setIsFetching(true)
-    //     setIsFetchingEditor(true)
-    //     onStart()
-    //         //.catch(() => console.log('Global error'))
-    // }, [owner, repo, path, commitSha])
+    /*useEffect(() => {
+         setIsFetching(true)
+         setIsFetchingEditor(true)
+         onStart()
+             //.catch(() => console.log('Global error'))
+    }, [owner, repo, path, commitSha])*/
 
     const onStart = () => {
         onStartGH(owner, repo, commitSha, path, 30, {
@@ -65,6 +65,7 @@ const EditorContainer = () => {
             currentValueBranch: editorStatus.currentValueBranch
         })
             .then((resp) => {
+                //console.log(resp)
                 if (resp.typeModal) setTypeModal(resp.typeModal)
                 else if (!resp.isCheck && resp.currentValueInfo && resp.value) {
                     if (resp.currentValueInfo !== defaultFileInfoState) dispatch(setCurrentValueInfo(resp.currentValueInfo))
@@ -72,7 +73,7 @@ const EditorContainer = () => {
                     dispatch(setValueText(resp.value))
                     dispatch(setIsSaveCurrentValueGit(true))
                 }
-                console.log(isFetching, isFetchingEditor)
+                //console.log(isFetching, isFetchingEditor)
                 setIsFetching(false)
                 })
             .catch((error) => {

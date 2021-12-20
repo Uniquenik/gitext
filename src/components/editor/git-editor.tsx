@@ -17,7 +17,6 @@ export const useEditorData = () => {
         let typeModal = ""
         let value = ""
         let pathNew = path.replaceAll("$", "/")
-        console.log(fileInfo)
         if (!(!commitSha && fileInfo.currentValueOwner.toUpperCase() === owner.toUpperCase() &&
             fileInfo.currentValuePath.toUpperCase() === pathNew.toUpperCase() &&
             fileInfo.currentValueRepo.toUpperCase() === repo.toUpperCase())
@@ -30,8 +29,9 @@ export const useEditorData = () => {
             }
             else if (!fileInfo.currentValueOwner && !fileInfo.currentValueRepo && !fileInfo.currentValuePath) {
                 //if editor is empty
-                getCommitFileAndBranchGH(owner, repo, pathNew, commitSha, per_page)
+                await getCommitFileAndBranchGH(owner, repo, pathNew, commitSha, per_page)
                     .then((resp) => {
+                        console.log(resp)
                         currentValueInfo = {
                             currentValueOwner: owner,
                             currentValuePath: pathNew,
@@ -41,14 +41,6 @@ export const useEditorData = () => {
                         }
                         console.log(value)
                         value = resp.value
-                        // dispatch(setCurrentValueInfo({
-                        //     currentValueOwner: owner,
-                        //     currentValuePath: pathNew,
-                        //     currentValueRepo: repo,
-                        //     currentValueParentCommit: commitSha,
-                        //     currentValueBranch: branch!
-                        // }))
-                        //setIsFetching(false)
                     })
             }
             else {
@@ -59,7 +51,7 @@ export const useEditorData = () => {
                 else typeModal = OVERRIDE_VALUE
             }
         }
-        console.log(typeModal, currentValueInfo, value)
+        //console.log(typeModal, currentValueInfo, value)
         return {
             isCheck: false,
             typeModal: typeModal,
