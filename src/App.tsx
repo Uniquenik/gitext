@@ -49,7 +49,7 @@ const App = () => {
                 <PrivateRoute exact path= "/:owner/:repo/" children={<ChangePathContainer/>}/>
                 <PrivateRoute exact path= "/userrepos" children={<ChangeRepoContainer/>}/>
                 <Route exact path="/auth" children={<AuthContainer/>}/>
-                <Route exact path="/" children={<MainPage/>}/>
+                <PrivateRoute exact path="/" children={<MainPage/>}/>
             </div>
         </Router>
     )

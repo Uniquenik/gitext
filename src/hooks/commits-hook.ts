@@ -16,7 +16,8 @@ export const useCommits = () => {
     const octokit = getOcto()!
 
     const getSingleTree = (owner:string, repo:string, tree_sha:string) => {
-        return new Promise<Endpoints['GET /repos/{owner}/{repo}/git/trees/{tree_sha}']["response"]["data"]>
+        return new
+        Promise<Endpoints['GET /repos/{owner}/{repo}/git/trees/{tree_sha}']["response"]["data"]>
         ((resolve, reject) => {
             octokit.request('GET /repos/{owner}/{repo}/git/trees/{tree_sha}', {
                 owner: owner,

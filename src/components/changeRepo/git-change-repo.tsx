@@ -20,7 +20,9 @@ export const useChangeRepo = () => {
                     owner_login: item.owner.login!,
                     owner_avatar: item.owner.avatar_url,
                     visibility: item.visibility!,
-                    permissions: [item.permissions!.admin, item.permissions!.pull, item.permissions!.push]
+                    permissions:
+                        [item.permissions!.admin,
+                            item.permissions!.pull, item.permissions!.push]
                 })
             }
         )
