@@ -1,12 +1,21 @@
 import {changeRepoInfo} from "./data-types";
 import {compareByPushedAt} from "../../types/comparators";
 import {useRepo} from "../../hooks/repo-hook";
+import {useAuthLogin} from "../auth/git-auth";
+import {useAuth} from "../../hooks/auth-hook";
 
 export const useChangeRepo = () => {
 
     const {getUserRepo} = useRepo()
+    const {stillValidOcto} = useAuth()
 
     async function getReposGH() {
+        await stillValidOcto()
+            .catch((err) => {
+                throw ("You are not authorized")
+                }
+            )
+        debugger;
         let repoArr: changeRepoInfo[] = []
         let response = await getUserRepo()
         response.forEach((item) => {

@@ -3,6 +3,8 @@ import {Octokit} from "@octokit/core";
 import {useDispatch, useSelector} from "react-redux";
 import {RootReducer} from "../redux";
 import {deleteAuthToken, setAuthToken} from "../redux/main-state/main-action-creators";
+import {Endpoints} from "@octokit/types";
+import {getUserRep304, getUserRep401, getUserRep403, getUserRep422} from "../types/errors-const";
 
 export const useAuth = () => {
     const defaultOctokit = new Octokit({auth:"1"})
@@ -13,6 +15,26 @@ export const useAuth = () => {
     const isOcto = () => {
         console.log(octo)
         return (octo && true) || false
+    }
+
+    const stillValidOcto = () => {
+        return new Promise<Boolean>
+        ((resolve, reject) => {
+            octo.request("/user")
+                .then((response:any) => {
+                    resolve(true)
+                })
+                .catch((error:any) => {
+                    if (error.response) {
+                        switch (error.response.status) {
+                            case 401:
+                                reject(false)
+                                deleteOcto()
+                        }
+                    } //обработка ошибок есть, просто скрыта
+                    reject("Unhandled:\n" + error)
+                })
+        })
     }
 
     const setToken = (token:string) => {
@@ -39,7 +61,8 @@ export const useAuth = () => {
         isOcto: isOcto,
         setToken: setToken,
         getOcto: getOcto,
-        deleteOcto: deleteOcto
+        deleteOcto: deleteOcto,
+        stillValidOcto: stillValidOcto
     }
 
 
