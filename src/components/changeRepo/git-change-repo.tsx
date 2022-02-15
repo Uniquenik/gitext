@@ -7,15 +7,15 @@ import {useAuth} from "../../hooks/auth-hook";
 export const useChangeRepo = () => {
 
     const {getUserRepo} = useRepo()
-    const {stillValidOcto} = useAuth()
+    //const {stillValidOcto} = useAuth()
 
     async function getReposGH() {
-        await stillValidOcto()
-            .catch((err) => {
-                throw ("You are not authorized")
-                }
-            )
-        debugger;
+        // await stillValidOcto()
+        //     .catch((err) => {
+        //         throw ("You are not authorized")
+        //         }
+        //     )
+        // debugger;
         let repoArr: changeRepoInfo[] = []
         let response = await getUserRepo()
         response.forEach((item) => {
